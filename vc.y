@@ -34,14 +34,14 @@ struct TableTypes {
 
 	string debugTTypes() {
 		string tt_content("");
-		tt_content += ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
-		tt_content += "; TableTypes\n";
-		tt_content += ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
+		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
+		tt_content += "// TableTypes\n";
+		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		for (int i = 0; i < v_tipos.size(); ++i) {
-			tt_content += "; type:" + to_string(v_tipos.at(i).type) + " tam:" + to_string(v_tipos.at(i).size) 
+			tt_content += "// type:" + to_string(v_tipos.at(i).type) + " tam:" + to_string(v_tipos.at(i).size) 
 						+ " baseType:" + to_string(v_tipos.at(i).baseType) + "\n";
 		}
-		tt_content += ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
+		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		return tt_content;
 	}
 	void add_primitivetype(int ttype, int tsize,int tbase) {		
@@ -77,7 +77,7 @@ struct TableTypes {
 	int getTotalSize(int type){
 		int auxType = type; 
 		int size = 1;
-		while (auxType >= LOGICO){
+		while (auxType >= LOGIC){
 			size = size * getSize(auxType);
 			auxType = baseType(auxType);
 		}
@@ -121,7 +121,7 @@ struct TableTypes {
 	}
 
 	bool isArray(int _type) {
-		return _type > LOGICO; 
+		return _type > LOGIC; 
 	}
 
 };
@@ -137,20 +137,107 @@ struct Symbol {
 };
 
 struct TableSymbols {
-	vector<Simbolo> v_symbols;
+	vector<Symbol> v_symbols;
+	int lastLabel;
 
 	string debugTSymbols() {
 		string ts_content("");
-		ts_content += "; TableSymbols\n";
-		ts_content += ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
-		for (int i = 0; i < v_simbolos.size();++i) {
-			ts_content += "; type:" + to_string(v_simbolos.at(i).type) + " nombre:" + v_simbolos.at(i).name + "\n";
+		ts_content += "// TableSymbols\n";
+		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
+		for (int i = 0; i < v_symbols.size();++i) {
+			ts_content += "// type:" + to_string(v_symbols.at(i).type) + " name:" + v_symbols.at(i).name + " value:" + to_string(v_symbols.at(i).value)"\n";
 		}
-		ts_content += ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
+		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		return ts_content;
+	}
+	string getNewLabel() {
+		string etq = "L" + to_string(lastLabel);
+		++lastLabel;
+		return etq;
+	}
+	bool addSymbol(string name, int type){
+		Symbol s;
+		s.type = type;
+		s.name = name;
+		for (int i = 0; i < v_symbols.size();++i) {
+			if (v_symbols.at(i).name == s.name) { 
+				// fail: var ya decl
+				msgError(ERRALDEC, nlin, ncol - name.length(), name.c_str());
+				return false;
+			}
+		}
+		v_symbols.push_back(s);
+		return true;
+	}
+	Symbol searchSymbol(string name) {
+		Symbol s;
+		s.type = -1;
+		s.value = -1;
+		s.name = "null"
+		for (int i = 0; i < v_symbols.size();++i) {
+			if (v_symbols.at(i).name == name) {
+				return v_symbols.at(i);
+			}
+		}
+		// fail: var no decl
+		msgError(ERRNODEC, nlin, ncol - name.length(), name.c_str());
+		return s;
+	}
+};
+
+/* Table Symbols */
+TableSymbols ts;
+/* Table Symbols */
+
+struct FunctionSymbol {
+	string name;
+	/* TODO add needed things */
+};
+
+struct TableFunctionSymbols {
+	vector<FunctionSymbol> v_funcSymbols;
+
+	string debugTSymbols() {
+		string ts_content("");
+		ts_content += "// TableFunctionSymbols\n";
+		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
+		for (int i = 0; i < v_funcSymbols.size();++i) {
+			ts_content += "//" " nombre:" + v_funcSymbols.at(i).name + "\n";
+		}
+		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
+		return ts_content;
+	}
+	bool addFunctionSymbol(string name){
+		FunctionSymbol s;
+		s.name = name;
+		for (int i = 0; i < v_funcSymbols.size();++i) {
+			if (v_funcSymbols.at(i).name == s.name) { 
+				// fail: func var ya decl
+				msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+				return false;
+			}
+		}
+		v_funcSymbols.push_back(s);
+		return true;
+	}
+	FunctionSymbol searchFunctionSymbol(string name) {
+		FunctionSymbol s;
+		s.name = "null"
+		for (int i = 0; i < v_funcSymbols.size();++i) {
+			if (v_funcSymbols.at(i).name == name) {
+				return v_funcSymbols.at(i);
+			}
+		}
+		// fail: func var no decl
+		msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
+		return s;
 	}
 
 };
+
+/* Table Symbols */
+TableFunctionSymbols tfs;
+/* Table Symbols */
 
 /* END FUNCTIONS */
 extern int yylex();
@@ -219,6 +306,14 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
             break;
          case ERRSINT: fprintf(stderr,"in '%s'\n",s);
             break;
+         case ERRNODEC: fprintf(stderr, "Variable %s not declared\n",s);
+         	break;
+         case ERRALDEC: fprintf(stderr, "Variable %s already declared\n",s);
+         	break;
+          case ERRNODEC: fprintf(stderr, "Module %s not declared\n",s);
+         	break;
+         case ERRALDEC: fprintf(stderr, "Module %s already declared\n",s);
+         	break;
         }
      }
      else
@@ -241,29 +336,56 @@ int yyerror(char *s)
     }
 }
 string init_output(){
-	string output = "//////////////////////////////////////////\n";
-		  output += "//                                        \n";
-		  output += "//                  `....``               \n";
-		  output += "//           -/shmNNNmmNNNmdy+:`          \n";
-		  output += "//       `/yNNMMdo:.`````-/yNMMNh+.       \n";
-		  output += "//     `omMMMMh-`           `oNMMMNy-     \n";
-		  output += "//    :mMMMMM+                -mMMMMNs`   \n";
-		  output += "//   /NMMMMM+                  .NMMMMMy   \n";
-		  output += "//  .NMMMMMh                    /MMMMMMo  \n";
-		  output += "//  sMMMMMM:                     dMMMMMN  \n";
-		  output += "//  dMMMMMM                      sMMMMMM. \n";
-		  output += "//  dMMMMMN                      oMMMMMM. \n";
-		  output += "//  oMMMMMM`                     yMMMMMN  \n";
-		  output += "//  `NMMMMM/                    `NMMMMM+  \n";
-		  output += "//   :NMMMMm`                   sMMMMMy   \n";
-		  output += "//    :mMMMMh`                 +MMMMNo    \n";
-		  output += "//     `omMMMd:`             .sMMMNy-     \n";
-		  output += "//`-     `/ymNMd+.        `/yNMNh+.     `.\n";
-		  output += "//.N:`      `-/hMN        sMm+:.      `.hs\n";
-		  output += "//.MMdysooooooosMM.       hMmooooooosyhNMo\n";
-		  output += "//`MMMMMMMMMMMMMMM:       NMMMMMMMMMMMMMMo\n";
-		  output += "// NNNNNNNNNNNNNNN/       NNNNNNNNNNNNNNN+\n";
-		  output += "// `..............        ............... \n";
+	string output = "
+////////////////////////////////////////////////////////////////////////////////\n
+//                                                                              \n
+//                                 -+ydNMMNdy+-                                 \n
+//                             -ohNmy+-.``.:omMmo.                              \n
+//                      .:/++hNds:`           +NMMy                             \n 
+//                    :mMMMMMNdh`              -NMM+                            \n
+//                   .MMMMMMMd`Ns               -MMy                            \n
+//                   /MMMMMmo` mm/o   :ymmmhs/.  yMh                            \n
+//                   .MMMMMmhhmMmy/  yMMMMMM+yNy sMy                            \n
+//                   oMo`-:NMMs-o+` oMMMMMMM+`mM-dMs                            \n
+//                  sMN/-.`+yyysys. yMMMmhy/  hs-MM/                            \n
+//                `hMdhdmNNmdhs+/-. `+ydmmhyys/ hMN`                            \n
+//                yMd````..:/osyhhdddys+/:...` -MMo                             \n
+//               sMm.            ```.-::/:.    dMM:                             \n
+//              oMN-                          /MMh                              \n
+//             +MM/                          `mMN-                              \n
+//            -NM+                  -`       yMM/                               \n
+//            /MN                  oN/ /+   :MM+                                \n
+//            /Mh                 `Nm`-MM` `mMo                   .+ysyy+.      \n
+//            +Ms                 /M+ dMo  sMd                  .omm:``/Mh      \n
+//            +M+                 dd +Mh` :MM-                `+mNs.   -Ms      \n
+//            +M+                -M:-Nm`  dMd   ```.``       :dNy-    -ms`      \n
+//            +M+                yy.mN-   NMhoyhhhddddho:` -yNy-    `om+        \n
+//            /Ms               .m.hN:    NMy/:-oo:.-/sdNdsmy-    `+mm:         \n
+//            -Mm              `h+`Mo     :+`  `+Ns--..-hms-    `/dMy.          \n
+//             NM-           `:ys  sy-       -shddmmmNmmMo.    :dMMo`           \n
+//             oMh          :s/- .s::N-       .....--:/sdMNs.  -ohds+-`         \n
+//             `NM/         .+sN/hmyyy`          `+.    `:dMm:  ```./My         \n
+//              +MN/           :yo. .            /y:      `dMN. `+yyso.         \n
+//               +NMs`                        -/           :MM/   :ds           \n
+//                .sNmo.                     `my           -MM/`   +M-          \n
+//          ``      .dMmh+.`                  ++`         `yMmdyyyyds           \n
+//          dyo-   `sNs-oNNdy+-.``            .:.       .odd/``.--.`            \n
+//          N-:hy.-dd:`:hy-/sdmmdhys+/.`        ++   `/ymh:                     \n
+//          yy  /hmo`-yh:     `-:+oymMM+ :hyysso+o/oydd+.                       \n
+//          .m/  `.:yd/       .sys++mMo `mm-:/osyyyo:.                          \n
+//           -d/./hd/         :MMymNm/  yN-                                     \n
+//            `oNd/`          `mMo .`  +N:                                      \n
+//              `              -NM:   /N+                                       \n
+//                              .dNo.oN+                                        \n
+//                                oNNh.                                         \n
+//                                                                              \n
+////////////////////////////////////////////////////////////////////////////////\n
+//					  THE DICKBUT RTL CONNECTION COMPILER				        \n
+//				    FOR NOT TO MAKE A DICKBUT RTL CONNECTIONS			        \n
+////////////////////////////////////////////////////////////////////////////////\n
+";
+
+	return output;
 }
 int main(int argc,char *argv[])
 {
