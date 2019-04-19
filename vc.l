@@ -2,6 +2,7 @@ D    [0-9]
 L    [a-zA-Z]
 LD   [0-9a-zA-Z]
 name ({L}|\$)({L}|{D}|[_.\-/$])*
+stringtext  \"[^\n"]+\"
 
 %{
 #include <string.h> 
@@ -47,17 +48,30 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "out"						{return ret(outtype);}
 "inout"						{return ret(inouttype);}
 "#define"					{return ret(definevalue);}
+"#function"					{return ret(functionmodule);}
+"#description"				{return ret(descriptionmodule);}
+"#coder"					{return ret(codermodule);}
+"#references"				{return ret(referencesmodule);}
+"true"						{return ret(booltoken);}
+"false"						{return ret(booltoken);}
+"wire"						{return ret(wiretipe);}
+"->"						{return ret(connectwire);}
+"main"						{return ret (mainmodule);}
 
 {name}						{return ret(id);}
+{stringtext}				{return ret(stringtext);}
 {D}+               			{return ret(ninteger);}
 {D}+(\.){D}+       			{return ret(nfloat);}
 "+"                			{return ret(opas);}
 "-"                			{return ret(opas);}
 "++"               			{return ret(opasinc);}
 "--"               			{return ret(opasinc);}
+"\""						{return ret(quotes);}
 "("                			{return ret(parl);}
 ")"                			{return ret(parr);}
 ";"                			{return ret(pyc);}
+":"							{return ret(twopoints);}
+"~"							{return ret(nyooperator);}
 ","                			{return ret(coma);}
 "=="               			{return ret(oprel);}
 "!="               			{return ret(oprel);}
