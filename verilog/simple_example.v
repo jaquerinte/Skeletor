@@ -3,6 +3,9 @@
 // File Name    : simple_example.v
 // Function     : Module to provide a reference output
 //                for our compiler
+// Description  : This is a detailed explanation use several
+//                lines to explain everything. You will forget
+//                how smart you where when coding this module
 // Coder        : G.Cabo
 // References   : https://github.com/jaquerinte/MA_2019.git
 //-----------------------------------------------------
@@ -64,7 +67,7 @@ module simple_example#(
         .out_o(rdy_o)
     );
     //Internal conexions
-    wire [TransAddrSize-1:0]taddr_a_b_int;  // wiring between taddr_o of module A and taddr_i of module B 
+    wire [TransAddrSize-1:0] taddr_a_b_int;  // wiring between taddr_o of module A and taddr_i of module B 
     wire rdy_a_d_int;    // wiring between rdy_o of module A and in1_i of module D 
     wire rdy_b_d_int;    // wiring between rdy_o of module B and in2_i of module D 
     wire rdy_c_d_int;    // wiring between rdy_o of module C and in3_i of module D 
