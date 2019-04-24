@@ -1,7 +1,7 @@
 %token id ninteger amp moduledefinition intype inttype outtype inouttype definevalue wiretipe
 %token opas parl parr pyc coma oprel opmd opasig bral connectwire nyooperator stringtext
-%token brar cbl cbr ybool obool nobool opasinc definevalue twopoints mainmodule
-%token functionmodule descriptionmodule codermodule referencesmodule booltoken
+%token brar cbl cbr ybool obool nobool opasinc twopoints mainmodule booltokentrue
+%token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse
 
 
 %{
@@ -26,6 +26,9 @@ const int REGISTER=2;
 const int STRING=3;
 const int LOGIC=5;
 
+/* Global proyect Name */
+string proyectName = "a.out";
+
 struct Type {
 	int type;
 	int size;
@@ -40,9 +43,9 @@ struct TableTypes {
 		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		tt_content += "// TableTypes\n";
 		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		for (int i = 0; i < v_tipos.size(); ++i) {
-			tt_content += "// type:" + to_string(v_tipos.at(i).type) + " tam:" + to_string(v_tipos.at(i).size) 
-						+ " baseType:" + to_string(v_tipos.at(i).baseType) + "\n";
+		for (int i = 0; i < v_types.size(); ++i) {
+			tt_content += "// type:" + to_string(v_types.at(i).type) + " tam:" + to_string(v_types.at(i).size) 
+						+ " baseType:" + to_string(v_types.at(i).baseType) + "\n";
 		}
 		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		return tt_content;
@@ -57,7 +60,7 @@ struct TableTypes {
 
    	int registerType(int tsize,int tbase) {
    		int _type = v_types.at(v_types.size() - 1).type + 1;
-		Tipo t;
+		Type t;
 		t.type = _type;
 		t.size = tsize;
 		t.baseType = tbase;
@@ -65,12 +68,12 @@ struct TableTypes {
 		return _type;
    	}
    	Type search(int type) {
-		Tipo t;
+		Type t;
 		t.type = -1;
 		t.baseType = -1;
 		t.size = -1;
 				
-		for (int i = 0; i < v_tipos.size(); ++i) {
+		for (int i = 0; i < v_types.size(); ++i) {
 			if (v_types.at(i).type == type) {
 				return v_types.at(i);
 			}
@@ -148,7 +151,7 @@ struct TableSymbols {
 		ts_content += "// TableSymbols\n";
 		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		for (int i = 0; i < v_symbols.size();++i) {
-			ts_content += "// type:" + to_string(v_symbols.at(i).type) + " name:" + v_symbols.at(i).name + " value:" + to_string(v_symbols.at(i).value)"\n";
+			ts_content += "// type:" + to_string(v_symbols.at(i).type) + " name:" + v_symbols.at(i).name + " value:" + to_string(v_symbols.at(i).value)+ "\n";
 		}
 		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		return ts_content;
@@ -176,7 +179,7 @@ struct TableSymbols {
 		Symbol s;
 		s.type = -1;
 		s.value = -1;
-		s.name = "null"
+		s.name = "null";
 		for (int i = 0; i < v_symbols.size();++i) {
 			if (v_symbols.at(i).name == name) {
 				return v_symbols.at(i);
@@ -196,7 +199,7 @@ const int IN=1;
 const int OUT=2;
 const int INOUT=3;
 
-sturct InoutSymbol {
+struct InoutSymbol {
 	/* Value definitions*/
 	string name;
 	int typeconnection;
@@ -224,7 +227,7 @@ struct FunctionSymbol {
 	bool addConnectionFunctionSymbol(string name,  int type, string with){
 		InoutSymbol s;
 		s.name = name;
-		s.type = type;
+		s.typeconnection = type;
 		s.with = with;
 		for (int i = 0; i < v_inoutwires.size();++i) {
 			if (v_inoutwires.at(i).name == s.name) { 
@@ -240,10 +243,9 @@ struct FunctionSymbol {
 	InoutSymbol searchinoutSymbol(string name) {
 		InoutSymbol s;
 		s.name = "null";
-		s.filename_asociated = "";
-		for (int i = 0; i < v_funcSymbols.size();++i) {
-			if (v_funcSymbols.at(i).name == name) {
-				return v_funcSymbols.at(i);
+		for (int i = 0; i < v_inoutwires.size();++i) {
+			if (v_param.at(i).name == name) {
+				return v_inoutwires.at(i);
 			}
 		}
 		// fail: connection not declared
@@ -280,15 +282,15 @@ struct FunctionSymbol {
 	FunctionSymbolParam searchFunctionSymbolParam(string name){
 		FunctionSymbolParam s;
 		s.name = "null";
-		s.value = "-1";
+		s.value = -1;
 		for (int i = 0; i < v_param.size();++i) {
 			if (v_param.at(i).name == s.name) { 
-				return v_funcSymbols.at(i);
+				return v_param.at(i);
 			}
 		}
 		// fail: Symbol param  not declared
 		msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
-		return FunctionSymbolParam;
+		return s;
 	}
 };
 
@@ -348,8 +350,7 @@ struct TableFunctionSymbols {
 /* Table Symbols */
 TableFunctionSymbols tfs;
 /* Table Symbols */
-/* Global proyect Name */
-string proyectName = "a.out";
+
 
 
 void createFileModule(string name){
@@ -450,19 +451,15 @@ SA		: S
 		}
 	;
 /* Base syntax */
-SIDS            : SIDS id {string pme = $2.lexema; $$.trad = $1.trad + " " + pme;}
-				| id {string pme = $1.lexema; $$.trad = pme;}
-				| /*epsilon*/ { } 
-	;
-ModuleTextDefinition : stringtext { string pme = $1.lexema; $$.trad = pme;} // TODO CHECK  HOW IN BISON MAKES THE STRINGS 
+ModuleTextDefinition : stringtext { string pme = $1.lexeme; $$.trad = pme;} // TODO CHECK  HOW IN BISON MAKES THE STRINGS 
 				     | Ref {$$.trad = $1.trad;}
 	;
 ValueDefinition : ninteger  {$$.trad = "";}
 				| booltoken {$$.trad = "";}
-				| quotes  SIDS id  quotes{$$.trad = "";} // TODO CHECK  HOW IN BISON MAKES THE STRINGS 
+				| stringtext{$$.trad = "";} // TODO CHECK  HOW IN BISON MAKES THE STRINGS 
 	;
-SSuperblock : SSuperblock definevalue id  {string pme = $3.lexema; $0.ph = pme;} ValueDefinition {$$.trad = $1.trad + $5.trad;}
-			| definevalue id {string pme = $3.lexema; $0.ph = pme;} ValueDefinition{$$.trad = $1.trad;}
+SSuperblock : SSuperblock definevalue id  {string pme = $3.lexeme; $0.ph = pme;} ValueDefinition {$$.trad = $1.trad + $5.trad;}
+			| definevalue id {string pme = $2.lexeme; $0.ph = pme;} ValueDefinition{$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
 	;
 /* Function agrupation*/
@@ -470,39 +467,53 @@ SFunc 		: SFunc Func {$$.trad = $1.trad + $2.trad;}
 			| Func {$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
 	;
-SAFunc      : SFunc MainFunc {$$.tad = $1.trad + $2.trad;}
+SAFunc      : SFunc MainFunc {$$.trad = $1.trad + $2.trad;}
 	;
 /* Function */
 Func 		: moduledefinition id 
 			{
 				/*Add module*/
-				string pme = $2.lexema;
+				string pme = $2.lexeme;
 				tfs.addFunctionSymbol(pme);
-				$$.ph = pme;
+				$5.ph = pme;
+				printf("%s", $$.ph);
 			} 
 			parl SArgs parr Block 
 			{
 				/* Create file for module*/	
+				string pme = $2.lexeme;
+				createFileModule(pme);
 			}
 	;
-MainFunc    : moduledefinition mainmodule id parl SArgs parr Block {string pme = $3.lexema; $$.trad = "main " + pme + " (" + $5.trad + ")" + $7.trad;}
+MainFunc    : moduledefinition mainmodule id parl SArgs parr Block {string pme = $3.lexeme; $$.trad = "main " + pme + " (" + $5.trad + ")" + $7.trad;}
 	;
 /* Function args */
-SArgs 		: {$$.ph = $0.ph;} SAArgs id 
+SArgs       : {$2.ph = $0.ph;} DArgs {}
+/*SArgs 		: { id SAArgs
 			{	
-				string pme = $3.lexema;
+				string pme = $3.lexeme;
 				FunctionSymbol s;
 				if($0.ph != "null"){
 					s = tfs.searchFunctionSymbol($0.ph);
 					s.addFunctionSymbolParam(pme);
 
 				}
-			}
+			}*/
 			| /*epsilon*/ { } 
 	;
-SAArgs 		:  id coma {$$.ph = $0.ph;} SAArgs 
+DArgs       :  id {$3.ph = $0.ph;} SAArgs {
+					string pme = $1.lexeme;
+				    FunctionSymbol s;
+				    printf("%s", $$.ph);
+				    if($0.ph != "null"){
+				    	s = tfs.searchFunctionSymbol($$.ph);
+						s.addFunctionSymbolParam(pme);
+				    }
+				}
+	;
+SAArgs 		:  coma id {$4.ph = $0.ph;} SAArgs 
 				{
-					string pme = $1.lexema;
+					string pme = $1.lexeme;
 				    FunctionSymbol s;
 				    if($0.ph != "null"){
 				    	s = tfs.searchFunctionSymbol($0.ph);
@@ -512,56 +523,64 @@ SAArgs 		:  id coma {$$.ph = $0.ph;} SAArgs
 			|/*epsilon*/ { } 
 	;
 /* Block definition and instructions base  */
-Block 		: cbl {$$.ph = $0.ph;}SInstr cbr  {}
+Block 		: cbl {$$.ph = $0.ph;}SInstr cbr  {	printf("ENTRO");}
 	;
 SInstr		: {$$.ph = $0.ph;} SInstr Instr {}
 			| {$$.ph = $0.ph;} Instr  	    {}
 	;
 /* Instruction definition  */
-Instr 		: EInstr pyc {$$.trad = $1.trad + ";"}
+Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 			| functionmodule ModuleTextDefinition 
 				{
+					FunctionSymbol s;
 					if($0.ph != "null"){
 				    	s = tfs.searchFunctionSymbol($0.ph);
 				    	if (s.function == ""){
 				    		s.function = $2.trad;
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
-							msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
+				    		string pme = $1.lexeme;
+							msgError(ERRFUNODEC, nlin, ncol, pme.c_str());
 				    	}
 						
 				    }
 				}
 			| descriptionmodule ModuleTextDefinition {
+					FunctionSymbol s;
 					if($0.ph != "null"){
 				    	s = tfs.searchFunctionSymbol($0.ph);
 						if (s.description == ""){
 				    		s.description = $2.trad;
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
-							msgError(ERRDESCDEFALDEC, nlin, ncol - name.length(), name.c_str());
+				    		string pme = $1.lexeme;
+							msgError(ERRDESCDEFALDEC, nlin, ncol, pme.c_str());
 				    	}
 				    }
 				}
 			| codermodule ModuleTextDefinition {
+				    FunctionSymbol s;
 					if($0.ph != "null"){
 				    	s = tfs.searchFunctionSymbol($0.ph);
 						if (s.code == ""){
 				    		s.code = $2.trad;
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
-							msgError(ERRORCODDEFALDEC, nlin, ncol - name.length(), name.c_str());
+				    		string pme = $1.lexeme;
+							msgError(ERRORCODDEFALDEC, nlin, ncol, pme.c_str());
 				    	}
 				    }
 				}
-			| references ModuleTextDefinition {
+			| referencesmodule ModuleTextDefinition {
 					if($0.ph != "null"){
+						FunctionSymbol s;
 				    	s = tfs.searchFunctionSymbol($0.ph);
 						if (s.references == ""){
 				    		s.references = $2.trad;
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
-							msgError(ERRORDEFIALDEC, nlin, ncol - name.length(), name.c_str());
+				    		string pme = $1.lexeme;
+							msgError(ERRORDEFIALDEC, nlin, ncol, pme.c_str());
 				    	}
 				    }
 				}
@@ -570,17 +589,47 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";"}
 					if($0.ph != "null"){
 
 					}
-				} 
+				}
+			| intype id pyc {}
+			|/*epsilon*/ { } 
 
 	;
-EInstr 		: Ref opasig SExpr {$$.trad = $1.trad + " = " + $3.trad;}
-			| TipoBase id      {string pme = $2.lexema; $$.trad = $1.trad + pme;}
+EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
+			| TipoBase id      {string pme = $2.lexeme; $$.trad = $1.trad + pme;}
 	;
-InstrINOUT  : id {string pme = $1.lexema; $$.trad = pme; $$.size = 0;}
-			| bral Expr twopoints Expr brar id {string pme = $6.lexema; $$.trad = pme; $$.size = 0;}
+InstrINOUT  : id {string pme = $1.lexeme; $$.trad = pme; $$.size = 0;}
+			| bral Expr twopoints Expr brar id {string pme = $6.lexeme; $$.trad = pme; $$.size = 0;}
+	;
+/* Expresion */
+Expr	:	Econj {} 
+		|	Expr obool Econj{}
+	;
+Econj	:	Ecomp {}
+		|	Econj ybool Ecomp {}
+	;
+
+Ecomp 	: Esimple {}
+		| Esimple oprel	Esimple {}
+	;
+Esimple	:	opas Term {}
+		|	Term {}
+		|	Esimple opas Term {}
+	;
+Term	:	Factor {}	
+		|	Term opmd Factor {}
+	;
+Factor	: Ref {}
+		| ninteger 	{}
+		| parl Expr parr {}
+		| nobool Factor	{}
+		| booltokentrue {}
+		| booltokenfalse {}
+	;
+Ref		:	id {}
+		|	Ref bral Esimple brar {}
 	;
 /* Tipos */
-TipoBase 	: int {string pme = $1.lexema $$.trad = pme;}
+TipoBase 	: inttype {string pme = $1.lexeme; $$.trad = pme;}
 
 S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;}
 	;
@@ -593,7 +642,7 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
      {
         fprintf(stderr,"Error %d (%d:%d) ",nerror,nlin,ncol);
         switch (nerror) {
-         case ERRLEXICO: fprintf(stderr,"character '%s' not correct\n",s);
+         case ERRLEXIC: fprintf(stderr,"character '%s' not correct\n",s);
             break;
          case ERRSINT: fprintf(stderr,"in '%s'\n",s);
             break;
@@ -601,9 +650,9 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
          	break;
          case ERRALDEC: fprintf(stderr, "Variable %s already declared\n",s);
          	break;
-          case ERRNODEC: fprintf(stderr, "Module %s not declared\n",s);
+          case ERRFUNODEC: fprintf(stderr, "Module %s not declared\n",s);
          	break;
-         case ERRALDEC: fprintf(stderr, "Module %s already declared\n",s);
+         case ERRFUNALDEC: fprintf(stderr, "Module %s already declared\n",s);
          	break;
         }
      }
@@ -615,9 +664,9 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
 
 int yyerror(char *s)
 {
-    extern int findefichero;   //  variable definida en plp5.l que indica si
+    extern int endfile;   //  variable definida en plp5.l que indica si
                                // se ha acabado el fichero
-    if (findefichero) 
+    if (endfile) 
     {
        msgError(ERREOF,-1,-1,"");
     }
@@ -627,54 +676,53 @@ int yyerror(char *s)
     }
 }
 string init_output(){
-	string output = "
-////////////////////////////////////////////////////////////////////////////////\n
-//                                                                              \n
-//                                 -+ydNMMNdy+-                                 \n
-//                             -ohNmy+-.``.:omMmo.                              \n
-//                      .:/++hNds:`           +NMMy                             \n 
-//                    :mMMMMMNdh`              -NMM+                            \n
-//                   .MMMMMMMd`Ns               -MMy                            \n
-//                   /MMMMMmo` mm/o   :ymmmhs/.  yMh                            \n
-//                   .MMMMMmhhmMmy/  yMMMMMM+yNy sMy                            \n
-//                   oMo`-:NMMs-o+` oMMMMMMM+`mM-dMs                            \n
-//                  sMN/-.`+yyysys. yMMMmhy/  hs-MM/                            \n
-//                `hMdhdmNNmdhs+/-. `+ydmmhyys/ hMN`                            \n
-//                yMd````..:/osyhhdddys+/:...` -MMo                             \n
-//               sMm.            ```.-::/:.    dMM:                             \n
-//              oMN-                          /MMh                              \n
-//             +MM/                          `mMN-                              \n
-//            -NM+                  -`       yMM/                               \n
-//            /MN                  oN/ /+   :MM+                                \n
-//            /Mh                 `Nm`-MM` `mMo                   .+ysyy+.      \n
-//            +Ms                 /M+ dMo  sMd                  .omm:``/Mh      \n
-//            +M+                 dd +Mh` :MM-                `+mNs.   -Ms      \n
-//            +M+                -M:-Nm`  dMd   ```.``       :dNy-    -ms`      \n
-//            +M+                yy.mN-   NMhoyhhhddddho:` -yNy-    `om+        \n
-//            /Ms               .m.hN:    NMy/:-oo:.-/sdNdsmy-    `+mm:         \n
-//            -Mm              `h+`Mo     :+`  `+Ns--..-hms-    `/dMy.          \n
-//             NM-           `:ys  sy-       -shddmmmNmmMo.    :dMMo`           \n
-//             oMh          :s/- .s::N-       .....--:/sdMNs.  -ohds+-`         \n
-//             `NM/         .+sN/hmyyy`          `+.    `:dMm:  ```./My         \n
-//              +MN/           :yo. .            /y:      `dMN. `+yyso.         \n
-//               +NMs`                        -/           :MM/   :ds           \n
-//                .sNmo.                     `my           -MM/`   +M-          \n
-//          ``      .dMmh+.`                  ++`         `yMmdyyyyds           \n
-//          dyo-   `sNs-oNNdy+-.``            .:.       .odd/``.--.`            \n
-//          N-:hy.-dd:`:hy-/sdmmdhys+/.`        ++   `/ymh:                     \n
-//          yy  /hmo`-yh:     `-:+oymMM+ :hyysso+o/oydd+.                       \n
-//          .m/  `.:yd/       .sys++mMo `mm-:/osyyyo:.                          \n
-//           -d/./hd/         :MMymNm/  yN-                                     \n
-//            `oNd/`          `mMo .`  +N:                                      \n
-//              `              -NM:   /N+                                       \n
-//                              .dNo.oN+                                        \n
-//                                oNNh.                                         \n
-//                                                                              \n
-////////////////////////////////////////////////////////////////////////////////\n
-//					  THE DICKBUT RTL CONNECTION COMPILER				        \n
-//				    FOR NOT TO MAKE A DICKBUT RTL CONNECTIONS			        \n
-////////////////////////////////////////////////////////////////////////////////\n
-";
+	
+string output = "////////////////////////////////////////////////////////////////////////////////\n"+
+std::string("//                                                                              \n")+
+std::string("//                                 -+ydNMMNdy+-                                 \n")+
+std::string("//                             -ohNmy+-.``.:omMmo.                              \n")+
+std::string("//                      .:/++hNds:`           +NMMy                             \n")+
+std::string("//                    :mMMMMMNdh`              -NMM+                            \n")+
+std::string("//                   .MMMMMMMd`Ns               -MMy                            \n")+
+std::string("//                   /MMMMMmo` mm/o   :ymmmhs/.  yMh                            \n")+
+std::string("//                   .MMMMMmhhmMmy/  yMMMMMM+yNy sMy                            \n")+
+std::string("//                   oMo`-:NMMs-o+` oMMMMMMM+`mM-dMs                            \n")+
+std::string("//                  sMN/-.`+yyysys. yMMMmhy/  hs-MM/                            \n")+
+std::string("//                `hMdhdmNNmdhs+/-. `+ydmmhyys/ hMN`                            \n")+
+std::string("//                yMd````..:/osyhhdddys+/:...` -MMo                             \n")+
+std::string("//               sMm.            ```.-::/:.    dMM:                             \n")+
+std::string("//              oMN-                          /MMh                              \n")+
+std::string("//             +MM/                          `mMN-                              \n")+
+std::string("//            -NM+                  -`       yMM/                               \n")+
+std::string("//            /MN                  oN/ /+   :MM+                                \n")+
+std::string("//            /Mh                 `Nm`-MM` `mMo                   .+ysyy+.      \n")+
+std::string("//            +Ms                 /M+ dMo  sMd                  .omm:``/Mh      \n")+
+std::string("//            +M+                 dd +Mh` :MM-                `+mNs.   -Ms      \n")+
+std::string("//            +M+                -M:-Nm`  dMd   ```.``       :dNy-    -ms`      \n")+
+std::string("//            +M+                yy.mN-   NMhoyhhhddddho:` -yNy-    `om+        \n")+
+std::string("//            /Ms               .m.hN:    NMy/:-oo:.-/sdNdsmy-    `+mm:         \n")+
+std::string("//            -Mm              `h+`Mo     :+`  `+Ns--..-hms-    `/dMy.          \n")+
+std::string("//             NM-           `:ys  sy-       -shddmmmNmmMo.    :dMMo`           \n")+
+std::string("//             oMh          :s/- .s::N-       .....--:/sdMNs.  -ohds+-`         \n")+
+std::string("//             `NM/         .+sN/hmyyy`          `+.    `:dMm:  ```./My         \n")+
+std::string("//              +MN/           :yo. .            /y:      `dMN. `+yyso.         \n")+
+std::string("//               +NMs`                        -/           :MM/   :ds           \n")+
+std::string("//                .sNmo.                     `my           -MM/`   +M-          \n")+
+std::string("//          ``      .dMmh+.`                  ++`         `yMmdyyyyds           \n")+
+std::string("//          dyo-   `sNs-oNNdy+-.``            .:.       .odd/``.--.`            \n")+
+std::string("//          N-:hy.-dd:`:hy-/sdmmdhys+/.`        ++   `/ymh:                     \n")+
+std::string("//          yy  /hmo`-yh:     `-:+oymMM+ :hyysso+o/oydd+.                       \n")+
+std::string("//          .m/  `.:yd/       .sys++mMo `mm-:/osyyyo:.                          \n")+
+std::string("//           -d/./hd/         :MMymNm/  yN-                                     \n")+
+std::string("//            `oNd/`          `mMo .`  +N:                                      \n")+
+std::string("//              `              -NM:   /N+                                       \n")+
+std::string("//                              .dNo.oN+                                        \n")+
+std::string("//                                oNNh.                                         \n")+
+std::string("//                                                                              \n")+
+std::string("////////////////////////////////////////////////////////////////////////////////\n")+
+std::string("//					  THE DICKBUT RTL CONNECTION COMPILER				         \n")+
+std::string("//				    FOR NOT TO MAKE A DICKBUT RTL CONNECTIONS			         \n")+
+std::string("////////////////////////////////////////////////////////////////////////////////\n");
 
 	return output;
 }

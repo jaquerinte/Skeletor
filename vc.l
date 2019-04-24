@@ -52,8 +52,8 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "#description"				{return ret(descriptionmodule);}
 "#coder"					{return ret(codermodule);}
 "#references"				{return ret(referencesmodule);}
-"true"						{return ret(booltoken);}
-"false"						{return ret(booltoken);}
+"true"						{return ret(booltokentrue);}
+"false"						{return ret(booltokenfalse);}
 "wire"						{return ret(wiretipe);}
 "->"						{return ret(connectwire);}
 "main"						{return ret (mainmodule);}
@@ -61,12 +61,10 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 {name}						{return ret(id);}
 {stringtext}				{return ret(stringtext);}
 {D}+               			{return ret(ninteger);}
-{D}+(\.){D}+       			{return ret(nfloat);}
 "+"                			{return ret(opas);}
 "-"                			{return ret(opas);}
 "++"               			{return ret(opasinc);}
 "--"               			{return ret(opasinc);}
-"\""						{return ret(quotes);}
 "("                			{return ret(parl);}
 ")"                			{return ret(parr);}
 ";"                			{return ret(pyc);}
@@ -92,7 +90,7 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "!"                			{return ret(nobool);}
 %%
 
-int yywrap(void) {findefichero=1; return 1;} /* for not to link with the lex lib*/
+int yywrap(void) {endfile=1; return 1;} /* for not to link with the lex lib*/
 
 
 int ret(int token)
