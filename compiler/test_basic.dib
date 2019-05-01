@@ -1,8 +1,12 @@
-module a (a) {
+module a (h,d) {
 	#function "AND current addr_i with previous addr_i"
 	#description GENERALDESCIPTION
 	#coder  WORKER1
 	#references GENRALREFERENCE
 
 	in clk;
+}
+
+module main c () {
+	#function "AND current addr_i with previous addr_i"
 }

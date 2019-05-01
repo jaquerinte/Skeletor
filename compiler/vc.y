@@ -357,23 +357,23 @@ void createFileModule(string name){
 	FunctionSymbol s = tfs.searchFunctionSymbol(name);
 	/* create file */
 	char buf[0x100];
-	snprintf(buf, sizeof(buf), "%s", s.filename_asociated);
+	snprintf(buf, sizeof(buf), "%s", s.filename_asociated.c_str());
 	FILE *f = fopen(buf, "w");
 	/* Start wriking the file */
 	/* Definition top file */
 	fprintf(f, "//-----------------------------------------------------\n"); 
-	fprintf(f, "// Project Name : %s\n", proyectName);
+	fprintf(f, "// Project Name : %s\n", proyectName.c_str());
 	if (s.function != ""){
-		fprintf(f, "// Function     : $s\n", s.function);
+		fprintf(f, "// Function     : %s\n", s.function.c_str());
 	}
 	if (s.description != ""){
-		fprintf(f, "// Description  : %s\n", s.function);
+		fprintf(f, "// Description  : %s\n", s.description.c_str());
 	}
 	if (s.code != ""){
-		fprintf(f, "// Coder        : %s\n", s.function);
+		fprintf(f, "// Coder        : %s\n", s.code.c_str());
 	}
 	if (s.references != ""){
-		fprintf(f, "// References   : %s\n", s.references);
+		fprintf(f, "// References   : %s\n", s.references.c_str());
 	}
 	fprintf(f, "\n");
 	fprintf(f, "//***Headers***\n"); 
@@ -381,16 +381,16 @@ void createFileModule(string name){
 	/* Defining Module */
 	if (s.v_param.size() != 0){
 		/* Module has param*/
-		fprintf(f, "module %s #(\n", s.name);
+		fprintf(f, "module %s #(\n", s.name.c_str());
 		// Loop over param
 		for (int i = 0; i < s.v_param.size();++i) {
 			if (i == s.v_param.size() -1){
 				/* Last parameter */
-				fprintf(f, "\t\tparameter integer %s = %d\n", s.v_param.at(i).name, s.v_param.at(i).value);
+				fprintf(f, "\t\tparameter integer %s = %d\n", s.v_param.at(i).name.c_str(), s.v_param.at(i).value);
 			}
 			else{
 				/* Rest parameter */
-				fprintf(f, "\t\tparameter integer %s = %d,\n", s.v_param.at(i).name, s.v_param.at(i).value);
+				fprintf(f, "\t\tparameter integer %s = %d,\n", s.v_param.at(i).name.c_str(), s.v_param.at(i).value);
 			}
 		}
 		fprintf(f, "\t)\n\t(\n");
@@ -398,7 +398,7 @@ void createFileModule(string name){
 	}
 	else{
 		/* Module has not param*/
-		fprintf(f, "module %s (\n", s.name); 
+		fprintf(f, "module %s (\n", s.name.c_str()); 
 	}
 	/* copy the inputs and outputs*/
 	for (int i = 0; i < s.v_inoutwires.size();++i) {
@@ -414,11 +414,11 @@ void createFileModule(string name){
 			}
 		if (i == s.v_inoutwires.size() -1){
 			/* Last INOUT parameter */
-			fprintf(f, "\t\t %s %s %s\n", type ,s.v_inoutwires.at(i).with, s.v_inoutwires.at(i).name);
+			fprintf(f, "\t\t %s %s %s\n", type ,s.v_inoutwires.at(i).with.c_str(), s.v_inoutwires.at(i).name.c_str());
 		}
 		else{
 			/* Rest INOUT parameter */
-			fprintf(f, "\t\t %s %s %s,\n", type ,s.v_inoutwires.at(i).with, s.v_inoutwires.at(i).name);
+			fprintf(f, "\t\t %s %s %s,\n", type ,s.v_inoutwires.at(i).with.c_str(), s.v_inoutwires.at(i).name.c_str());
 		}
 	}
 	/* End inputs and outputs */
@@ -437,6 +437,8 @@ void createFileModule(string name){
 extern int yylex();
 extern char *yytext;
 extern FILE *yyin;
+
+string s1;
 
 int yyerror(char *s);
 
@@ -463,11 +465,14 @@ SSuperblock : SSuperblock definevalue id  {string pme = $3.lexeme; $0.ph = pme;}
 			| /*epsilon*/ { } 
 	;
 /* Function agrupation*/
-SFunc 		: SFunc Func {$$.trad = $1.trad + $2.trad;}
-			| Func {$$.trad = $1.trad;}
-			| /*epsilon*/ { } 
-	;
-SAFunc      : SFunc MainFunc {$$.trad = $1.trad + $2.trad;}
+//SFunc 		: SSAFunc {$$.trad = "";}
+//			| /*epsilon*/ { } 
+//	;
+//SSAFunc     : SSAFunc Func {$$.trad = "";}
+//			| Func {$$.trad = "";}
+//			| /*epsilon*/ { } 
+//	;
+SAFunc      : Func MainFunc {$$.trad = $1.trad + $2.trad;}
 	;
 /* Function */
 Func 		: moduledefinition id 
@@ -475,10 +480,10 @@ Func 		: moduledefinition id
 				/*Add module*/
 				string pme = $2.lexeme;
 				tfs.addFunctionSymbol(pme);
-				$5.ph = pme;
-				printf("%s", $$.ph);
+				s1 = pme;
+				//printf("%s", s1);
 			} 
-			parl SArgs parr Block 
+			parl SArgs parr  {} Block 
 			{
 				/* Create file for module*/	
 				string pme = $2.lexeme;
@@ -488,7 +493,7 @@ Func 		: moduledefinition id
 MainFunc    : moduledefinition mainmodule id parl SArgs parr Block {string pme = $3.lexeme; $$.trad = "main " + pme + " (" + $5.trad + ")" + $7.trad;}
 	;
 /* Function args */
-SArgs       : {$2.ph = $0.ph;} DArgs {}
+SArgs       : DArgs {$$.trad = "";}
 /*SArgs 		: { id SAArgs
 			{	
 				string pme = $3.lexeme;
@@ -501,40 +506,40 @@ SArgs       : {$2.ph = $0.ph;} DArgs {}
 			}*/
 			| /*epsilon*/ { } 
 	;
-DArgs       :  id {$3.ph = $0.ph;} SAArgs {
+DArgs       :  id SAArgs {
 					string pme = $1.lexeme;
 				    FunctionSymbol s;
-				    printf("%s", $$.ph);
-				    if($0.ph != "null"){
-				    	s = tfs.searchFunctionSymbol($$.ph);
+				    //printf("%s", s1);
+				    if(s1 != "null"){
+				    	s = tfs.searchFunctionSymbol(s1);
 						s.addFunctionSymbolParam(pme);
 				    }
 				}
 	;
-SAArgs 		:  coma id {$4.ph = $0.ph;} SAArgs 
+SAArgs 		:  coma id SAArgs 
 				{
 					string pme = $1.lexeme;
 				    FunctionSymbol s;
-				    if($0.ph != "null"){
-				    	s = tfs.searchFunctionSymbol($0.ph);
+				    if(s1 != "null"){
+				    	s = tfs.searchFunctionSymbol(s1);
 						s.addFunctionSymbolParam(pme);
 				    }
 				}
 			|/*epsilon*/ { } 
 	;
 /* Block definition and instructions base  */
-Block 		: cbl {$$.ph = $0.ph;}SInstr cbr  {	printf("ENTRO");}
+Block 		: cbl SInstr cbr  {}
 	;
-SInstr		: {$$.ph = $0.ph;} SInstr Instr {}
-			| {$$.ph = $0.ph;} Instr  	    {}
+SInstr		: SInstr Instr {}
+			| Instr  	   {}
 	;
 /* Instruction definition  */
 Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 			| functionmodule ModuleTextDefinition 
 				{
 					FunctionSymbol s;
-					if($0.ph != "null"){
-				    	s = tfs.searchFunctionSymbol($0.ph);
+					if(s1 != "null"){
+				    	s = tfs.searchFunctionSymbol(s1);
 				    	if (s.function == ""){
 				    		s.function = $2.trad;
 				    	}else{
@@ -547,8 +552,8 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				}
 			| descriptionmodule ModuleTextDefinition {
 					FunctionSymbol s;
-					if($0.ph != "null"){
-				    	s = tfs.searchFunctionSymbol($0.ph);
+					if(s1 != "null"){
+				    	s = tfs.searchFunctionSymbol(s1);
 						if (s.description == ""){
 				    		s.description = $2.trad;
 				    	}else{
@@ -560,8 +565,8 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				}
 			| codermodule ModuleTextDefinition {
 				    FunctionSymbol s;
-					if($0.ph != "null"){
-				    	s = tfs.searchFunctionSymbol($0.ph);
+					if(s1 != "null"){
+				    	s = tfs.searchFunctionSymbol(s1);
 						if (s.code == ""){
 				    		s.code = $2.trad;
 				    	}else{
@@ -572,9 +577,9 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				    }
 				}
 			| referencesmodule ModuleTextDefinition {
-					if($0.ph != "null"){
+					if(s1 != "null"){
 						FunctionSymbol s;
-				    	s = tfs.searchFunctionSymbol($0.ph);
+				    	s = tfs.searchFunctionSymbol(s1);
 						if (s.references == ""){
 				    		s.references = $2.trad;
 				    	}else{
@@ -586,11 +591,18 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				}
 			| intype InstrINOUT 
 				{
-					if($0.ph != "null"){
 
-					}
 				}
 			| intype id pyc {}
+			/*| inttype id pyc {
+				FunctionSymbol s;
+				if(s1 != "null"){
+					    string pme = $2.lexeme;
+						s = tfs.searchFunctionSymbol(s1);
+						string a = "";
+						s.addConnectionFunctionSymbol(pme, IN,"");
+					}
+				}*/
 			|/*epsilon*/ { } 
 
 	;
