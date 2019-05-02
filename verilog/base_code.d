@@ -1,5 +1,3 @@
-
-
 #define T_ADDR_SIZE 32
 #define ADDR_SIZE 32
 #define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
