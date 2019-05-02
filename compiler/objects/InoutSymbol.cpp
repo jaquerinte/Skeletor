@@ -31,3 +31,6 @@ InoutSymbol& InoutSymbol :: operator = (const InoutSymbol &In) {
 string InoutSymbol :: getName(){return this->name;}
 int InoutSymbol :: getType(){return this->typeconnection;}
 string InoutSymbol :: getWith(){return this->width;}
+void InoutSymbol :: setName(string name){this -> name = name;}
+void InoutSymbol :: setType(int type){this -> typeconnection = type;}
+void InoutSymbol :: setWith(int width){this -> width = width;}
