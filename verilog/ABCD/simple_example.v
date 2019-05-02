@@ -34,8 +34,8 @@ module simple_example#(
         .rst_i    (rst_i),
         .clk_i    (clk_i),
         .addr_i   (addr_i),
-        .taddr_o  (taddr_a_b_int),
-        .rdy_o    (rdy_a_d_int)
+        .taddr_o  (taddr_a_b),
+        .rdy_o    (rdy_a_d)
     );
     //Module B does: OR current addr_i with previous addr_i 
     b #(
@@ -46,9 +46,9 @@ module simple_example#(
         .rstn_i     (~rst_i),
         .clk_i      (clk_i),
         .addr_i     (addr_i),
-        .taddr_i    (taddr_a_b_int),
+        .taddr_i    (taddr_a_b),
         .taddr_o    (taddr_o),
-        .rdy_o      (rdy_b_d_int)
+        .rdy_o      (rdy_b_d)
     );
     //Module C does: rdy_o is high when a n bit counter overflow 
     c #(
@@ -57,21 +57,21 @@ module simple_example#(
     inst_c(
         .rst_i  (rst_i),
         .clk_i  (clk_i),
-        .rdy_o  (rdy_c_d_int)
+        .rdy_o  (rdy_c_d)
     );
     //Module D does: Three way AND gate
     d inst_d(
-        .in1_i(rdy_a_d_int),
-        .in2_i(rdy_b_d_int),
-        .in3_i(rdy_c_d_int),
+        .in1_i(rdy_a_d),
+        .in2_i(rdy_b_d),
+        .in3_i(rdy_c_d),
         .out_o(rdy_o)
     );
     //Internal conexions
-    wire [TransAddrSize-1:0] taddr_a_b_int;  // wiring between taddr_o of module A and taddr_i of module B 
-    wire rdy_a_d_int;    // wiring between rdy_o of module A and in1_i of module D 
-    wire rdy_b_d_int;    // wiring between rdy_o of module B and in2_i of module D 
-    wire rdy_c_d_int;    // wiring between rdy_o of module C and in3_i of module D 
-    //***Handcrafted Internal logic*** 
+    wire [TransAddrSize-1:0] taddr_a_b;  // wiring between taddr_o of module A and taddr_i of module B 
+    wire rdy_a_d;    // wiring between rdy_o of module A and in1_i of module D 
+    wire rdy_b_d;    // wiring between rdy_o of module B and in2_i of module D 
+    wire rdy_c_d;    // wiring between rdy_o of module C and in3_i of module D 
+    //:bufdo %s/pattern/replace/ge | update***Handcrafted Internal logic*** 
     //TODO:No additional internal logic
 
 endmodule

@@ -22,14 +22,14 @@ TOP.simple_example.TransAddrSize[31:0]
 TOP.simple_example.addr_i[31:0]
 @28
 TOP.simple_example.clk_i
-TOP.simple_example.rdy_a_d_int
+TOP.simple_example.rdy_a_d
 TOP.simple_example.rdy_b_d_int
 TOP.simple_example.rdy_c_d_int
 TOP.simple_example.rdy_o
 TOP.simple_example.rst_i
 @22
 [color] 3
-TOP.simple_example.taddr_a_b_int[31:0]
+TOP.simple_example.taddr_a_b[31:0]
 [color] 3
 TOP.simple_example.taddr_o[31:0]
 [color] 3
