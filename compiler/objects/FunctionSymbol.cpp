@@ -1,5 +1,5 @@
 #include "FunctionSymbol.h"
-
+#include <iostream>
 
 FunctionSymbol :: FunctionSymbol()
 {
@@ -34,6 +34,7 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
 	this -> filename_asociated = In.filename_asociated;
 	this -> output_file_data = In.output_file_data;
 }
+FunctionSymbol :: ~FunctionSymbol(){}
 
 FunctionSymbol& FunctionSymbol :: operator = (const FunctionSymbol &In)
 {
@@ -117,6 +118,7 @@ void FunctionSymbol :: createFileModule()
 {
 	/* Start wriking the file */
 	/* Definition top file */
+	cout<<this -> function<<" : "<<this -> description << " : " << this -> code << endl;
 	this -> output_file_data = "//-----------------------------------------------------\n";
 	this -> output_file_data += "// Project Name : " + this -> proyectName + "\n";
 

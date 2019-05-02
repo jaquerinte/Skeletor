@@ -8,5 +8,5 @@ module a (h,d) {
 }
 
 module main c () {
-	#function "AND current addr_i with previous addr_i"
+	#function "AND current addr_i with previou"
 }

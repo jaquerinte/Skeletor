@@ -18,7 +18,7 @@ InoutSymbol :: InoutSymbol(const InoutSymbol &In){
 	this -> typeconnection = In.typeconnection;
 	this -> width = In.width;
 }
-
+InoutSymbol :: ~InoutSymbol(){}
 InoutSymbol& InoutSymbol :: operator = (const InoutSymbol &In) {
 	
 	if(this != &In)

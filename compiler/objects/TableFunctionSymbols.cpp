@@ -1,5 +1,9 @@
 #include "TableFunctionSymbols.h"
 
+TableFunctionSymbols :: TableFunctionSymbols(){}
+
+TableFunctionSymbols :: ~TableFunctionSymbols(){}
+
 bool TableFunctionSymbols :: addFunctionSymbol(string name, string proyectName)
 {
 	FunctionSymbol s(name,proyectName);
@@ -13,15 +17,21 @@ bool TableFunctionSymbols :: addFunctionSymbol(string name, string proyectName)
 	v_funcSymbols.push_back(s);
 	return true;
 }
-FunctionSymbol& TableFunctionSymbols :: searchFunctionSymbol(string name)
+int TableFunctionSymbols :: searchFunctionSymbol(string name)
 {
-	FunctionSymbol s;
 	for (int i = 0; i < v_funcSymbols.size();++i) {
 		if (v_funcSymbols.at(i).getName() == name) {
-			return v_funcSymbols.at(i);
+			return i;
 		}
 	}
 	// fail: func var no decl
 	//msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
-	return s;
+	return 0;
+}
+void TableFunctionSymbols :: createFiles()
+{
+	for (int i = 0; i < v_funcSymbols.size();++i) {
+		v_funcSymbols.at(i).printToFile();
+	}
+
 }

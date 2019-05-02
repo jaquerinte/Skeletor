@@ -16,6 +16,7 @@
 using namespace std;
 
 #include "common.h"
+#include "./objects/TableFunctionSymbols.h"
 
 // variables y funciones del A. Léxico
 extern int ncol,nlin,endfile;
@@ -28,6 +29,7 @@ const int LOGIC=5;
 
 /* Global proyect Name */
 string proyectName = "a.out";
+string init_output();
 
 struct Type {
 	int type;
@@ -195,242 +197,9 @@ struct TableSymbols {
 TableSymbols ts;
 /* Table Symbols */
 
-const int IN=1;
-const int OUT=2;
-const int INOUT=3;
-
-struct InoutSymbol {
-	/* Value definitions*/
-	string name;
-	int typeconnection;
-	string with; // TODO CHECK
-};
-
-struct FunctionSymbolParam{
-	string name;
-	int value;
-};
-
-struct FunctionSymbol {
-	/* Value definitions*/
-	string name;
-	vector<InoutSymbol> v_inoutwires;
-	vector<FunctionSymbolParam> v_param;
-	string filename_asociated;
-	string function;
-	string description;
-	string code;
-	string proyectName;
-	string references;
-
-	/* Functions */
-	bool addConnectionFunctionSymbol(string name,  int type, string with){
-		InoutSymbol s;
-		s.name = name;
-		s.typeconnection = type;
-		s.with = with;
-		for (int i = 0; i < v_inoutwires.size();++i) {
-			if (v_inoutwires.at(i).name == s.name) { 
-				// fail: connection alrady declared
-				msgError(ERRCONNDEC, nlin, ncol - name.length(), name.c_str());
-				return false;
-			}
-		}
-		v_inoutwires.push_back(s);
-		return true;
-	}
-
-	InoutSymbol searchinoutSymbol(string name) {
-		InoutSymbol s;
-		s.name = "null";
-		for (int i = 0; i < v_inoutwires.size();++i) {
-			if (v_param.at(i).name == name) {
-				return v_inoutwires.at(i);
-			}
-		}
-		// fail: connection not declared
-		msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
-		return s;
-	}
-
-	bool addFunctionSymbolParam(string name){
-		FunctionSymbolParam s;
-		s.name = name;
-		for (int i = 0; i < v_param.size();++i) {
-			if (v_param.at(i).name == s.name) { 
-				// fail: Symbol param  already declared
-				msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
-				return false;
-			}
-		}
-		v_param.push_back(s);
-		return true;
-	}
-	bool addValueFunctionSymbolParam(string name, int value){
-		FunctionSymbolParam s;
-		s.name = name;
-		for (int i = 0; i < v_param.size();++i) {
-			if (v_param.at(i).name == s.name) { 
-				v_param.at(i).value = value;
-				return true;
-			}
-		}
-		// fail: Symbol param  not declared
-		msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
-		return false;
-	}
-	FunctionSymbolParam searchFunctionSymbolParam(string name){
-		FunctionSymbolParam s;
-		s.name = "null";
-		s.value = -1;
-		for (int i = 0; i < v_param.size();++i) {
-			if (v_param.at(i).name == s.name) { 
-				return v_param.at(i);
-			}
-		}
-		// fail: Symbol param  not declared
-		msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
-		return s;
-	}
-};
-
-
-struct TableFunctionSymbols {
-	/* Value definitions*/
-	vector<FunctionSymbol> v_funcSymbols;
-
-
-	/* Functions */
-	string debugTSymbols() {
-		string ts_content("");
-		ts_content += "// TableFunctionSymbols\n";
-		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		for (int i = 0; i < v_funcSymbols.size();++i) {
-			ts_content += "// name:" + v_funcSymbols.at(i).name + "\n";
-		}
-		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		return ts_content;
-	}
-	bool addFunctionSymbol(string name){
-		FunctionSymbol s;
-		s.name = name;
-		s.function = "";
-		s.description = "";
-		s.code = "";
-		s.proyectName = proyectName;
-		s.references  = "";
-		for (int i = 0; i < v_funcSymbols.size();++i) {
-			if (v_funcSymbols.at(i).name == s.name) { 
-				// fail: func var ya decl
-				msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
-				return false;
-			}
-		}
-		/* Generate File Name */
-		s.filename_asociated = s.name + ".v";
-		/* add function to vector */
-		v_funcSymbols.push_back(s);
-		return true;
-	}
-	FunctionSymbol searchFunctionSymbol(string name) {
-		FunctionSymbol s;
-		s.name = "null";
-		for (int i = 0; i < v_funcSymbols.size();++i) {
-			if (v_funcSymbols.at(i).name == name) {
-				return v_funcSymbols.at(i);
-			}
-		}
-		// fail: func var no decl
-		msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
-		return s;
-	}
-
-};
-
 /* Table Symbols */
 TableFunctionSymbols tfs;
 /* Table Symbols */
-
-
-
-void createFileModule(string name){
-	FunctionSymbol s = tfs.searchFunctionSymbol(name);
-	/* create file */
-	char buf[0x100];
-	snprintf(buf, sizeof(buf), "%s", s.filename_asociated.c_str());
-	FILE *f = fopen(buf, "w");
-	/* Start wriking the file */
-	/* Definition top file */
-	fprintf(f, "//-----------------------------------------------------\n"); 
-	fprintf(f, "// Project Name : %s\n", proyectName.c_str());
-	if (s.function != ""){
-		fprintf(f, "// Function     : %s\n", s.function.c_str());
-	}
-	if (s.description != ""){
-		fprintf(f, "// Description  : %s\n", s.description.c_str());
-	}
-	if (s.code != ""){
-		fprintf(f, "// Coder        : %s\n", s.code.c_str());
-	}
-	if (s.references != ""){
-		fprintf(f, "// References   : %s\n", s.references.c_str());
-	}
-	fprintf(f, "\n");
-	fprintf(f, "//***Headers***\n"); 
-	fprintf(f, "//***Module***\n");
-	/* Defining Module */
-	if (s.v_param.size() != 0){
-		/* Module has param*/
-		fprintf(f, "module %s #(\n", s.name.c_str());
-		// Loop over param
-		for (int i = 0; i < s.v_param.size();++i) {
-			if (i == s.v_param.size() -1){
-				/* Last parameter */
-				fprintf(f, "\t\tparameter integer %s = %d\n", s.v_param.at(i).name.c_str(), s.v_param.at(i).value);
-			}
-			else{
-				/* Rest parameter */
-				fprintf(f, "\t\tparameter integer %s = %d,\n", s.v_param.at(i).name.c_str(), s.v_param.at(i).value);
-			}
-		}
-		fprintf(f, "\t)\n\t(\n");
-
-	}
-	else{
-		/* Module has not param*/
-		fprintf(f, "module %s (\n", s.name.c_str()); 
-	}
-	/* copy the inputs and outputs*/
-	for (int i = 0; i < s.v_inoutwires.size();++i) {
-		string type = "";
-			if (s.v_inoutwires.at(i).typeconnection == IN){
-				type = "input";
-			}
-			else if (s.v_inoutwires.at(i).typeconnection == OUT){
-				type = "output";
-			}
-			else if (s.v_inoutwires.at(i).typeconnection == INOUT){
-				type = "inout";
-			}
-		if (i == s.v_inoutwires.size() -1){
-			/* Last INOUT parameter */
-			fprintf(f, "\t\t %s %s %s\n", type ,s.v_inoutwires.at(i).with.c_str(), s.v_inoutwires.at(i).name.c_str());
-		}
-		else{
-			/* Rest INOUT parameter */
-			fprintf(f, "\t\t %s %s %s,\n", type ,s.v_inoutwires.at(i).with.c_str(), s.v_inoutwires.at(i).name.c_str());
-		}
-	}
-	/* End inputs and outputs */
-	fprintf(f, "\t);\n");
-	/* Putin some extra coments */
-	fprintf(f, "//***Interal logic generated by compiler***  \n");
-	fprintf(f, "//***Handcrafted Internal logic*** \n");
-	fprintf(f, "//TODO\n");
-	/* finish file */
-	fprintf(f, "endmodule\n"); 
-	fclose(f);
-}
 
 /* END FUNCTIONS */
 /*Global Helpers*/
@@ -479,18 +248,35 @@ Func 		: moduledefinition id
 			{
 				/*Add module*/
 				string pme = $2.lexeme;
-				tfs.addFunctionSymbol(pme);
+				tfs.addFunctionSymbol(pme, proyectName);
 				s1 = pme;
 				//printf("%s", s1);
 			} 
-			parl SArgs parr  {} Block 
+			parl SArgs parr  Block 
 			{
-				/* Create file for module*/	
+				/* Create file for module*/
+				s1 = "null";
 				string pme = $2.lexeme;
-				createFileModule(pme);
+				int pos = tfs.searchFunctionSymbol(pme);
+				tfs.v_funcSymbols.at(pos).createFileModule();
+
 			}
 	;
-MainFunc    : moduledefinition mainmodule id parl SArgs parr Block {string pme = $3.lexeme; $$.trad = "main " + pme + " (" + $5.trad + ")" + $7.trad;}
+MainFunc    : moduledefinition mainmodule id
+			{
+				/*Add module*/
+				string pme = $3.lexeme;
+				tfs.addFunctionSymbol(pme, proyectName);
+				s1 = pme;
+			}  parl SArgs parr Block
+			{
+				/* Create file for module*/
+				s1 = "null";
+				string pme = $3.lexeme;
+				int pos = tfs.searchFunctionSymbol(pme);
+				tfs.v_funcSymbols.at(pos).createFileModule();
+
+			}
 	;
 /* Function args */
 SArgs       : DArgs {$$.trad = "";}
@@ -508,21 +294,21 @@ SArgs       : DArgs {$$.trad = "";}
 	;
 DArgs       :  id SAArgs {
 					string pme = $1.lexeme;
-				    FunctionSymbol s;
+				    
 				    //printf("%s", s1);
 				    if(s1 != "null"){
-				    	s = tfs.searchFunctionSymbol(s1);
-						s.addFunctionSymbolParam(pme);
+				    	int pos  = tfs.searchFunctionSymbol(s1);
+				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
 				    }
 				}
 	;
 SAArgs 		:  coma id SAArgs 
 				{
-					string pme = $1.lexeme;
+					string pme = $2.lexeme;
 				    FunctionSymbol s;
 				    if(s1 != "null"){
-				    	s = tfs.searchFunctionSymbol(s1);
-						s.addFunctionSymbolParam(pme);
+				    	int pos  = tfs.searchFunctionSymbol(s1);
+				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
 				    }
 				}
 			|/*epsilon*/ { } 
@@ -530,18 +316,18 @@ SAArgs 		:  coma id SAArgs
 /* Block definition and instructions base  */
 Block 		: cbl SInstr cbr  {}
 	;
-SInstr		: SInstr Instr {}
-			| Instr  	   {}
+SInstr		: SInstr Instr {$$.trad = $1.trad + $2.trad;}
+			| Instr  	   {$$.trad = $1.trad;}
 	;
 /* Instruction definition  */
 Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 			| functionmodule ModuleTextDefinition 
 				{
-					FunctionSymbol s;
+					int pos;
 					if(s1 != "null"){
-				    	s = tfs.searchFunctionSymbol(s1);
-				    	if (s.function == ""){
-				    		s.function = $2.trad;
+				    	pos = tfs.searchFunctionSymbol(s1);
+				    	if (tfs.v_funcSymbols.at(pos).getFunction() == ""){
+				    		tfs.v_funcSymbols.at(pos).setFunction($2.trad);
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
 				    		string pme = $1.lexeme;
@@ -551,11 +337,11 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				    }
 				}
 			| descriptionmodule ModuleTextDefinition {
-					FunctionSymbol s;
+					int pos;
 					if(s1 != "null"){
-				    	s = tfs.searchFunctionSymbol(s1);
-						if (s.description == ""){
-				    		s.description = $2.trad;
+				    	pos = tfs.searchFunctionSymbol(s1);
+						if (tfs.v_funcSymbols.at(pos).getDescription() == ""){
+				    		tfs.v_funcSymbols.at(pos).setDescription($2.trad);
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
 				    		string pme = $1.lexeme;
@@ -564,11 +350,11 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				    }
 				}
 			| codermodule ModuleTextDefinition {
-				    FunctionSymbol s;
+				    int pos;
 					if(s1 != "null"){
-				    	s = tfs.searchFunctionSymbol(s1);
-						if (s.code == ""){
-				    		s.code = $2.trad;
+				    	pos = tfs.searchFunctionSymbol(s1);
+						if (tfs.v_funcSymbols.at(pos).getCode() == ""){
+				    		tfs.v_funcSymbols.at(pos).setCode($2.trad);
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
 				    		string pme = $1.lexeme;
@@ -578,10 +364,10 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				}
 			| referencesmodule ModuleTextDefinition {
 					if(s1 != "null"){
-						FunctionSymbol s;
-				    	s = tfs.searchFunctionSymbol(s1);
-						if (s.references == ""){
-				    		s.references = $2.trad;
+						int pos;
+				    	pos = tfs.searchFunctionSymbol(s1);
+						if (tfs.v_funcSymbols.at(pos).getReferences() == ""){
+				    		tfs.v_funcSymbols.at(pos).setReferences($2.trad);
 				    	}else{
 				    		// fail: functionmodule Olreeady defing
 				    		string pme = $1.lexeme;
@@ -643,7 +429,7 @@ Ref		:	id {}
 /* Tipos */
 TipoBase 	: inttype {string pme = $1.lexeme; $$.trad = pme;}
 
-S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;}
+S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles();}
 	;
 
 %%

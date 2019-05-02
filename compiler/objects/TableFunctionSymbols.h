@@ -15,9 +15,8 @@ public:
 	TableFunctionSymbols();
 	~TableFunctionSymbols();
 	bool addFunctionSymbol(string name, string proyectName);
-	FunctionSymbol& searchFunctionSymbol(string name);
-
-private:
+	int searchFunctionSymbol(string name);
+	void createFiles();
 	vector<FunctionSymbol> v_funcSymbols;
 	
 };

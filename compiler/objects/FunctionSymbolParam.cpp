@@ -24,6 +24,8 @@ FunctionSymbolParam :: FunctionSymbolParam(const FunctionSymbolParam &In)
 	this -> value = In.value;
 }
 
+FunctionSymbolParam ::  ~FunctionSymbolParam(){}
+
 FunctionSymbolParam& FunctionSymbolParam :: operator = (const FunctionSymbolParam &In)
 {
 	if(this != &In)
