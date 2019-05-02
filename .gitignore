@@ -1,1 +1,10 @@
+obj_dir
 rtlcompiler
+compiler/bin/
+compiler/lex.yy.c
+compiler/objects/FunctionSymbol.o
+compiler/objects/FunctionSymbolParam.o
+compiler/objects/InoutSymbol.o
+compiler/objects/TableFunctionSymbols.o
+compiler/vc.tab.c
+compiler/vc.tab.h
