@@ -234,14 +234,10 @@ SSuperblock : SSuperblock definevalue id  {string pme = $3.lexeme; $0.ph = pme;}
 			| /*epsilon*/ { } 
 	;
 /* Function agrupation*/
-//SFunc 		: SSAFunc {$$.trad = "";}
-//			| /*epsilon*/ { } 
-//	;
-//SSAFunc     : SSAFunc Func {$$.trad = "";}
-//			| Func {$$.trad = "";}
-//			| /*epsilon*/ { } 
-//	;
-SAFunc      : Func MainFunc {$$.trad = $1.trad + $2.trad;}
+SSAFunc     : SSAFunc Func {$$.trad = $1.trad + $2.trad;}
+			| Func {$$.trad = $1.trad;}
+	;
+SAFunc      : SSAFunc MainFunc {$$.trad = $1.trad + $2.trad;}
 	;
 /* Function */
 Func 		: moduledefinition id 
@@ -267,6 +263,7 @@ MainFunc    : moduledefinition mainmodule id
 				/*Add module*/
 				string pme = $3.lexeme;
 				tfs.addFunctionSymbol(pme, proyectName);
+				int pos = tfs.searchFunctionSymbol(pme);
 				s1 = pme;
 			}  parl SArgs parr Block
 			{
@@ -274,7 +271,8 @@ MainFunc    : moduledefinition mainmodule id
 				s1 = "null";
 				string pme = $3.lexeme;
 				int pos = tfs.searchFunctionSymbol(pme);
-				tfs.v_funcSymbols.at(pos).createFileModule();
+				string base = init_output();
+				tfs.v_funcSymbols.at(pos).createFileModule(base);
 
 			}
 	;
@@ -314,7 +312,7 @@ SAArgs 		:  coma id SAArgs
 			|/*epsilon*/ { } 
 	;
 /* Block definition and instructions base  */
-Block 		: cbl SInstr cbr  {}
+Block 		: cbl SInstr cbr  {$$.trad = $2.trad;}
 	;
 SInstr		: SInstr Instr {$$.trad = $1.trad + $2.trad;}
 			| Instr  	   {$$.trad = $1.trad;}
@@ -375,11 +373,7 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 				    	}
 				    }
 				}
-			| intype InstrINOUT 
-				{
-
-				}
-			| intype id pyc {}
+			| intype id pyc { }
 			/*| inttype id pyc {
 				FunctionSymbol s;
 				if(s1 != "null"){
@@ -393,10 +387,16 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 
 	;
 EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
-			| TipoBase id      {string pme = $2.lexeme; $$.trad = $1.trad + pme;}
+			| TipoBase id      {
+								string pme = $2.lexeme; 
+								$$.trad = $1.trad + pme;
+								int pos = tfs.searchFunctionSymbol(s1);
+								InoutSymbol con (pme ,$1.size,"");
+								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(con);
+								}
 	;
-InstrINOUT  : id {string pme = $1.lexeme; $$.trad = pme; $$.size = 0;}
-			| bral Expr twopoints Expr brar id {string pme = $6.lexeme; $$.trad = pme; $$.size = 0;}
+/*InstrINOUT  : id {string pme = $1.lexeme; $$.trad = pme; $$.size = 0;}
+			| bral Expr twopoints Expr brar id {string pme = $6.lexeme; $$.trad = pme; $$.size = 0;}*/
 	;
 /* Expresion */
 Expr	:	Econj {} 
@@ -427,7 +427,8 @@ Ref		:	id {}
 		|	Ref bral Esimple brar {}
 	;
 /* Tipos */
-TipoBase 	: inttype {string pme = $1.lexeme; $$.trad = pme;}
+TipoBase 	: inttype {$$.size = IN;}
+	;
 
 S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles();}
 	;

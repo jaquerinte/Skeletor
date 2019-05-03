@@ -7,6 +7,15 @@ module a (h,d) {
 	in clk;
 }
 
-module main c () {
+module d (b,a) {
+	#function "AND current addr_i  addr_i"
+	#description GENERALDESCIPTION
+	#coder  WORKER1
+	#references GENRALREFERENCE
+
+	in clk;
+}
+
+module main h () {
 	#function "AND current addr_i with previou"
 }

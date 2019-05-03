@@ -28,6 +28,7 @@ public:
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
 	void createFileModule();
+	void createFileModule(string base);
 	void printToFile();
 
 	// getters
