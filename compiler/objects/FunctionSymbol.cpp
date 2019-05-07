@@ -118,7 +118,6 @@ void FunctionSymbol :: createFileModule()
 {
 	/* Start wriking the file */
 	/* Definition top file */
-	cout<<this -> function<<" : "<<this -> description << " : " << this -> code << endl;
 	this -> output_file_data = "//-----------------------------------------------------\n";
 	this -> output_file_data += "// Project Name : " + this -> proyectName + "\n";
 

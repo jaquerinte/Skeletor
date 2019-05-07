@@ -158,11 +158,6 @@ struct TableSymbols {
 		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
 		return ts_content;
 	}
-	string getNewLabel() {
-		string etq = "L" + to_string(lastLabel);
-		++lastLabel;
-		return etq;
-	}
 	bool addSymbol(string name, int type){
 		Symbol s;
 		s.type = type;
@@ -222,14 +217,15 @@ SA		: S
 		}
 	;
 /* Base syntax */
-ModuleTextDefinition : stringtext { string pme = $1.lexeme; $$.trad = pme;} // TODO CHECK  HOW IN BISON MAKES THE STRINGS 
+ModuleTextDefinition : stringtext { string pme = $1.lexeme; $$.trad = pme;}
 				     | Ref {$$.trad = $1.trad;}
 	;
-ValueDefinition : ninteger  {$$.trad = "";}
-				| booltoken {$$.trad = "";}
-				| stringtext{$$.trad = "";} // TODO CHECK  HOW IN BISON MAKES THE STRINGS 
+
+ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = INTEGER;}
+				| booltoken {string pme = $1.lexeme; $$.trad = pme; $$.size = LOGIC;}
+				| stringtext{string pme = $1.lexeme; $$.trad = pme; $$.size = STRING;}
 	;
-SSuperblock : SSuperblock definevalue id  {string pme = $3.lexeme; $0.ph = pme;} ValueDefinition {$$.trad = $1.trad + $5.trad;}
+SSuperblock : SSuperblock definevalue id ValueDefinition {$$.trad = "";}
 			| definevalue id {string pme = $2.lexeme; $0.ph = pme;} ValueDefinition{$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
 	;
@@ -290,7 +286,7 @@ SArgs       : DArgs {$$.trad = "";}
 			}*/
 			| /*epsilon*/ { } 
 	;
-DArgs       :  id SAArgs {
+DArgs       :  id SArBlock SAArgs {
 					string pme = $1.lexeme;
 				    
 				    //printf("%s", s1);
@@ -300,7 +296,7 @@ DArgs       :  id SAArgs {
 				    }
 				}
 	;
-SAArgs 		:  coma id SAArgs 
+SAArgs 		:  coma id SArBlock SAArgs 
 				{
 					string pme = $2.lexeme;
 				    FunctionSymbol s;
@@ -310,6 +306,9 @@ SAArgs 		:  coma id SAArgs
 				    }
 				}
 			|/*epsilon*/ { } 
+	;
+SArBlock    : opasig id {string pme = $2.lexeme; $$.trad = pme;}
+			| /*epsilon*/ { $$.trad = "";} 
 	;
 /* Block definition and instructions base  */
 Block 		: cbl SInstr cbr  {$$.trad = $2.trad;}
@@ -428,6 +427,8 @@ Ref		:	id {}
 	;
 /* Tipos */
 TipoBase 	: inttype {$$.size = IN;}
+			| outtype {$$.size = OUT;} 
+			| inouttype {$$.size = INOUT;} 
 	;
 
 S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles();}
