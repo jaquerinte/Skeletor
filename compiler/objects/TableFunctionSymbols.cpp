@@ -1,4 +1,8 @@
 #include "TableFunctionSymbols.h"
+#include <bits/stdc++.h> 
+#include <iostream> 
+#include <sys/stat.h> 
+#include <sys/types.h> 
 
 TableFunctionSymbols :: TableFunctionSymbols(){}
 
@@ -28,10 +32,17 @@ int TableFunctionSymbols :: searchFunctionSymbol(string name)
 	//msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
 	return 0;
 }
+
+//TableFunctionSymbols añadir una nueva carpeta
 void TableFunctionSymbols :: createFiles()
 {
-	for (int i = 0; i < v_funcSymbols.size();++i) {
-		v_funcSymbols.at(i).printToFile();
+	// Creating a directory 
+	if (mkdir("output", 0777) == -1) 
+		cerr << "Error : " << strerror(errno) << endl; 
+	
+    for (int i = 0; i < v_funcSymbols.size();++i) {
+		//mandarlo a la carpeta
+        v_funcSymbols.at(i).printToFile();
 	}
 
 }

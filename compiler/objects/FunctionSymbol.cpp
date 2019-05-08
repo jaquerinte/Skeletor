@@ -8,7 +8,7 @@ FunctionSymbol :: FunctionSymbol()
 	this -> description = "";
 	this -> code = "";
 	this -> proyectName = "";
-	this -> filename_asociated = name + ".v";
+	this -> filename_asociated = "./output/"+ name + ".v";
 	this -> output_file_data = "";
 }
 
@@ -20,7 +20,7 @@ FunctionSymbol :: FunctionSymbol(string name, string proyectName)
 	this -> description = "";
 	this -> code = "";
 	this -> proyectName = proyectName;
-	this -> filename_asociated = name + ".v";
+	this -> filename_asociated = "./output/"+ name + ".v";
 	this -> output_file_data = "";
 }
 
@@ -31,8 +31,8 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
 	this -> description = In.description;
 	this -> code = In.code;
 	this -> proyectName = In.proyectName;
-	this -> filename_asociated = In.filename_asociated;
-	this -> output_file_data = In.output_file_data;
+    this -> filename_asociated = In.filename_asociated;
+    this -> output_file_data = In.output_file_data;
 }
 FunctionSymbol :: ~FunctionSymbol(){}
 
