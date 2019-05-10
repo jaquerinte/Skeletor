@@ -17,6 +17,7 @@ using namespace std;
 
 #include "common.h"
 #include "./objects/TableFunctionSymbols.h"
+#include "./objects/TableSymbols.h"
 
 // variables y funciones del A. Léxico
 extern int ncol,nlin,endfile;
@@ -138,7 +139,7 @@ struct TableTypes {
 TableTypes tt;
 /* Tabla Types */
 
-struct Symbol {
+/*struct Symbol {
 	int type;
 	string name;
 	int value;
@@ -186,7 +187,7 @@ struct TableSymbols {
 		msgError(ERRNODEC, nlin, ncol - name.length(), name.c_str());
 		return s;
 	}
-};
+};*/
 
 /* Table Symbols */
 TableSymbols ts;
@@ -217,16 +218,35 @@ SA		: S
 		}
 	;
 /* Base syntax */
-ModuleTextDefinition : stringtext { string pme = $1.lexeme; $$.trad = pme;}
-				     | Ref {$$.trad = $1.trad;}
+ModuleTextDefinition : stringtext { string pme = $1.lexeme; pme.erase(0, 1);pme.erase(pme.size() - 1); $$.trad = pme;}
+				     | Ref {
+				     	int pos = ts.shearchSymbol($1.trad);
+				     	string value = ts.v_symbols.at(pos).getValue_S();
+				     	// TODO ERASE 
+				     	//cout<<"name "<<ts.v_symbols.at(pos).getName() << " type "<< ts.v_symbols.at(pos).getType() << " value " << value << endl;
+				     	$$.trad = value;
+				    	}
 	;
 
 ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = INTEGER;}
 				| booltoken {string pme = $1.lexeme; $$.trad = pme; $$.size = LOGIC;}
 				| stringtext{string pme = $1.lexeme; $$.trad = pme; $$.size = STRING;}
 	;
-SSuperblock : SSuperblock definevalue id ValueDefinition {$$.trad = "";}
-			| definevalue id {string pme = $2.lexeme; $0.ph = pme;} ValueDefinition{$$.trad = $1.trad;}
+SSuperblock : SSuperblock definevalue id ValueDefinition {
+						string pme = $3.lexeme;
+						/*if ( $4.size == INTEGER){
+							ts.addSymbol(pme,DEFINITION, $4.trad);
+						}
+						else if ( $4.size == INTEGER) {
+							ts.addSymbol(pme,DEFINITION, $4.trad);
+						}
+						else {
+							ts.addSymbol(pme,DEFINITION, $4.trad);
+						}*/
+						ts.addSymbol(pme,DEFINITION, $4.trad);
+						$$.trad = $1.trad;
+						}
+			| definevalue id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,DEFINITION, $3.trad); ;$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
 	;
 /* Function agrupation*/
@@ -268,7 +288,7 @@ MainFunc    : moduledefinition mainmodule id
 				string pme = $3.lexeme;
 				int pos = tfs.searchFunctionSymbol(pme);
 				string base = init_output();
-				tfs.v_funcSymbols.at(pos).createFileModule(base);
+				tfs.v_funcSymbols.at(pos).createFileModule("");
 
 			}
 	;
@@ -422,7 +442,7 @@ Factor	: Ref {}
 		| booltokentrue {}
 		| booltokenfalse {}
 	;
-Ref		:	id {}
+Ref		:	id {string pme = $1.lexeme; $$.trad = pme;}
 		|	Ref bral Esimple brar {}
 	;
 /* Tipos */

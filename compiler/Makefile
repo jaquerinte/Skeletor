@@ -21,7 +21,13 @@ OUTPUTFOLDER = ./bin/
 all:main
 	
 # End Main
-# Object compilation 
+# Object compilation
+Symbol.o: $(OBJECTSFOLDER)Symbol.cpp
+	$(CC) -c $(OBJECTSFOLDER)Symbol.cpp -o $(OBJECTSFOLDER)Symbol.o $(CFLAGS)
+
+TableSymbols.o: $(OBJECTSFOLDER)TableSymbols.cpp
+	$(CC) -c $(OBJECTSFOLDER)TableSymbols.cpp -o $(OBJECTSFOLDER)TableSymbols.o $(CFLAGS)
+
 InoutSymbol.o: $(OBJECTSFOLDER)InoutSymbol.cpp
 	$(CC) -c $(OBJECTSFOLDER)InoutSymbol.cpp -o $(OBJECTSFOLDER)InoutSymbol.o $(CFLAGS)
 
@@ -34,14 +40,14 @@ FunctionSymbol.o: $(OBJECTSFOLDER)FunctionSymbol.cpp
 TableFunctionSymbols.o: $(OBJECTSFOLDER)TableFunctionSymbols.cpp
 	$(CC) -c $(OBJECTSFOLDER)TableFunctionSymbols.cpp -o $(OBJECTSFOLDER)TableFunctionSymbols.o $(CFLAGS)
 
-main: InoutSymbol.o FunctionSymbolParam.o FunctionSymbol.o TableFunctionSymbols.o
+main: InoutSymbol.o FunctionSymbolParam.o FunctionSymbol.o TableFunctionSymbols.o Symbol.o TableSymbols.o
 	mkdir -p $(OUTPUTFOLDER)
 	rm -f *.tab.*
 	rm -f lex.yy.c
 	flex  $(LFILE) 
 	bison -d $(YFILE) $(YFLAGS)
 	# compile objects
-	g++ -o $(OUTPUTFOLDER)$(TARGET) vc.tab.c lex.yy.c $(OBJECTSFOLDER)InoutSymbol.o $(OBJECTSFOLDER)FunctionSymbolParam.o $(OBJECTSFOLDER)FunctionSymbol.o $(OBJECTSFOLDER)TableFunctionSymbols.o
+	$(CC) -o $(OUTPUTFOLDER)$(TARGET) vc.tab.c lex.yy.c $(OBJECTSFOLDER)InoutSymbol.o $(OBJECTSFOLDER)FunctionSymbolParam.o $(OBJECTSFOLDER)FunctionSymbol.o $(OBJECTSFOLDER)TableFunctionSymbols.o $(OBJECTSFOLDER)Symbol.o $(OBJECTSFOLDER)TableSymbols.o
 
 # Clean
 .PHONY: clean
