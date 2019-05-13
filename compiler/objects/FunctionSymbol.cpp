@@ -7,20 +7,21 @@ FunctionSymbol :: FunctionSymbol()
 	this -> function = "";
 	this -> description = "";
 	this -> code = "";
-	this -> proyectName = "";
-	this -> filename_asociated = "./output/"+ name + ".v";
+	this -> projectName = "";
+	this -> filename_asociated = "./output/" + name + ".v";
 	this -> output_file_data = "";
 }
 
 
-FunctionSymbol :: FunctionSymbol(string name, string proyectName)
+FunctionSymbol :: FunctionSymbol(string name, string projectName, string projectFolder)
 {
 	this -> name = name;
 	this -> function = "";
 	this -> description = "";
 	this -> code = "";
-	this -> proyectName = proyectName;
-	this -> filename_asociated = "./output/"+ name + ".v";
+	this -> projectName = projectName;
+	this -> filename_asociated = "./" + projectFolder + "/" + name + ".v";
+	//this -> filename_asociated = "./objects/" + name + ".v";
 	this -> output_file_data = "";
 }
 
@@ -30,7 +31,7 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
 	this -> function = In.function;
 	this -> description = In.description;
 	this -> code = In.code;
-	this -> proyectName = In.proyectName;
+	this -> projectName = In.projectName;
     this -> filename_asociated = In.filename_asociated;
     this -> output_file_data = In.output_file_data;
 }
@@ -119,7 +120,7 @@ void FunctionSymbol :: createFileModule()
 	/* Start wriking the file */
 	/* Definition top file */
 	this -> output_file_data = "//-----------------------------------------------------\n";
-	this -> output_file_data += "// Project Name : " + this -> proyectName + "\n";
+	this -> output_file_data += "// Project Name : " + this -> projectName + "\n";
 
 	if (this -> function != ""){
 		this -> output_file_data += "// Function     : " + this -> function + "\n";
@@ -195,7 +196,7 @@ void FunctionSymbol :: createFileModule(string base)
 	/* Definition top file */
 	cout<<this -> function<<" : "<<this -> description << " : " << this -> code << endl;
 	this -> output_file_data += "//-----------------------------------------------------\n";
-	this -> output_file_data += "// Project Name : " + this -> proyectName + "\n";
+	this -> output_file_data += "// Project Name : " + this -> projectName + "\n";
 
 	if (this -> function != ""){
 		this -> output_file_data += "// Function     : " + this -> function + "\n";
@@ -280,7 +281,7 @@ string FunctionSymbol :: getFilenameAsociated(){return this -> filename_asociate
 string FunctionSymbol :: getFunction() {return this -> function;}
 string FunctionSymbol :: getDescription() {return this -> description;}
 string FunctionSymbol :: getCode() {return this -> code;}
-string FunctionSymbol :: getProyectName() {return this -> proyectName;}
+string FunctionSymbol :: getProjectName() {return this -> projectName;}
 string FunctionSymbol :: getReferences() {return this -> references;}
 string FunctionSymbol :: getOutputFileData() {return this -> output_file_data;};
 
@@ -290,5 +291,5 @@ void FunctionSymbol :: setName(string name){ this -> name = name;}
 void FunctionSymbol :: setFunction(string function) { this -> function = function;}
 void FunctionSymbol :: setDescription(string description) { this -> description = description;}
 void FunctionSymbol :: setCode(string code) { this -> code = code;}
-void FunctionSymbol :: setProyectName(string proyectName) { this -> proyectName = proyectName;}
+void FunctionSymbol :: setProjectName(string projectName) { this -> projectName = projectName;}
 void FunctionSymbol :: setReferences(string references) { this -> references = references;}

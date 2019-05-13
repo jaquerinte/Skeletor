@@ -18,6 +18,10 @@ using namespace std;
 #include "common.h"
 #include "./objects/TableFunctionSymbols.h"
 
+/* Return messages */
+#define CORRECT_EXECUTION 0
+#define WRONG_ARGUMENTS 1
+
 // variables y funciones del A. Léxico
 extern int ncol,nlin,endfile;
 
@@ -27,8 +31,9 @@ const int REGISTER=2;
 const int STRING=3;
 const int LOGIC=5;
 
-/* Global proyect Name */
-string proyectName = "a.out";
+/* Global project Name */
+string projectName = "a.out";
+string projectFolder = "OUTPUT";
 string init_output();
 
 struct Type {
@@ -240,7 +245,7 @@ Func 		: moduledefinition id
 			{
 				/*Add module*/
 				string pme = $2.lexeme;
-				tfs.addFunctionSymbol(pme, proyectName);
+				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				s1 = pme;
 				//printf("%s", s1);
 			} 
@@ -258,7 +263,7 @@ MainFunc    : moduledefinition mainmodule id
 			{
 				/*Add module*/
 				string pme = $3.lexeme;
-				tfs.addFunctionSymbol(pme, proyectName);
+				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				int pos = tfs.searchFunctionSymbol(pme);
 				s1 = pme;
 			}  parl SArgs parr Block
@@ -431,7 +436,7 @@ TipoBase 	: inttype {$$.size = IN;}
 			| inouttype {$$.size = INOUT;} 
 	;
 
-S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles();}
+S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles(projectFolder);}
 	;
 
 %%
@@ -485,6 +490,47 @@ std::string("///////////////////////////////////////////////////////////////////
 
 	return output;
 }
+
+void print_usage(void)
+{
+    printf("Use: verilog_connector <filename>\n");
+    printf("-h, --help, help        Print this message\n");
+    printf("-d                      Output directory name\n");
+    printf("-n                      Set project name\n");
+}
+int arguments_handler(int argc, char ** argv){
+    string str1 ;
+    for(unsigned int args = 2; args < argc; ++args)
+    {
+        switch (argv[args][1]) {
+            //directory name
+            case 'd':
+                str1.clear();
+                str1.append(argv[args+1]);
+                args++;
+                projectFolder.clear();
+                projectFolder.append(str1);
+                break; 
+            //project name
+            case 'n' :
+                str1.clear();
+                str1.append(argv[args+1]);
+                args++;
+                projectName.clear();
+                projectName.append(str1);
+                break; 
+            //default
+            default:
+                printf("argc %d \n", argc);
+                printf("argv %c \n", argv[args][1]);
+                printf("WRONG_ARGUMENTS\n");
+                print_usage();
+                return 1;
+        }
+    }
+    return 0;
+}
+
 int main(int argc,char *argv[])
 {
     FILE *fent;
@@ -492,13 +538,17 @@ int main(int argc,char *argv[])
     //Check if Help flag
     for(int i=0; i<argc; ++i){
         if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"--help")){
-            printf("Use: verilog_connector <filename>\n");
-            printf("-h, --help, help        Print this message\n");
-            return(0);
+            print_usage();
+            return(CORRECT_EXECUTION);
         }
     }
+    //check if arguments are valid
+    if (arguments_handler(argc,argv)) {
+        printf("WRONG_ARGUMENTS\n");
+        return(WRONG_ARGUMENTS);
+    }
 
-    if (argc==2)
+    if (argc>=2)
     {
         fent = fopen(argv[1],"rt");
         if (fent)
@@ -510,6 +560,11 @@ int main(int argc,char *argv[])
         else
             fprintf(stderr,"File can not open\n");
     }
-    else
+    else{
         fprintf(stderr,"Use: example <filename>\n");
+        return(WRONG_ARGUMENTS);
+    }        
 }
+
+
+

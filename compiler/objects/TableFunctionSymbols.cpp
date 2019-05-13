@@ -8,9 +8,10 @@ TableFunctionSymbols :: TableFunctionSymbols(){}
 
 TableFunctionSymbols :: ~TableFunctionSymbols(){}
 
-bool TableFunctionSymbols :: addFunctionSymbol(string name, string proyectName)
+bool TableFunctionSymbols :: addFunctionSymbol(string name, string projectName, string projectFolder)
+
 {
-	FunctionSymbol s(name,proyectName);
+	FunctionSymbol s(name, projectName, projectFolder );
 	for (int i = 0; i < v_funcSymbols.size();++i) {
 		if (v_funcSymbols.at(i).getName() == s.getName()) { 
 			// fail: func var ya decl
@@ -34,10 +35,10 @@ int TableFunctionSymbols :: searchFunctionSymbol(string name)
 }
 
 //TableFunctionSymbols añadir una nueva carpeta
-void TableFunctionSymbols :: createFiles()
+void TableFunctionSymbols :: createFiles(string projectFolder)
 {
 	// Creating a directory 
-	if (mkdir("output", 0777) == -1) 
+	if (mkdir(projectFolder.c_str(), 0777) == -1) 
 		cerr << "Error : " << strerror(errno) << endl; 
 	
     for (int i = 0; i < v_funcSymbols.size();++i) {
