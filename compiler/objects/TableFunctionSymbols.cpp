@@ -1,12 +1,17 @@
 #include "TableFunctionSymbols.h"
+#include <bits/stdc++.h> 
+#include <iostream> 
+#include <sys/stat.h> 
+#include <sys/types.h> 
 
 TableFunctionSymbols :: TableFunctionSymbols(){}
 
 TableFunctionSymbols :: ~TableFunctionSymbols(){}
 
-bool TableFunctionSymbols :: addFunctionSymbol(string name, string proyectName)
+bool TableFunctionSymbols :: addFunctionSymbol(string name, string projectName, string projectFolder)
+
 {
-	FunctionSymbol s(name,proyectName);
+	FunctionSymbol s(name, projectName, projectFolder );
 	for (int i = 0; i < v_funcSymbols.size();++i) {
 		if (v_funcSymbols.at(i).getName() == s.getName()) { 
 			// fail: func var ya decl
@@ -28,10 +33,17 @@ int TableFunctionSymbols :: searchFunctionSymbol(string name)
 	//msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
 	return 0;
 }
-void TableFunctionSymbols :: createFiles()
+
+//TableFunctionSymbols añadir una nueva carpeta
+void TableFunctionSymbols :: createFiles(string projectFolder)
 {
-	for (int i = 0; i < v_funcSymbols.size();++i) {
-		v_funcSymbols.at(i).printToFile();
+	// Creating a directory 
+	if (mkdir(projectFolder.c_str(), 0777) == -1) 
+		cerr << "Error : " << strerror(errno) << endl; 
+	
+    for (int i = 0; i < v_funcSymbols.size();++i) {
+		//mandarlo a la carpeta
+        v_funcSymbols.at(i).printToFile();
 	}
 
 }
