@@ -34,6 +34,9 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
 	this -> projectName = In.projectName;
     this -> filename_asociated = In.filename_asociated;
     this -> output_file_data = In.output_file_data;
+	this -> v_inoutwires = In.v_inoutwires;
+	this -> v_param = In.v_param;
+	this -> v_wire = In.v_wire;
 }
 FunctionSymbol :: ~FunctionSymbol(){}
 
@@ -47,8 +50,10 @@ FunctionSymbol& FunctionSymbol :: operator = (const FunctionSymbol &In)
 }
 
 
-bool FunctionSymbol :: addConnectionFunctionSymbol(InoutSymbol s)
+bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string with)
 {
+	InoutSymbol s(name, size, with);
+	cout<< s.getName()<< "IN Definition"<<endl;
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
 		if (this -> v_inoutwires.at(i).getName() == s.getName()) { 
 			// fail: connection alrady declared
@@ -56,7 +61,7 @@ bool FunctionSymbol :: addConnectionFunctionSymbol(InoutSymbol s)
 			return false;
 		}
 	}
-	v_inoutwires.push_back(s);
+	this -> v_inoutwires.push_back(s);
 	return true;
 
 }
@@ -115,6 +120,12 @@ FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name)
 	return s;
 }
 
+bool FunctionSymbol :: addWireConnection(string function_in, InoutSymbol out, InoutSymbol in){
+	WireSymbol wire(function_in, out, in);
+	this -> v_wire.push_back(wire);
+}
+
+
 void FunctionSymbol :: createFileModule()
 {
 	/* Start wriking the file */
@@ -159,7 +170,9 @@ void FunctionSymbol :: createFileModule()
 		this -> output_file_data += "module " + this -> name + " (\n";
 	}
 	/* copy the inputs and outputs*/
+	cout<<"size: " + to_string(this -> v_inoutwires.size()) << endl;
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
+		cout << this-> v_inoutwires.at(i).getName()<< endl;
 		string type = "";
 			if (this -> v_inoutwires.at(i).getType() == IN){
 				type = "input";

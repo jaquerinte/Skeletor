@@ -1,6 +1,6 @@
 %token id ninteger amp moduledefinition intype inttype outtype inouttype definevalue wiretipe
 %token opas parl parr pyc coma oprel opmd opasig bral connectwire nyooperator stringtext
-%token brar cbl cbr ybool obool nobool opasinc twopoints mainmodule booltokentrue
+%token brar cbl cbr ybool obool nobool opasinc twopoints mainmodule booltokentrue definevalueverilog
 %token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse
 
 
@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
@@ -140,59 +141,22 @@ struct TableTypes {
 
 };
 
+/* Auxiliary Function */
+vector<std::string> split_ref(string value){
+	istringstream iss(value);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (std::getline(iss, token, '.')) {
+	    if (!token.empty())
+	        tokens.push_back(token);
+	}
+return  tokens;
+}
+/*  Auxiliary Function */
+
 /* Tabla Types */
 TableTypes tt;
 /* Tabla Types */
-
-/*struct Symbol {
-	int type;
-	string name;
-	int value;
-};
-
-struct TableSymbols {
-	vector<Symbol> v_symbols;
-	int lastLabel;
-
-	string debugTSymbols() {
-		string ts_content("");
-		ts_content += "// TableSymbols\n";
-		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		for (int i = 0; i < v_symbols.size();++i) {
-			ts_content += "// type:" + to_string(v_symbols.at(i).type) + " name:" + v_symbols.at(i).name + " value:" + to_string(v_symbols.at(i).value)+ "\n";
-		}
-		ts_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		return ts_content;
-	}
-	bool addSymbol(string name, int type){
-		Symbol s;
-		s.type = type;
-		s.name = name;
-		for (int i = 0; i < v_symbols.size();++i) {
-			if (v_symbols.at(i).name == s.name) { 
-				// fail: var ya decl
-				msgError(ERRALDEC, nlin, ncol - name.length(), name.c_str());
-				return false;
-			}
-		}
-		v_symbols.push_back(s);
-		return true;
-	}
-	Symbol searchSymbol(string name) {
-		Symbol s;
-		s.type = -1;
-		s.value = -1;
-		s.name = "null";
-		for (int i = 0; i < v_symbols.size();++i) {
-			if (v_symbols.at(i).name == name) {
-				return v_symbols.at(i);
-			}
-		}
-		// fail: var no decl
-		msgError(ERRNODEC, nlin, ncol - name.length(), name.c_str());
-		return s;
-	}
-};*/
 
 /* Table Symbols */
 TableSymbols ts;
@@ -219,7 +183,6 @@ SA		: S
 		{ 
 			int tk = yylex();
 			if (tk != 0) yyerror("");
-			cout << $1.trad << endl; 
 		}
 	;
 /* Base syntax */
@@ -237,22 +200,16 @@ ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = IN
 				| booltoken {string pme = $1.lexeme; $$.trad = pme; $$.size = LOGIC;}
 				| stringtext{string pme = $1.lexeme; $$.trad = pme; $$.size = STRING;}
 	;
-SSuperblock : SSuperblock definevalue id ValueDefinition {
+SSuperblock : SSuperblock SSSuperblockDefine id ValueDefinition {
 						string pme = $3.lexeme;
-						/*if ( $4.size == INTEGER){
-							ts.addSymbol(pme,DEFINITION, $4.trad);
-						}
-						else if ( $4.size == INTEGER) {
-							ts.addSymbol(pme,DEFINITION, $4.trad);
-						}
-						else {
-							ts.addSymbol(pme,DEFINITION, $4.trad);
-						}*/
-						ts.addSymbol(pme,DEFINITION, $4.trad);
+						ts.addSymbol(pme,$2.size, $4.trad);
 						$$.trad = $1.trad;
 						}
-			| definevalue id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,DEFINITION, $3.trad); ;$$.trad = $1.trad;}
+			| SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad);$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
+	;
+SSSuperblockDefine	: definevalue {$$.size = DEFINITION;}
+				   	| definevalueverilog {$$.size = DEFINITIONVERILOG;} 
 	;
 /* Function agrupation*/
 SSAFunc     : SSAFunc Func {$$.trad = $1.trad + $2.trad;}
@@ -265,6 +222,9 @@ Func 		: moduledefinition id
 			{
 				/*Add module*/
 				string pme = $2.lexeme;
+				// fist add symbol
+				ts.addSymbol(pme,FUNCTION);
+				// then add symbol
 				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				s1 = pme;
 				//printf("%s", s1);
@@ -283,8 +243,10 @@ MainFunc    : moduledefinition mainmodule id
 			{
 				/*Add module*/
 				string pme = $3.lexeme;
+				// fist add symbol
+				ts.addSymbol(pme,FUNCTION);
+				// then add symbol
 				tfs.addFunctionSymbol(pme, projectName, projectFolder);
-				int pos = tfs.searchFunctionSymbol(pme);
 				s1 = pme;
 			}  parl SArgs parr Block
 			{
@@ -342,8 +304,9 @@ SInstr		: SInstr Instr {$$.trad = $1.trad + $2.trad;}
 			| Instr  	   {$$.trad = $1.trad;}
 	;
 /* Instruction definition  */
-Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
-			| functionmodule ModuleTextDefinition 
+/* TODO THINK TO REDO WITH ONLY 2 RULES*/
+Instr 		//: EInstr pyc {$$.trad = $1.trad + ";";}
+			: functionmodule ModuleTextDefinition 
 				{
 					int pos;
 					if(s1 != "null"){
@@ -407,18 +370,100 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 						s.addConnectionFunctionSymbol(pme, IN,"");
 					}
 				}*/
-			|/*epsilon*/ { } 
-
-	;
-EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
-			| TipoBase id      {
+			| Ref opasig Expr pyc{$$.trad = $1.trad + " = " + $3.trad;}
+			| TipoBase id pyc     {
+								cout<<"ENTRO TIPO"<<endl;
 								string pme = $2.lexeme; 
 								$$.trad = $1.trad + pme;
 								int pos = tfs.searchFunctionSymbol(s1);
 								InoutSymbol con (pme ,$1.size,"");
-								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(con);
+								string with = "";
+								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
 								}
+			| wiretipe Ref connectwire Ref pyc{
+											string var_out = $2.trad;
+											string var_in = $4.trad;
+											// decompse the variables.
+											// decompse out var
+											vector<string> out = split_ref(var_out);
+											// decompse in var
+											vector<string> in = split_ref(var_in);
+											// check out function 
+											int pos = tfs.searchFunctionSymbol(out[0]);
+											if (pos == -1){ 
+												// error 
+											}
+											// check InoutSymbol
+											InoutSymbol out_inout;
+											out_inout= tfs.v_funcSymbols.at(pos).searchinoutSymbol(out[1]);
+											if (out_inout.getName() == "null"){
+												//error 
+											}
+											pos = tfs.searchFunctionSymbol(in[0]);
+											if (pos == -1){ 
+												// error 
+											}
+											// check InoutSymbol
+											InoutSymbol in_inout;
+											in_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(in[1]);
+											if (in_inout.getName() == "null"){
+												//error 
+											}
+											// all verfiy
+											// create wire. 
+
+
+
+										   }
+			|/*epsilon*/ { } 
+
 	;
+/*EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
+			| TipoBase id      {
+								cout<<"ENTRO TIPO"<<endl;
+								string pme = $2.lexeme; 
+								$$.trad = $1.trad + pme;
+								int pos = tfs.searchFunctionSymbol(s1);
+								InoutSymbol con (pme ,$1.size,"");
+								string with = "";
+								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
+								}
+			| wiretipe Ref connectwire Ref {
+											string var_out = $2.trad;
+											string var_in = $4.trad;
+											// decompse the variables.
+											// decompse out var
+											vector<string> out = split_ref(var_out);
+											// decompse in var
+											vector<string> in = split_ref(var_in);
+											// check out function 
+											int pos = tfs.searchFunctionSymbol(out[0]);
+											if (pos == -1){ 
+												// error 
+											}
+											// check InoutSymbol
+											InoutSymbol out_inout;
+											out_inout= tfs.v_funcSymbols.at(pos).searchinoutSymbol(out[1]);
+											if (out_inout.getName() == "null"){
+												//error 
+											}
+											pos = tfs.searchFunctionSymbol(in[0]);
+											if (pos == -1){ 
+												// error 
+											}
+											// check InoutSymbol
+											InoutSymbol in_inout;
+											in_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(in[1]);
+											if (in_inout.getName() == "null"){
+												//error 
+											}
+											// all verfiy
+											// create wire. 
+
+
+
+										   }
+	;*/
 /*InstrINOUT  : id {string pme = $1.lexeme; $$.trad = pme; $$.size = 0;}
 			| bral Expr twopoints Expr brar id {string pme = $6.lexeme; $$.trad = pme; $$.size = 0;}*/
 	;

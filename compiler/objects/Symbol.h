@@ -7,8 +7,9 @@
 using namespace std;
 
 const int DEFINITION=1;
-const int VARIABE=2;
-const int FUNCTION=3;
+const int DEFINITIONVERILOG=2;
+const int VARIABE=3;
+const int FUNCTION=4;
 
 class Symbol
 {

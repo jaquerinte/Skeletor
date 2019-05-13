@@ -60,7 +60,7 @@ module simple_example#(
         .rdy_o  (rdy_c_d)
     );
     //Module D does: Three way AND gate
-    d inst_d(
+    d inst_d( // @GUILLEM el inst_d que funcion tiene?
         .in1_i(rdy_a_d),
         .in2_i(rdy_b_d),
         .in3_i(rdy_c_d),
