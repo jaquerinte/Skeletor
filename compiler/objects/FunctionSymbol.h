@@ -17,7 +17,7 @@ class FunctionSymbol
 public:
 
 	FunctionSymbol();
-	FunctionSymbol(string name, string proyectName);
+    FunctionSymbol(string name, string projectName, string projectFolder);
 	FunctionSymbol(const FunctionSymbol &In);
 	~FunctionSymbol();
 	FunctionSymbol& operator = (const FunctionSymbol &In);
@@ -41,7 +41,7 @@ public:
 	string getFunction();
 	string getDescription();
 	string getCode();
-	string getProyectName();
+	string getProjectName();
 	string getReferences();
 	string getOutputFileData();
 
@@ -51,7 +51,7 @@ public:
 	void setFunction(string function);
 	void setDescription(string description);
 	void setCode(string code);
-	void setProyectName(string proyectName);
+	void setProjectName(string projectName);
 	void setReferences(string references);
 
 private:
@@ -63,7 +63,7 @@ private:
 	string function;
 	string description;
 	string code;
-	string proyectName;
+	string projectName;
 	string references;
 	string output_file_data;
 	

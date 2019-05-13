@@ -20,6 +20,10 @@ using namespace std;
 #include "./objects/TableFunctionSymbols.h"
 #include "./objects/TableSymbols.h"
 
+/* Return messages */
+#define CORRECT_EXECUTION 0
+#define WRONG_ARGUMENTS 1
+
 // variables y funciones del A. Léxico
 extern int ncol,nlin,endfile;
 
@@ -29,8 +33,9 @@ const int REGISTER=2;
 const int STRING=3;
 const int LOGIC=5;
 
-/* Global proyect Name */
-string proyectName = "a.out";
+/* Global project Name */
+string projectName = "a.out";
+string projectFolder = "OUTPUT";
 string init_output();
 
 struct Type {
@@ -220,7 +225,7 @@ Func 		: moduledefinition id
 				// fist add symbol
 				ts.addSymbol(pme,FUNCTION);
 				// then add symbol
-				tfs.addFunctionSymbol(pme, proyectName);
+				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				s1 = pme;
 				//printf("%s", s1);
 			} 
@@ -241,7 +246,7 @@ MainFunc    : moduledefinition mainmodule id
 				// fist add symbol
 				ts.addSymbol(pme,FUNCTION);
 				// then add symbol
-				tfs.addFunctionSymbol(pme, proyectName);
+				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				s1 = pme;
 			}  parl SArgs parr Block
 			{
@@ -281,7 +286,7 @@ DArgs       :  id SArBlock SAArgs {
 SAArgs 		:  coma id SArBlock SAArgs 
 				{
 					string pme = $2.lexeme;
-				    FunctionSymbol s;
+				    FunctionSymbol s;//not used can be removed
 				    if(s1 != "null"){
 				    	int pos  = tfs.searchFunctionSymbol(s1);
 				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
@@ -496,7 +501,7 @@ TipoBase 	: inttype {$$.size = IN;}
 			| inouttype {$$.size = INOUT;} 
 	;
 
-S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles();}
+S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles(projectFolder);}
 	;
 
 %%
@@ -543,59 +548,72 @@ int yyerror(char *s)
 string init_output(){
 	
 string output = "////////////////////////////////////////////////////////////////////////////////\n"+
-std::string("//                                                                              \n")+
-std::string("//                                 -+ydNMMNdy+-                                 \n")+
-std::string("//                             -ohNmy+-.``.:omMmo.                              \n")+
-std::string("//                      .:/++hNds:`           +NMMy                             \n")+
-std::string("//                    :mMMMMMNdh`              -NMM+                            \n")+
-std::string("//                   .MMMMMMMd`Ns               -MMy                            \n")+
-std::string("//                   /MMMMMmo` mm/o   :ymmmhs/.  yMh                            \n")+
-std::string("//                   .MMMMMmhhmMmy/  yMMMMMM+yNy sMy                            \n")+
-std::string("//                   oMo`-:NMMs-o+` oMMMMMMM+`mM-dMs                            \n")+
-std::string("//                  sMN/-.`+yyysys. yMMMmhy/  hs-MM/                            \n")+
-std::string("//                `hMdhdmNNmdhs+/-. `+ydmmhyys/ hMN`                            \n")+
-std::string("//                yMd````..:/osyhhdddys+/:...` -MMo                             \n")+
-std::string("//               sMm.            ```.-::/:.    dMM:                             \n")+
-std::string("//              oMN-                          /MMh                              \n")+
-std::string("//             +MM/                          `mMN-                              \n")+
-std::string("//            -NM+                  -`       yMM/                               \n")+
-std::string("//            /MN                  oN/ /+   :MM+                                \n")+
-std::string("//            /Mh                 `Nm`-MM` `mMo                   .+ysyy+.      \n")+
-std::string("//            +Ms                 /M+ dMo  sMd                  .omm:``/Mh      \n")+
-std::string("//            +M+                 dd +Mh` :MM-                `+mNs.   -Ms      \n")+
-std::string("//            +M+                -M:-Nm`  dMd   ```.``       :dNy-    -ms`      \n")+
-std::string("//            +M+                yy.mN-   NMhoyhhhddddho:` -yNy-    `om+        \n")+
-std::string("//            /Ms               .m.hN:    NMy/:-oo:.-/sdNdsmy-    `+mm:         \n")+
-std::string("//            -Mm              `h+`Mo     :+`  `+Ns--..-hms-    `/dMy.          \n")+
-std::string("//             NM-           `:ys  sy-       -shddmmmNmmMo.    :dMMo`           \n")+
-std::string("//             oMh          :s/- .s::N-       .....--:/sdMNs.  -ohds+-`         \n")+
-std::string("//             `NM/         .+sN/hmyyy`          `+.    `:dMm:  ```./My         \n")+
-std::string("//              +MN/           :yo. .            /y:      `dMN. `+yyso.         \n")+
-std::string("//               +NMs`                        -/           :MM/   :ds           \n")+
-std::string("//                .sNmo.                     `my           -MM/`   +M-          \n")+
-std::string("//          ``      .dMmh+.`                  ++`         `yMmdyyyyds           \n")+
-std::string("//          dyo-   `sNs-oNNdy+-.``            .:.       .odd/``.--.`            \n")+
-std::string("//          N-:hy.-dd:`:hy-/sdmmdhys+/.`        ++   `/ymh:                     \n")+
-std::string("//          yy  /hmo`-yh:     `-:+oymMM+ :hyysso+o/oydd+.                       \n")+
-std::string("//          .m/  `.:yd/       .sys++mMo `mm-:/osyyyo:.                          \n")+
-std::string("//           -d/./hd/         :MMymNm/  yN-                                     \n")+
-std::string("//            `oNd/`          `mMo .`  +N:                                      \n")+
-std::string("//              `              -NM:   /N+                                       \n")+
-std::string("//                              .dNo.oN+                                        \n")+
-std::string("//                                oNNh.                                         \n")+
-std::string("//                                                                              \n")+
 std::string("////////////////////////////////////////////////////////////////////////////////\n")+
-std::string("//					  THE DICKBUT RTL CONNECTION COMPILER				         \n")+
-std::string("//				    FOR NOT TO MAKE A DICKBUT RTL CONNECTIONS			         \n")+
+std::string("//					  THE         RTL CONNECTION COMPILER				         \n")+
+std::string("//				    FOR NOT TO MAKE A         RTL CONNECTIONS			         \n")+
 std::string("////////////////////////////////////////////////////////////////////////////////\n");
 
 	return output;
 }
+
+void print_usage(void)
+{
+    printf("Use: verilog_connector <filename>\n");
+    printf("-h, --help, help        Print this message\n");
+    printf("-d                      Output directory name\n");
+    printf("-n                      Set project name\n");
+}
+int arguments_handler(int argc, char ** argv){
+    string str1 ;
+    for(unsigned int args = 2; args < argc; ++args)
+    {
+        switch (argv[args][1]) {
+            //directory name
+            case 'd':
+                str1.clear();
+                str1.append(argv[args+1]);
+                args++;
+                projectFolder.clear();
+                projectFolder.append(str1);
+                break; 
+            //project name
+            case 'n' :
+                str1.clear();
+                str1.append(argv[args+1]);
+                args++;
+                projectName.clear();
+                projectName.append(str1);
+                break; 
+            //default
+            default:
+                printf("argc %d \n", argc);
+                printf("argv %c \n", argv[args][1]);
+                printf("WRONG_ARGUMENTS\n");
+                print_usage();
+                return 1;
+        }
+    }
+    return 0;
+}
+
 int main(int argc,char *argv[])
 {
     FILE *fent;
+    
+    //Check if Help flag
+    for(int i=0; i<argc; ++i){
+        if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"--help")){
+            print_usage();
+            return(CORRECT_EXECUTION);
+        }
+    }
+    //check if arguments are valid
+    if (arguments_handler(argc,argv)) {
+        printf("WRONG_ARGUMENTS\n");
+        return(WRONG_ARGUMENTS);
+    }
 
-    if (argc==2)
+    if (argc>=2)
     {
         fent = fopen(argv[1],"rt");
         if (fent)
@@ -607,6 +625,11 @@ int main(int argc,char *argv[])
         else
             fprintf(stderr,"File can not open\n");
     }
-    else
+    else{
         fprintf(stderr,"Use: example <filename>\n");
+        return(WRONG_ARGUMENTS);
+    }        
 }
+
+
+
