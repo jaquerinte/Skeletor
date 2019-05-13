@@ -31,7 +31,7 @@ module b (TransAddrSize, AddrSize){
 }
 
 module c(n){
-	#function = "rdy_o is high when a n bit counter overflow "
+	#function "rdy_o is high when a n bit counter overflow "
 	#description GENERALDESCIPTION
 	#coder  WORKER1
 	#references GENRALREFERENCE

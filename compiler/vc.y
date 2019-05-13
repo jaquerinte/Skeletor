@@ -305,8 +305,8 @@ SInstr		: SInstr Instr {$$.trad = $1.trad + $2.trad;}
 	;
 /* Instruction definition  */
 /* TODO THINK TO REDO WITH ONLY 2 RULES*/
-Instr 		//: EInstr pyc {$$.trad = $1.trad + ";";}
-			: functionmodule ModuleTextDefinition 
+Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
+			| functionmodule ModuleTextDefinition 
 				{
 					int pos;
 					if(s1 != "null"){
@@ -360,67 +360,11 @@ Instr 		//: EInstr pyc {$$.trad = $1.trad + ";";}
 				    	}
 				    }
 				}
-			| intype id pyc { }
-			/*| inttype id pyc {
-				FunctionSymbol s;
-				if(s1 != "null"){
-					    string pme = $2.lexeme;
-						s = tfs.searchFunctionSymbol(s1);
-						string a = "";
-						s.addConnectionFunctionSymbol(pme, IN,"");
-					}
-				}*/
-			| Ref opasig Expr pyc{$$.trad = $1.trad + " = " + $3.trad;}
-			| TipoBase id pyc     {
-								cout<<"ENTRO TIPO"<<endl;
-								string pme = $2.lexeme; 
-								$$.trad = $1.trad + pme;
-								int pos = tfs.searchFunctionSymbol(s1);
-								InoutSymbol con (pme ,$1.size,"");
-								string with = "";
-								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
-								}
-			| wiretipe Ref connectwire Ref {
-											string var_out = $2.trad;
-											string var_in = $4.trad;
-											// decompse the variables.
-											// decompse out var
-											vector<string> out = split_ref(var_out);
-											// decompse in var
-											vector<string> in = split_ref(var_in);
-											// check out function 
-											int pos = tfs.searchFunctionSymbol(out[0]);
-											if (pos == -1){ 
-												// error 
-											}
-											// check InoutSymbol
-											InoutSymbol out_inout;
-											out_inout= tfs.v_funcSymbols.at(pos).searchinoutSymbol(out[1]);
-											if (out_inout.getName() == "null"){
-												//error 
-											}
-											pos = tfs.searchFunctionSymbol(in[0]);
-											if (pos == -1){ 
-												// error 
-											}
-											// check InoutSymbol
-											InoutSymbol in_inout;
-											in_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(in[1]);
-											if (in_inout.getName() == "null"){
-												//error 
-											}
-											// all verfiy
-											// create wire. 
-
-
-
-										   }
 			|/*epsilon*/ { } 
 
 	;
-/*EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
+EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
 			| TipoBase id      {
-								cout<<"ENTRO TIPO"<<endl;
 								string pme = $2.lexeme; 
 								$$.trad = $1.trad + pme;
 								int pos = tfs.searchFunctionSymbol(s1);
@@ -463,7 +407,7 @@ Instr 		//: EInstr pyc {$$.trad = $1.trad + ";";}
 
 
 										   }
-	;*/
+	;
 /*InstrINOUT  : id {string pme = $1.lexeme; $$.trad = pme; $$.size = 0;}
 			| bral Expr twopoints Expr brar id {string pme = $6.lexeme; $$.trad = pme; $$.size = 0;}*/
 	;
@@ -496,7 +440,7 @@ Ref		:	id {string pme = $1.lexeme; $$.trad = pme;}
 		|	Ref bral Esimple brar {}
 	;
 /* Tipos */
-TipoBase 	: inttype {$$.size = IN;}
+TipoBase 	: intype {$$.size = IN;}
 			| outtype {$$.size = OUT;} 
 			| inouttype {$$.size = INOUT;} 
 	;

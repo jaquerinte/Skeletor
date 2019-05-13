@@ -1,24 +1,56 @@
-#define WORKER1 "J.CABO"
-#define WORKER2 "J.BANANA sdasd"
+#define T_ADDR_SIZE 32
+#define ADDR_SIZE 32
 #define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
+#define WORKER1 "G.Cabo"
 #define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
 
-module a (h,d) {
+module a (TransAddrSize, AddrSize){
 	#function "AND current addr_i with previous addr_i"
 	#description GENERALDESCIPTION
-	#coder WORKER1
+	#coder  WORKER1
 	#references GENRALREFERENCE
 
 	in clk;
+	in rts;
+	//in [AddrSize -1 : 0] addr;
+	//out [TransAddrSize-1: 0] taddr;
+	out rdy;
+}
+module b (TransAddrSize, AddrSize){
+	#function "OR current addr_i with previous addr_i"
+	#description GENERALDESCIPTION
+	#coder  WORKER1
+	#references GENRALREFERENCE
+
+	in rstn;                           
+    in clk;                            
+    //in [AddrSize-1:0] addr;            
+    //in [AddrSize-1:0] taddr;            
+    //out [TransAddrSize-1:0] taddr;      
+    out rdy;                            
 }
 
-module d (b,a) {
-	#function "AND current addr_i  addr_i"
+module c(n){
+	#function "rdy_o is high when a n bit counter overflow "
 	#description GENERALDESCIPTION
-	#coder  WORKER2
+	#coder  WORKER1
 	#references GENRALREFERENCE
 
+	in rst;
 	in clk;
+	out rdy;
+}
+
+module d(){
+	#function  "Three way AND gate"
+	#description GENERALDESCIPTION
+	#coder  WORKER1
+	#references GENRALREFERENCE
+
+	in in1;
+	in in2;
+	in in3;
+	out out1; // no puede ser out porque es una palabra reservada
 }
 
 module main h () {

@@ -53,7 +53,6 @@ FunctionSymbol& FunctionSymbol :: operator = (const FunctionSymbol &In)
 bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string with)
 {
 	InoutSymbol s(name, size, with);
-	cout<< s.getName()<< "IN Definition"<<endl;
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
 		if (this -> v_inoutwires.at(i).getName() == s.getName()) { 
 			// fail: connection alrady declared
@@ -170,9 +169,7 @@ void FunctionSymbol :: createFileModule()
 		this -> output_file_data += "module " + this -> name + " (\n";
 	}
 	/* copy the inputs and outputs*/
-	cout<<"size: " + to_string(this -> v_inoutwires.size()) << endl;
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
-		cout << this-> v_inoutwires.at(i).getName()<< endl;
 		string type = "";
 			if (this -> v_inoutwires.at(i).getType() == IN){
 				type = "input";

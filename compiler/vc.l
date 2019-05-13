@@ -43,8 +43,8 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 <COMMENT>"*/"        		{ncol+=strlen(yytext); BEGIN(INITIAL);}
 <COMMENT>[*/]        		{ncol += strlen(yytext);}
 "module"					{return ret(moduledefinition);}
-"int"						{return ret(inttype);}
 "in"						{return ret(intype);}
+"int"						{return ret(inttype);}
 "out"						{return ret(outtype);}
 "inout"						{return ret(inouttype);}
 "#define"					{return ret(definevalue);}
