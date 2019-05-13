@@ -5,8 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "InoutSymbol.h"
+
 #include "FunctionSymbolParam.h"
+#include "WireSymbol.h"
 
 using namespace std;
 
@@ -21,11 +22,13 @@ public:
 	~FunctionSymbol();
 	FunctionSymbol& operator = (const FunctionSymbol &In);
 
-	bool addConnectionFunctionSymbol(InoutSymbol s);
+	bool addConnectionFunctionSymbol(string name, int size, string with);
 	InoutSymbol& searchinoutSymbol(string name);
 	bool addFunctionSymbolParam(string name);
 	bool addValueFunctionSymbolParam(string name, int value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
+
+	bool addWireConnection(string function_in, InoutSymbol out, InoutSymbol in);
 
 	void createFileModule();
 	void createFileModule(string base);
@@ -55,6 +58,7 @@ private:
 	string name;
 	vector<InoutSymbol> v_inoutwires;
 	vector<FunctionSymbolParam> v_param;
+	vector<WireSymbol> v_wire;
 	string filename_asociated;
 	string function;
 	string description;

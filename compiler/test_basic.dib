@@ -1,18 +1,22 @@
 #define WORKER1 "J.CABO"
+#define WORKER2 "J.BANANA sdasd"
+#define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
+#define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
+
 module a (h,d) {
 	#function "AND current addr_i with previous addr_i"
-	#description "GENERALDESCIPTION"
+	#description GENERALDESCIPTION
 	#coder WORKER1
-	#references "GENRALREFERENCE"
+	#references GENRALREFERENCE
 
 	in clk;
 }
 
 module d (b,a) {
 	#function "AND current addr_i  addr_i"
-	#description "GENERALDESCIPTION"
-	#coder  "WORKER1"
-	#references "GENRALREFERENCE"
+	#description GENERALDESCIPTION
+	#coder  WORKER2
+	#references GENRALREFERENCE
 
 	in clk;
 }
