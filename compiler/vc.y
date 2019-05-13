@@ -375,7 +375,7 @@ Instr 		//: EInstr pyc {$$.trad = $1.trad + ";";}
 								string with = "";
 								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
 								}
-			| wiretipe Ref connectwire Ref pyc{
+			| wiretipe Ref connectwire Ref {
 											string var_out = $2.trad;
 											string var_in = $4.trad;
 											// decompse the variables.
