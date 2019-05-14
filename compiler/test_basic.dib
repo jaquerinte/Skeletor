@@ -53,7 +53,7 @@ module d(){
 	out out1; // no puede ser out porque es una palabra reservada
 }
 
-module main h () {
+module top h () {
 	#function "AND current addr_i with previou"
 	a()[];
 }

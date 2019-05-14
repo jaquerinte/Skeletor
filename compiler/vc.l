@@ -57,7 +57,7 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "false"						{return ret(booltokenfalse);}
 "wire"						{return ret(wiretipe);}
 "->"						{return ret(connectwire);}
-"main"						{return ret (mainmodule);}
+"top"						{return ret (mainmodule);}
 
 {name}						{return ret(id);}
 {stringtext}				{return ret(stringtext);}

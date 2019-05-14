@@ -53,7 +53,7 @@ module d(){
 	out out1; // no puede ser out porque es una palabra reservada
 }
 
-module main simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
+module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	#function  "Module to provide a reference output"
 	#coder  WORKER1
 	#references GENRALREFERENCE
