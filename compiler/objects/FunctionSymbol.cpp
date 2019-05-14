@@ -182,11 +182,11 @@ void FunctionSymbol :: createFileModule()
 			}
 		if (i == this -> v_inoutwires.size() -1){
 			/* Last INOUT parameter */
-			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getName() + "\n";
+			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
 		}
 		else{
 			/* Rest INOUT parameter */
-			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getName() + ",\n";
+			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
 		}
 	}
 	/* End inputs and outputs */
@@ -257,11 +257,11 @@ void FunctionSymbol :: createFileModule(string base)
 			}
 		if (i == this -> v_inoutwires.size() -1){
 			/* Last INOUT parameter */
-			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getName(); + "\n";
+			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getNameVerilog(); + "\n";
 		}
 		else{
 			/* Rest INOUT parameter */
-			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getName(); + ",\n";
+			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getNameVerilog(); + ",\n";
 		}
 	}
 	/* End inputs and outputs */

@@ -55,4 +55,5 @@ module d(){
 
 module main h () {
 	#function "AND current addr_i with previou"
+	a()[];
 }

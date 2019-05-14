@@ -55,6 +55,7 @@ main: InoutSymbol.o FunctionSymbolParam.o FunctionSymbol.o TableFunctionSymbols.
 # Clean
 .PHONY: clean
 clean:
+	rm -rf OUTPUT/
 	rm -f *.tab.*
 	rm -f lex.yy.c
 	rm -rf *.o

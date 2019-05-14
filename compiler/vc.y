@@ -363,7 +363,7 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 			|/*epsilon*/ { } 
 
 	;
-EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
+EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
 			| TipoBase id      {
 								string pme = $2.lexeme; 
 								$$.trad = $1.trad + pme;
@@ -381,36 +381,42 @@ EInstr 		: Ref opasig Expr {$$.trad = $1.trad + " = " + $3.trad;}
 											// decompse in var
 											vector<string> in = split_ref(var_in);
 											// check out function 
-											int pos = tfs.searchFunctionSymbol(out[0]);
-											if (pos == -1){ 
+											int pos_base = tfs.searchFunctionSymbol(out[0]);
+											if (pos_base == -1){ 
 												// error 
 											}
 											// check InoutSymbol
 											InoutSymbol out_inout;
-											out_inout= tfs.v_funcSymbols.at(pos).searchinoutSymbol(out[1]);
+											out_inout= tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1]);
 											if (out_inout.getName() == "null"){
 												//error 
 											}
-											pos = tfs.searchFunctionSymbol(in[0]);
-											if (pos == -1){ 
+											int pos_aux = tfs.searchFunctionSymbol(in[0]);
+											if (pos_aux == -1){ 
 												// error 
 											}
 											// check InoutSymbol
 											InoutSymbol in_inout;
-											in_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(in[1]);
+											in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1]);
 											if (in_inout.getName() == "null"){
 												//error 
 											}
 											// all verfiy
-											// create wire. 
+											// create wire.
 
-
+											tfs.v_funcSymbols.at(pos_base).addWireConnection(out[0],out_inout, in_inout);
 
 										   }
 	;
-/*InstrINOUT  : id {string pme = $1.lexeme; $$.trad = pme; $$.size = 0;}
-			| bral Expr twopoints Expr brar id {string pme = $6.lexeme; $$.trad = pme; $$.size = 0;}*/
+CallExpresion	:  opasig Expr {$$.trad = $2.trad;}
+				|  parl CallArgs parr bral CallConnectors brar 
+							{
+								int pos = tfs.searchFunctionSymbol($0.ph);
+							}
 	;
+CallArgs		: /*epsilon*/ { } 
+	;
+CallConnectors  : /*epsilon*/ { }
 /* Expresion */
 Expr	:	Econj {} 
 		|	Expr obool Econj{}

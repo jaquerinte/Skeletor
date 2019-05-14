@@ -21,6 +21,7 @@ public:
 	InoutSymbol& operator = (const InoutSymbol &In);
 	// getters
 	string getName();
+	string getNameVerilog();
 	int getType();
 	string getWith();
 	void setName(string name);
@@ -31,6 +32,7 @@ public:
 private:
 	/* Value definitions*/
 	string name;
+	string name_verilog;
 	int typeconnection;
 	string width; // TODO CHECK
 	
