@@ -375,6 +375,7 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 			| wiretipe Ref connectwire Ref {
 											string var_out = $2.trad;
 											string var_in = $4.trad;
+
 											// decompse the variables.
 											// decompse out var
 											vector<string> out = split_ref(var_out);
@@ -384,27 +385,37 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 											int pos_base = tfs.searchFunctionSymbol(out[0]);
 											if (pos_base == -1){ 
 												// error 
+												cout<<"ERROR NAME NULL OUT FUNCTION"<<endl;
+												exit(1);
 											}
 											// check InoutSymbol
 											InoutSymbol out_inout;
-											out_inout= tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1]);
+											out_inout = tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1]);
+											
 											if (out_inout.getName() == "null"){
 												//error 
+												cout<<"ERROR NAME NULL OUT INOUTSYMBOL"<<endl;
+												exit(1);
 											}
 											int pos_aux = tfs.searchFunctionSymbol(in[0]);
 											if (pos_aux == -1){ 
-												// error 
+												// error
+												cout<<"ERROR NAME NULL IN FUNCTION"<<endl;
+												exit(1);
 											}
 											// check InoutSymbol
 											InoutSymbol in_inout;
 											in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1]);
 											if (in_inout.getName() == "null"){
-												//error 
+												//error
+												cout<<"ERROR NAME NULL IN INOUTSYMBOL"<<endl;
+												exit(1);
 											}
 											// all verfiy
 											// create wire.
+											int pos = tfs.searchFunctionSymbol(s1);
 
-											tfs.v_funcSymbols.at(pos_base).addWireConnection(out[0],out_inout, in_inout);
+											tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout);
 
 										   }
 	;

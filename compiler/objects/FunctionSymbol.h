@@ -23,12 +23,12 @@ public:
 	FunctionSymbol& operator = (const FunctionSymbol &In);
 
 	bool addConnectionFunctionSymbol(string name, int size, string with);
-	InoutSymbol& searchinoutSymbol(string name);
+	const InoutSymbol& searchinoutSymbol(string name);
 	bool addFunctionSymbolParam(string name);
 	bool addValueFunctionSymbolParam(string name, int value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
-	bool addWireConnection(string function_in, InoutSymbol out, InoutSymbol in);
+	bool addWireConnection(string function_out, string function_in, InoutSymbol &out, InoutSymbol &in);
 
 	void createFileModule();
 	void createFileModule(string base);
