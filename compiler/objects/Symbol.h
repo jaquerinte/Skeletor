@@ -17,7 +17,7 @@ class Symbol
 public:
 	Symbol();
 	Symbol(const string name,const int type);
-	Symbol(const string name,const int type, const string value);
+	Symbol(const string name,const int type, const string value, const int type_var);
 	//Symbol(const string name,const int type, const int value);
 	//Symbol(const string name,const int type, const bool value);
 	Symbol(const Symbol &In);

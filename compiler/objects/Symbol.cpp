@@ -9,13 +9,20 @@ Symbol :: Symbol(const string name,const int type){
 	this -> name = name;
 	this -> type = type;
 }
-Symbol :: Symbol(const string name,const int type, const string value){
+Symbol :: Symbol(const string name,const int type, const string value, const int type_var){
 	this -> name = name;
 	this -> type = type;
 	string value_aux = value;
-	value_aux.erase(0, 1);
-	value_aux.erase(value_aux.size() - 1);
-	this -> value_s = value_aux;
+	// is a String
+	if (type_var == 3){
+		value_aux.erase(0, 1);
+		value_aux.erase(value_aux.size() - 1);
+		this -> value_s = value_aux;
+	}
+	else{
+		this -> value_s = value;
+	}
+	
 
 }
 /*

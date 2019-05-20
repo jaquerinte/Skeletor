@@ -1,5 +1,5 @@
-#define T_ADDR_SIZE 32
-#define ADDR_SIZE 32
+'define T_ADDR_SIZE 32
+'define ADDR_SIZE 32
 #define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
 #define WORKER1 "G.Cabo"
 #define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
@@ -66,8 +66,8 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 
 	//wire [TransAddrSize-1:0] simple_example.taddr -> a.taddr;
 	wire a.rdy -> d.in1;
-	wire b.rdr -> d.in2;
-	//wire c.rdr -> d.in3;
+	wire b.rdy -> d.in2;
+	wire c.rdy -> d.in3;
 	
 	//a(TransAddrSize, AddrSize)[in clk,in rts,in addr]; // no needs to be in order beacuse names match
 	//b(TransAddrSize, AddrSize)[in rstn=~rts,in clk,in addr,in taddr,out taddr]; // not need to be in orden beacuse use =

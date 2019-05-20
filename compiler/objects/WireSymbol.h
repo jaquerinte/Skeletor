@@ -11,21 +11,21 @@ class WireSymbol
 {
 public:
 	WireSymbol();
-	WireSymbol(string function_out, string function_in ,InoutSymbol &out, InoutSymbol &in);
+	WireSymbol(string function_out, string function_in ,int pos_out, int pos_in);
 	~WireSymbol();
 	WireSymbol(const WireSymbol &In);
 	WireSymbol& operator = (const WireSymbol &In);
 
 	string getFuncionOut();
 	string getFuncionIn();
-	InoutSymbol& getInoutSymbolOut();
-	InoutSymbol& getInoutSymbolIn();
+	int getInoutSymbolOut();
+	int getInoutSymbolIn();
 
 private:
 	string function_out;
 	string function_in;
-	InoutSymbol out;
-	InoutSymbol in;
+	int pos_out;
+	int pos_in;
 	
 };
 

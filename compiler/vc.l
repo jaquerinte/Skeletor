@@ -47,8 +47,8 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "int"						{return ret(inttype);}
 "out"						{return ret(outtype);}
 "inout"						{return ret(inouttype);}
-"#define"					{return ret(definevalue);}
 "'define"					{return ret(definevalueverilog);}
+"#define"					{return ret(definevalue);}
 "#function"					{return ret(functionmodule);}
 "#description"				{return ret(descriptionmodule);}
 "#coder"					{return ret(codermodule);}

@@ -202,10 +202,10 @@ ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = IN
 	;
 SSuperblock : SSuperblock SSSuperblockDefine id ValueDefinition {
 						string pme = $3.lexeme;
-						ts.addSymbol(pme,$2.size, $4.trad);
+						ts.addSymbol(pme,$2.size, $4.trad, $4.size);
 						$$.trad = $1.trad;
 						}
-			| SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad);$$.trad = $1.trad;}
+			| SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size);$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
 	;
 SSSuperblockDefine	: definevalue {$$.size = DEFINITION;}
@@ -255,7 +255,7 @@ MainFunc    : moduledefinition mainmodule id
 				string pme = $3.lexeme;
 				int pos = tfs.searchFunctionSymbol(pme);
 				string base = init_output();
-				tfs.v_funcSymbols.at(pos).createFileModule("");
+				tfs.v_funcSymbols.at(pos).createFileModule(ts.getTableSymbols(), ts.createDefinitions());
 
 			}
 	;
@@ -389,10 +389,10 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 												exit(1);
 											}
 											// check InoutSymbol
-											InoutSymbol out_inout;
-											out_inout = tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1]);
+											int out_inout;
+											out_inout = tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1], OUT);
 											
-											if (out_inout.getName() == "null"){
+											if (out_inout == -1){
 												//error 
 												cout<<"ERROR NAME NULL OUT INOUTSYMBOL"<<endl;
 												exit(1);
@@ -404,9 +404,9 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 												exit(1);
 											}
 											// check InoutSymbol
-											InoutSymbol in_inout;
-											in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1]);
-											if (in_inout.getName() == "null"){
+											int in_inout;
+											in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1], IN);
+											if (in_inout == -1){
 												//error
 												cout<<"ERROR NAME NULL IN INOUTSYMBOL"<<endl;
 												exit(1);
@@ -462,7 +462,7 @@ TipoBase 	: intype {$$.size = IN;}
 			| inouttype {$$.size = INOUT;} 
 	;
 
-S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad; tfs.createFiles(projectFolder);}
+S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;tfs.createFiles(projectFolder);ts.printToFile(projectFolder);}
 	;
 
 %%

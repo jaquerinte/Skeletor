@@ -3,22 +3,22 @@
 WireSymbol :: WireSymbol(){
 	this -> function_out = "";
 	this -> function_in = "";
-	this -> in = InoutSymbol();
-	this -> out = InoutSymbol();
+	this -> pos_out = -1;
+	this -> pos_in = -1;
 
 }
-WireSymbol :: WireSymbol(string function_out, string function_in ,InoutSymbol &out, InoutSymbol &in): out(out), in(in){
+WireSymbol :: WireSymbol(string function_out, string function_in ,int pos_out, int pos_in){
 	this -> function_out = function_out;
 	this -> function_in = function_in;
-	//this -> out = out;
-	//this -> in = in;
+	this -> pos_out = pos_out;
+	this -> pos_in = pos_in;
 }
 WireSymbol :: ~WireSymbol(){}
-WireSymbol :: WireSymbol(const WireSymbol &In): out(In.out), in(In.in){
+WireSymbol :: WireSymbol(const WireSymbol &In){
 	this -> function_out = In.function_out;
 	this -> function_in = In.function_in;
-	//this -> out = In.out;
-	//this -> in = In.in;
+	this -> pos_out = In.pos_out;
+	this -> pos_in = In.pos_in;
 
 }
 WireSymbol& WireSymbol :: operator = (const WireSymbol &In){
@@ -31,6 +31,6 @@ WireSymbol& WireSymbol :: operator = (const WireSymbol &In){
 
 string WireSymbol :: getFuncionOut(){return this -> function_out;}
 string WireSymbol :: getFuncionIn(){return this -> function_in;}
-InoutSymbol& WireSymbol :: getInoutSymbolOut(){return this -> out;}
-InoutSymbol& WireSymbol :: getInoutSymbolIn(){return this -> in;}
+int WireSymbol :: getInoutSymbolOut(){return this -> pos_out;}
+int WireSymbol :: getInoutSymbolIn(){return this -> pos_in;}
 

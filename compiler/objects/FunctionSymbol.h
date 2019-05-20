@@ -23,15 +23,16 @@ public:
 	FunctionSymbol& operator = (const FunctionSymbol &In);
 
 	bool addConnectionFunctionSymbol(string name, int size, string with);
-	const InoutSymbol& searchinoutSymbol(string name);
+	int searchinoutSymbol(string name);
+	int searchinoutSymbol(string name, int type);
 	bool addFunctionSymbolParam(string name);
 	bool addValueFunctionSymbolParam(string name, int value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
-	bool addWireConnection(string function_out, string function_in, InoutSymbol &out, InoutSymbol &in);
+	bool addWireConnection(string function_out, string function_in, int out, int in);
 
 	void createFileModule();
-	void createFileModule(string base);
+	void createFileModule(string base, bool verilog_def);
 	void printToFile();
 
 	// getters
@@ -55,6 +56,8 @@ public:
 	void setReferences(string references);
 
 private:
+	void createFileModuleDefines();
+	void createFileModuleBase();
 	string name;
 	vector<InoutSymbol> v_inoutwires;
 	vector<FunctionSymbolParam> v_param;

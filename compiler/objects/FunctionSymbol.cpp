@@ -65,17 +65,35 @@ bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string
 
 }
 
-const InoutSymbol& FunctionSymbol :: searchinoutSymbol(string name)
+int FunctionSymbol :: searchinoutSymbol(string name)
 {
-	InoutSymbol s;
 	for (int i = 0; i <  this -> v_inoutwires.size();++i) {
 		if ( this -> v_inoutwires.at(i).getName() == name) {
-			return  this -> v_inoutwires.at(i);
+			return  i;
 		}
 	}
 	// fail: connection not declared
 	//msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
-	return s;
+	return -1;
+}
+
+
+int FunctionSymbol :: searchinoutSymbol(string name, int type)
+{
+	for (int i = 0; i <  this -> v_inoutwires.size();++i) {
+		if ( this -> v_inoutwires.at(i).getName() == name) {
+			if (v_inoutwires.at(i).getType() == type || v_inoutwires.at(i).getType() == INOUT){
+				return  i;
+			}
+			else{
+				return -1;
+			}
+			
+		}
+	}
+	// fail: connection not declared
+	//msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+	return -1;
 }
 
 bool FunctionSymbol :: addFunctionSymbolParam(string name)
@@ -119,99 +137,35 @@ FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name)
 	return s;
 }
 
-bool FunctionSymbol :: addWireConnection(string function_out, string function_in, InoutSymbol &out, InoutSymbol &in){
-	WireSymbol wire(function_out,function_in, out, in);
-	cout << "wire " << wire.getFuncionOut() << " " << wire.getFuncionIn() << " " << wire.getInoutSymbolOut().getName() << " " << wire.getInoutSymbolIn().getName();
+bool FunctionSymbol :: addWireConnection(string function_out, string function_in, int pos_out, int pos_in){
+	WireSymbol wire(function_out,function_in, pos_out, pos_in);
+	//cout << "wire " << wire.getFuncionOut() << " " << wire.getFuncionIn() << " " << wire.getInoutSymbolOut().getName() << " " << wire.getInoutSymbolIn().getName();
 	this -> v_wire.push_back(wire);
 }
-
 
 void FunctionSymbol :: createFileModule()
 {
 	/* Start wriking the file */
-	/* Definition top file */
-	this -> output_file_data = "//-----------------------------------------------------\n";
-	this -> output_file_data += "// Project Name : " + this -> projectName + "\n";
-
-	if (this -> function != ""){
-		this -> output_file_data += "// Function     : " + this -> function + "\n";
-	}
-	if (this -> description != ""){
-		this -> output_file_data += "// Description  : " + this -> description + "\n";
-	}
-	if (this -> code != ""){
-		this -> output_file_data += "// Coder        : " + this -> code + "\n";
-	}
-	if (this -> references != ""){
-		this -> output_file_data += "// References   : " + this -> references + "\n";
-	}
-	this -> output_file_data += "\n";
-	this -> output_file_data += "//***Headers***\n";
-	this -> output_file_data +="//***Module***\n";
-	/* Defining Module */
-	if (this -> v_param.size() != 0){
-		/* Module has param*/
-		this -> output_file_data += "module " + this -> name + " #(\n";
-		// Loop over param
-		for (int i = 0; i < this -> v_param.size();++i) {
-			if (i == this -> v_param.size() -1){
-				/* Last parameter */
-				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + to_string(this -> v_param.at(i).getValue()) + "\n";
-			}
-			else{
-				/* Rest parameter */
-				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + to_string(this -> v_param.at(i).getValue()) + ",\n";
-			}
-		}
-		this -> output_file_data += "\t)\n\t(\n";
-	}
-	else{
-		/* Module has not param*/
-		this -> output_file_data += "module " + this -> name + " (\n";
-	}
-	/* copy the inputs and outputs*/
-	for (int i = 0; i < this -> v_inoutwires.size();++i) {
-		string type = "";
-			if (this -> v_inoutwires.at(i).getType() == IN){
-				type = "input";
-			}
-			else if (this -> v_inoutwires.at(i).getType() == OUT){
-				type = "output";
-			}
-			else if (this -> v_inoutwires.at(i).getType() == INOUT){
-				type = "inout";
-			}
-		if (i == this -> v_inoutwires.size() -1){
-			/* Last INOUT parameter */
-			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
-		}
-		else{
-			/* Rest INOUT parameter */
-			this -> output_file_data += "\t\t " + type + " " + this -> v_inoutwires.at(i).getWith() + " " + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
-		}
-	}
-	/* End inputs and outputs */
-	this -> output_file_data += "\t);\n";
-
-	/* Add Wires */
-	for (int i = 0; i < this -> v_wire.size(); ++i){
-		this -> output_file_data += "\t wire " + v_wire.at(i).getInoutSymbolOut().getName() + "_" + v_wire.at(i).getFuncionOut() + "_" + v_wire.at(i).getFuncionIn();
-		this -> output_file_data += " // wiring between " + v_wire.at(i).getInoutSymbolOut().getNameVerilog() + " of module " + v_wire.at(i).getFuncionOut() + " and " + v_wire.at(i).getInoutSymbolIn().getNameVerilog() + " of module " + v_wire.at(i).getFuncionIn();
-		this -> output_file_data += "\n";
-	}
-
-	/* Putin some extra coments */
-	this -> output_file_data += "//***Interal logic generated by compiler***  \n";
-	this -> output_file_data += "//***Handcrafted Internal logic*** \n";
-	this -> output_file_data += "//TODO\n";
-	/* finish file */
-	this -> output_file_data += "endmodule\n";
+	this -> createFileModuleDefines();
+	this -> createFileModuleBase();
 }
 
-void FunctionSymbol :: createFileModule(string base)
+void FunctionSymbol :: createFileModule(string base, bool verilogDef)
 {
 	/* Start wriking the file */
-	this -> output_file_data = base;
+	this -> output_file_data += base;
+	this -> createFileModuleDefines();
+	/* DEFINES */
+	if (verilogDef){
+		this -> output_file_data += "`include \"defines.vh\"\n";
+	}
+
+	/* Continue */
+	this -> createFileModuleBase();
+}
+
+void FunctionSymbol :: createFileModuleDefines(){
+	
 	/* Definition top file */
 	this -> output_file_data += "//-----------------------------------------------------\n";
 	this -> output_file_data += "// Project Name : " + this -> projectName + "\n";
@@ -230,6 +184,8 @@ void FunctionSymbol :: createFileModule(string base)
 	}
 	this -> output_file_data += "\n";
 	this -> output_file_data += "//***Headers***\n";
+}
+void FunctionSymbol ::createFileModuleBase(){
 	this -> output_file_data +="//***Module***\n";
 	/* Defining Module */
 	if (this -> v_param.size() != 0){
@@ -275,12 +231,16 @@ void FunctionSymbol :: createFileModule(string base)
 	}
 	/* End inputs and outputs */
 	this -> output_file_data += "\t);\n";
+
 	/* Add Wires */
 	for (int i = 0; i < this -> v_wire.size(); ++i){
-		this -> output_file_data += "\t wire " + v_wire.at(i).getInoutSymbolOut().getName() + "_" + v_wire.at(i).getFuncionOut() + "_" + v_wire.at(i).getFuncionIn();
-		this -> output_file_data += " // wiring between " + v_wire.at(i).getInoutSymbolOut().getNameVerilog() + " of module " + v_wire.at(i).getFuncionOut() + " and " + v_wire.at(i).getInoutSymbolIn().getNameVerilog() + " of module " + v_wire.at(i).getFuncionIn();
+		int pos_out = v_wire.at(i).getInoutSymbolOut();
+		int pos_in = v_wire.at(i).getInoutSymbolIn();
+		this -> output_file_data += "\t wire " + v_inoutwires.at(pos_out).getName() + "_" + v_wire.at(i).getFuncionOut() + "_" + v_wire.at(i).getFuncionIn();
+		this -> output_file_data += " // wiring between " + v_inoutwires.at(pos_out).getNameVerilog() + " of module " + v_wire.at(i).getFuncionOut() + " and " + v_inoutwires.at(pos_in).getNameVerilog() + " of module " + v_wire.at(i).getFuncionIn();
 		this -> output_file_data += "\n";
 	}
+
 	/* Putin some extra coments */
 	this -> output_file_data += "//***Interal logic generated by compiler***  \n";
 	this -> output_file_data += "//***Handcrafted Internal logic*** \n";
