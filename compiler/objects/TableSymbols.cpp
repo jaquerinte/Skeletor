@@ -104,5 +104,6 @@ string TableSymbols :: getTableSymbols()
       	}
 		out += "// name: " + v_symbols.at(i).getName() + ", type: " + type + " value: "+ v_symbols.at(i).getValue_S() + "\n";
 	}
+	out += "\n";
 	return out;
 }
