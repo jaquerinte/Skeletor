@@ -364,17 +364,16 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 
 	;
 EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
-			| TipoBase id      {
-								string pme = $2.lexeme; 
+			| TipoBase Arrayargs id  {
+								string pme = $3.lexeme; 
 								$$.trad = $1.trad + pme;
 								int pos = tfs.searchFunctionSymbol(s1);
-								InoutSymbol con (pme ,$1.size,"");
-								string with = "";
+								string with = $2.trad ;
 								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
 								}
-			| wiretipe Ref connectwire Ref {
-											string var_out = $2.trad;
-											string var_in = $4.trad;
+			| wiretipe Arrayargs Ref connectwire Ref {
+											string var_out = $3.trad;
+											string var_in = $5.trad;
 
 											// decompse the variables.
 											// decompse out var
@@ -415,7 +414,7 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 											// create wire.
 											int pos = tfs.searchFunctionSymbol(s1);
 
-											tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout);
+											tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad);
 
 										   }
 	;
@@ -444,7 +443,7 @@ SDCallArgs  : coma id SDCallArgs {}
 CallConnectors  : /*epsilon*/ { }
 /* Expresion */
 Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $1.trad + ":" + $2.trad + "]";}
-            | /*epsilon*/ { }
+            | /*epsilon*/ {$$.trad = "";}
     ;
 Expr	:	Econj {} 
 		|	Expr obool Econj{}

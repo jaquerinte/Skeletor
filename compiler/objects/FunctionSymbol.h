@@ -30,7 +30,7 @@ public:
 	void addValueFunctionSymbolParamPos(int pos, string value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
-	bool addWireConnection(string function_out, string function_in, int out, int in);
+	bool addWireConnection(string function_out, string function_in, int out, int in,string with_out);
 
 	void createFileModule();
 	void createFileModule(string base, bool verilog_def);

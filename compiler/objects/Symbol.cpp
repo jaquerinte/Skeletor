@@ -41,6 +41,7 @@ Symbol :: Symbol(const Symbol &In){
 	this -> name = In.name;
 	this -> type = In.type;
 	this -> value_s = In.value_s;
+	this -> typeVar = In.typeVar;
 }
 Symbol :: ~Symbol(){}
 
