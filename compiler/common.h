@@ -4,7 +4,11 @@ typedef struct {
    string trad;
    string ph;
    int size;
-
+   int type;    //Translation from integer to type in vc.y. 
+                    //INTEGER=1 
+                    //REGISTER=2
+                    //STRING=3
+                    //LOGIC=5
 } BASETYPE;
 
 #define YYSTYPE BASETYPE
@@ -18,6 +22,8 @@ typedef struct {
 #define ERRALDEC        5 // ERROR Var already declared
 #define ERRFUNODEC      6 // ERROR Module not declared
 #define ERRFUNALDEC     7 // ERROR Module already declared
+#define ERRNEEDBOOL     8 // ERROR Bool required but something else founded
+#define ERRNEEDDEF      9 // ERROR DEFINITION or DEFINITIONVERILOG needed but something else founded 
 
 /* MODULE ERRORS */
 #define ERRCONNDEC     20 // ERROR Connection already declared

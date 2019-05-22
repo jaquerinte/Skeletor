@@ -429,6 +429,9 @@ CallArgs		: /*epsilon*/ { }
 	;
 CallConnectors  : /*epsilon*/ { }
 /* Expresion */
+Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $1.trad + ":" + $2.trad + "]";}
+            | /*epsilon*/ { }
+    ;
 Expr	:	Econj {} 
 		|	Expr obool Econj{}
 	;
@@ -446,12 +449,42 @@ Esimple	:	opas Term {}
 Term	:	Factor {}	
 		|	Term opmd Factor {}
 	;
-Factor	: Ref {}
-		| ninteger 	{}
-		| parl Expr parr {}
-		| nobool Factor	{}
-		| booltokentrue {}
-		| booltokenfalse {}
+Factor	: Ref   {
+                    int pos = ts.shearchSymbol($1.trad);
+                    int type = ts.v_symbols.at(pos).getTypeVar();
+                    switch(type){
+                    case(1)://DEFINITION=1
+                        $$.trad = ts.v_symbols.at(pos).getValue_S();
+                        break;
+                    case(2)://DEFINITIONVERILOG=2
+                        $$.trad = ts.v_symbols.at(pos).getName();
+                        break;
+                    default: //VARIABE=3 FUNCTION=4 or someting else
+                        msgError(ERRNEEDDEF, nlin, ncol, $1.trad.c_str());
+                        break;
+                    }
+                }
+		| ninteger  {
+                        string pme = $1.lexeme;
+                        $$.type=INTEGER;
+                        $$.trad=pme;
+                    }
+		| parl Expr parr {  $$.trad="(" + $2.trad + ")";}
+		| nobool Factor	    {
+                                if($2.type!=5){
+							        msgError(ERRFUNODEC, nlin, ncol, $2.trad.c_str());
+                                }
+                                $$.trad = "!" + $2.trad;
+                                $$.type = $2.type;
+                            }
+		| booltokentrue     {
+                                $$.type=LOGIC;
+                                $$.trad="false";
+                            }
+		| booltokenfalse    {
+                                $$.type=LOGIC;
+                                $$.trad="true";
+                            }
 	;
 Ref		:	id {string pme = $1.lexeme; $$.trad = pme;}
 		|	Ref bral Esimple brar {}
