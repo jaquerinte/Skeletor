@@ -13,19 +13,19 @@ class FunctionSymbolParam
 public:
 	FunctionSymbolParam();
 	FunctionSymbolParam(string name);
-	FunctionSymbolParam(string name, int value);
+	FunctionSymbolParam(string name, string value);
 	FunctionSymbolParam(const FunctionSymbolParam &In);
 	~FunctionSymbolParam();
 	FunctionSymbolParam& operator = (const FunctionSymbolParam &In);
 	// getters
 	string getName();
-	int getValue();
+	string getValue();
 	void setName(string name);
-	void setValue(int value);
+	void setValue(string value);
 
 private:
 	string name;
-	int value;
+	string value;
 	
 };
 

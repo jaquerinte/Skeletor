@@ -3,16 +3,16 @@
 FunctionSymbolParam :: FunctionSymbolParam()
 {
 	this -> name = "null";
-	this -> value = -1;
+	this -> value = "-1";
 }
 
 FunctionSymbolParam :: FunctionSymbolParam(string name)
 {
 	this -> name = name;
-	this -> value = -1;
+	this -> value = "-1";
 }
 
-FunctionSymbolParam :: FunctionSymbolParam(string name, int value)
+FunctionSymbolParam :: FunctionSymbolParam(string name, string value)
 {
 	this -> name = name;
 	this -> value = value;
@@ -36,6 +36,6 @@ FunctionSymbolParam& FunctionSymbolParam :: operator = (const FunctionSymbolPara
 }
 // getters
 string FunctionSymbolParam :: getName(){return this -> name;}
-int FunctionSymbolParam :: getValue(){return this -> value;}
+string FunctionSymbolParam :: getValue(){return this -> value;}
 void FunctionSymbolParam :: setName(string name) {this -> name = name;}
-void FunctionSymbolParam :: setValue(int value) {this -> value = value;}
+void FunctionSymbolParam :: setValue(string value) {this -> value = value;}

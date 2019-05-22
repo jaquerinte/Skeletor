@@ -425,7 +425,21 @@ CallExpresion	:  opasig Expr {$$.trad = $2.trad;}
 								int pos = tfs.searchFunctionSymbol($0.ph);
 							}
 	;
-CallArgs		: /*epsilon*/ { } 
+/* Call args */
+CallArgs	: DCallArgs {$$.trad = "";}
+			| /*epsilon*/ { } 
+	;
+
+DCallArgs 	:  Expr SDCallArgs {
+							$$.trad = $2.trad;
+							int pos = tfs.searchFunctionSymbol(s1);
+							tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+
+						}
+	;
+
+SDCallArgs  : coma id SDCallArgs {}
+			| /*epsilon*/ { } 
 	;
 CallConnectors  : /*epsilon*/ { }
 /* Expresion */

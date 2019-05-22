@@ -110,7 +110,7 @@ bool FunctionSymbol :: addFunctionSymbolParam(string name)
 	return true;
 }
 
-bool FunctionSymbol :: addValueFunctionSymbolParam(string name, int value)
+bool FunctionSymbol :: addValueFunctionSymbolParam(string name, string value)
 {
 	FunctionSymbolParam s(name);
 	for (int i = 0; i < this -> v_param.size();++i) {
@@ -122,6 +122,12 @@ bool FunctionSymbol :: addValueFunctionSymbolParam(string name, int value)
 	// fail: Symbol param  not declared
 	//msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 	return false;
+}
+
+void FunctionSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
+{
+	FunctionSymbolParam s(name);
+	this -> v_param.at(pos).setValue(value);
 }
 
 FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name)
@@ -195,11 +201,11 @@ void FunctionSymbol ::createFileModuleBase(){
 		for (int i = 0; i < this -> v_param.size();++i) {
 			if (i == this -> v_param.size() -1){
 				/* Last parameter */
-				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + to_string(this -> v_param.at(i).getValue()) + "\n";
+				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + this -> v_param.at(i).getValue() + "\n";
 			}
 			else{
 				/* Rest parameter */
-				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + to_string(this -> v_param.at(i).getValue()) + ",\n";
+				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + this -> v_param.at(i).getValue() + ",\n";
 			}
 		}
 		this -> output_file_data += "\t)\n\t(\n";

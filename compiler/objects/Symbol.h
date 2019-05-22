@@ -25,10 +25,12 @@ public:
 	Symbol& operator = (const Symbol &In);
 	string getName();
 	int getType();
+	int getTypeVar(); 
 	string getValue_S();
 private:
 	string name;
 	int type;
+	int typeVar;
 	string value_s;
 	//int value_i;
 	//bool value_b;

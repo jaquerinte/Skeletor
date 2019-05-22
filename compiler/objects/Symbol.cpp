@@ -13,6 +13,7 @@ Symbol :: Symbol(const string name,const int type, const string value, const int
 	this -> name = name;
 	this -> type = type;
 	string value_aux = value;
+	this -> typeVar = type_var;
 	// is a String
 	if (type_var == 3){
 		value_aux.erase(0, 1);
@@ -54,4 +55,5 @@ Symbol& Symbol ::  operator = (const Symbol &In) {
 
 string Symbol :: getName() {return this -> name;}
 int Symbol :: getType() {return this -> type;}
+int Symbol :: getTypeVar() {return this -> typeVar;}
 string Symbol :: getValue_S() {return this -> value_s;}
