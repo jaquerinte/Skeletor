@@ -126,8 +126,10 @@ bool FunctionSymbol :: addValueFunctionSymbolParam(string name, string value)
 
 void FunctionSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
 {
-	FunctionSymbolParam s(name);
-	this -> v_param.at(pos).setValue(value);
+	if (pos < v_param.size()){
+		this -> v_param.at(pos).setValue(value);
+	}
+	
 }
 
 FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name)
@@ -242,7 +244,11 @@ void FunctionSymbol ::createFileModuleBase(){
 	for (int i = 0; i < this -> v_wire.size(); ++i){
 		int pos_out = v_wire.at(i).getInoutSymbolOut();
 		int pos_in = v_wire.at(i).getInoutSymbolIn();
-		this -> output_file_data += "\t wire " + v_wire.at(i).getWithOut() + v_inoutwires.at(pos_out).getName() + "_" + v_wire.at(i).getFuncionOut() + "_" + v_wire.at(i).getFuncionIn() + ";";
+		string with = "";
+		if (v_wire.at(i).getWithOut() != ""){
+			with = v_wire.at(i).getWithOut() + " ";
+		}
+		this -> output_file_data += "\t wire " + with + v_inoutwires.at(pos_out).getName() + "_" + v_wire.at(i).getFuncionOut() + "_" + v_wire.at(i).getFuncionIn() + ";";
 		this -> output_file_data += " // wiring between " + v_inoutwires.at(pos_out).getNameVerilog() + " of module " + v_wire.at(i).getFuncionOut() + " and " + v_inoutwires.at(pos_in).getNameVerilog() + " of module " + v_wire.at(i).getFuncionIn();
 		this -> output_file_data += "\n";
 	}

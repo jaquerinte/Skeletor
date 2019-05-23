@@ -13,9 +13,9 @@ class TableSymbols
 public:
 	TableSymbols();
 	~TableSymbols();
-	bool addSymbol(string name, int type);
-	bool addSymbol(string name, int type, string value,int type_var);
-	int shearchSymbol(string name);
+	bool addSymbol(string name, int type, string module);
+	bool addSymbol(string name, int type, string value,int type_var, string module);
+	int shearchSymbol(string name, string module);
 	string getTableSymbols();
 	bool createDefinitions();
 	void printToFile(string projectFolder);

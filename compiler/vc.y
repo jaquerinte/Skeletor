@@ -188,8 +188,9 @@ SA		: S
 /* Base syntax */
 ModuleTextDefinition : stringtext { string pme = $1.lexeme; pme.erase(0, 1);pme.erase(pme.size() - 1); $$.trad = pme;}
 				     | Ref {
-				     	int pos = ts.shearchSymbol($1.trad);
-				     	string value = ts.v_symbols.at(pos).getValue_S();
+				     	int pos = ts.shearchSymbol($1.trad, s1);
+				     	//cout<< "pos " << to_string(pos)<< " On "<< $1.trad << endl;
+ 				     	string value = ts.v_symbols.at(pos).getValue_S();
 				     	// TODO ERASE 
 				     	//cout<<"name "<<ts.v_symbols.at(pos).getName() << " type "<< ts.v_symbols.at(pos).getType() << " value " << value << endl;
 				     	$$.trad = value;
@@ -202,10 +203,10 @@ ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = IN
 	;
 SSuperblock : SSuperblock SSSuperblockDefine id ValueDefinition {
 						string pme = $3.lexeme;
-						ts.addSymbol(pme,$2.size, $4.trad, $4.size);
+						ts.addSymbol(pme,$2.size, $4.trad, $4.size, "null");
 						$$.trad = $1.trad;
 						}
-			| SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size);$$.trad = $1.trad;}
+			| SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size, "null");$$.trad = $1.trad;}
 			| /*epsilon*/ { } 
 	;
 SSSuperblockDefine	: definevalue {$$.size = DEFINITION;}
@@ -223,7 +224,7 @@ Func 		: moduledefinition id
 				/*Add module*/
 				string pme = $2.lexeme;
 				// fist add symbol
-				ts.addSymbol(pme,FUNCTION);
+				ts.addSymbol(pme,FUNCTION, "null");
 				// then add symbol
 				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				s1 = pme;
@@ -244,7 +245,7 @@ MainFunc    : moduledefinition mainmodule id
 				/*Add module*/
 				string pme = $3.lexeme;
 				// fist add symbol
-				ts.addSymbol(pme,FUNCTION);
+				ts.addSymbol(pme,FUNCTION,"null");
 				// then add symbol
 				tfs.addFunctionSymbol(pme, projectName, projectFolder);
 				s1 = pme;
@@ -261,16 +262,6 @@ MainFunc    : moduledefinition mainmodule id
 	;
 /* Function args */
 SArgs       : DArgs {$$.trad = "";}
-/*SArgs 		: { id SAArgs
-			{	
-				string pme = $3.lexeme;
-				FunctionSymbol s;
-				if($0.ph != "null"){
-					s = tfs.searchFunctionSymbol($0.ph);
-					s.addFunctionSymbolParam(pme);
-
-				}
-			}*/
 			| /*epsilon*/ { } 
 	;
 DArgs       :  id SArBlock SAArgs {
@@ -278,6 +269,7 @@ DArgs       :  id SArBlock SAArgs {
 				    
 				    //printf("%s", s1);
 				    if(s1 != "null"){
+				    	ts.addSymbol(pme,PARAMETERFUNCTION,s1);
 				    	int pos  = tfs.searchFunctionSymbol(s1);
 				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
 				    }
@@ -288,6 +280,7 @@ SAArgs 		:  coma id SArBlock SAArgs
 					string pme = $2.lexeme;
 				    FunctionSymbol s;//not used can be removed
 				    if(s1 != "null"){
+				    	ts.addSymbol(pme,PARAMETERFUNCTION,s1);
 				    	int pos  = tfs.searchFunctionSymbol(s1);
 				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
 				    }
@@ -445,31 +438,35 @@ CallConnectors  : /*epsilon*/ { }
 Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $1.trad + ":" + $2.trad + "]";}
             | /*epsilon*/ {$$.trad = "";}
     ;
-Expr	:	Econj {} 
+Expr	:	Econj {$$.trad = $1.trad;} 
 		|	Expr obool Econj{}
 	;
-Econj	:	Ecomp {}
+Econj	:	Ecomp {$$.trad = $1.trad;}
 		|	Econj ybool Ecomp {}
 	;
 
-Ecomp 	: Esimple {}
+Ecomp 	: Esimple {$$.trad = $1.trad;}
 		| Esimple oprel	Esimple {}
 	;
 Esimple	:	opas Term {}
-		|	Term {}
+		|	Term {$$.trad = $1.trad;}
 		|	Esimple opas Term {}
 	;
-Term	:	Factor {}	
+Term	:	Factor {$$.trad = $1.trad;}	
 		|	Term opmd Factor {}
 	;
 Factor	: Ref   {
-                    int pos = ts.shearchSymbol($1.trad);
-                    int type = ts.v_symbols.at(pos).getTypeVar();
+                    int pos = ts.shearchSymbol($1.trad, s1);
+                    //cout<<"ENTRO: "<< to_string(pos)<< " Name :" << $1.trad <<endl;
+                    int type = ts.v_symbols.at(pos).getType();
                     switch(type){
-                    case(1)://DEFINITION=1
+                    case(DEFINITION)://DEFINITION=1
                         $$.trad = ts.v_symbols.at(pos).getValue_S();
                         break;
-                    case(2)://DEFINITIONVERILOG=2
+                    case(DEFINITIONVERILOG)://DEFINITIONVERILOG=2
+                        $$.trad = ts.v_symbols.at(pos).getName();
+                        break;
+                    case(PARAMETERFUNCTION)://PARAMETERFUNCTION=5
                         $$.trad = ts.v_symbols.at(pos).getName();
                         break;
                     default: //VARIABE=3 FUNCTION=4 or someting else

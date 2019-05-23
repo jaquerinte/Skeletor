@@ -4,38 +4,63 @@ TableSymbols :: TableSymbols(){
 	this -> output_file_data = "";
 }
 TableSymbols :: ~TableSymbols(){}
-bool TableSymbols :: addSymbol(string name, int type)
+bool TableSymbols :: addSymbol(string name, int type, string module)
 {
-	Symbol s(name,type);
+	Symbol s(name,type, module);
+	//cout<<"TRY DEFING "<< name <<endl;
 	for (int i = 0; i < v_symbols.size();++i) {
 		if (v_symbols.at(i).getName() == s.getName()) { 
-			// fail: Symbol var ya decl
+			if (v_symbols.at(i).getModule() == "null")
+			{
+				// fail: Symbol var ya decl
 			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+				//cout<<"ERROR ALREAY DEFING"<< name <<endl;
 			return false;
+			}
+			else{
+				v_symbols.push_back(s);
+				return true;
+			}
+			
 		}
 	}
 	v_symbols.push_back(s);
 	return true;
 
 }
-bool TableSymbols :: addSymbol(string name, int type, string value, int type_var)
+bool TableSymbols :: addSymbol(string name, int type, string value, int type_var, string module)
 {
-	Symbol s(name,type,value,type_var);
+	Symbol s(name,type,value,type_var, module);
+	//cout<<"TRY DEFING "<< name <<endl;
 	for (int i = 0; i < v_symbols.size();++i) {
 		if (v_symbols.at(i).getName() == s.getName()) { 
-			// fail: Symbol var ya decl
+			if (v_symbols.at(i).getModule() == "null")
+			{
+				// fail: Symbol var ya decl
 			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+				//cout<<"ERROR ALREAY DEFING"<< name <<endl;
 			return false;
+			}
+			else{
+				v_symbols.push_back(s);
+				return true;
+			}
+			
 		}
 	}
 	v_symbols.push_back(s);
 	return true;
 
 }
-int TableSymbols :: shearchSymbol(string name)
+int TableSymbols :: shearchSymbol(string name, string module)
 {
 	for (int i = 0; i < v_symbols.size();++i) {
-		if (v_symbols.at(i).getName() == name) { 
+		if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == module) { 
+			// fail: Symbol var ya decl
+			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+			return i;
+		}
+		else if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == "null"){
 			// fail: Symbol var ya decl
 			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
 			return i;
@@ -98,11 +123,21 @@ string TableSymbols :: getTableSymbols()
 	         case 4:
 	         	type = "FUNCTION";
 	         	break;
+	         case 5:
+	         	type = "PARAMETERFUNCTION";
+	         	break;
 	         default:
 	            type = "UNDEFINED";
 
       	}
-		out += "// name: " + v_symbols.at(i).getName() + ", type: " + type + " value: "+ v_symbols.at(i).getValue_S() + "\n";
+      	string module = "";
+      	if (v_symbols.at(i).getModule() == "null"){
+      		module = "Global";
+      	}
+      	else{
+      		module = v_symbols.at(i).getModule();
+      	}
+		out += "// name: " + v_symbols.at(i).getName() + " " + module + " , type: " + type + " value: "+ v_symbols.at(i).getValue_S() + "\n";
 	}
 	out += "\n";
 	return out;
