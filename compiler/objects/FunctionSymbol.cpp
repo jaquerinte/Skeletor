@@ -110,6 +110,20 @@ bool FunctionSymbol :: addFunctionSymbolParam(string name)
 	return true;
 }
 
+bool FunctionSymbol :: addFunctionSymbolParam(string name, string value)
+{
+	FunctionSymbolParam s(name, value);
+	for (int i = 0; i < this -> v_param.size();++i) {
+		if (this ->  v_param.at(i).getName() == s.getName()) { 
+			// fail: Symbol param  already declared
+			//msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
+			return false;
+		}
+	}
+	this -> v_param.push_back(s);
+	return true;
+}
+
 bool FunctionSymbol :: addValueFunctionSymbolParam(string name, string value)
 {
 	FunctionSymbolParam s(name);

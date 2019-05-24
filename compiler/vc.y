@@ -262,9 +262,10 @@ MainFunc    : moduledefinition mainmodule id
     ;
 /* Function args */
 SArgs       : DArgs {$$.trad = "";}
-            //| /*epsilon*/ { } 
+            | /*epsilon*/ { } 
     ;
-DArgs       :  id SArBlock SAArgs {
+
+DArgs       : id SArBlock {
                     string pme = $1.lexeme;
                     
                     //printf("%s", s1);
@@ -275,17 +276,14 @@ DArgs       :  id SArBlock SAArgs {
                             tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
                         }
                         else{
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
-                            tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $2.trad);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $2.trad);
                         }
                         
                     }
-                }
-    ;
-SAArgs      :  coma id SArBlock SAArgs 
-                {
-                    string pme = $2.lexeme;
-                    FunctionSymbol s;//not used can be removed
+
+            }
+            | DArgs  coma id SArBlock {
+                 string pme = $3.lexeme;
                     if(s1 != "null"){
                         ts.addSymbol(pme,PARAMETERFUNCTION,s1);
                         int pos  = tfs.searchFunctionSymbol(s1);
@@ -293,18 +291,17 @@ SAArgs      :  coma id SArBlock SAArgs
                             tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
                         }
                         else{
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
-                            tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $3.trad);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $4.trad);
                         }
                     }
-                }
-            |/*epsilon*/ { } 
+
+            }
     ;
 SArBlock    : opasig Expr {
-                        string pme = $2.lexeme; 
-                        int pos = ts.shearchSymbol(pme, s1);
+                         
+                        int pos = ts.shearchSymbol($2.trad, s1);
                         if($2.type != INTEGER){
-                            msgError()
+                            //msgError()
                         }
                         
                         $$.trad = $2.trad;}
@@ -528,7 +525,6 @@ Factor  : Ref   {
                             }
     ;
 Ref     :   id {string pme = $1.lexeme; $$.trad = pme;}
-        |   Ref bral Esimple brar {}
     ;
 /* Tipos */
 TipoBase    : intype {$$.size = IN;}
