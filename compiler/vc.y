@@ -358,7 +358,9 @@ Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
 	;
 EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
 			| TipoBase Arrayargs id  {
-								string pme = $3.lexeme; 
+								string pme = $3.lexeme;
+								// add symbol
+								ts.addSymbol(pme,INOUTSYMBOL,s1);
 								$$.trad = $1.trad + pme;
 								int pos = tfs.searchFunctionSymbol(s1);
 								string with = $2.trad ;
@@ -386,7 +388,7 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 											
 											if (out_inout == -1){
 												//error 
-												cout<<"ERROR NAME NULL OUT INOUTSYMBOL"<<endl;
+												cout<<"ERROR NAME NULL OUT INOUTSYMBOL: "<< out[1] <<endl;
 												exit(1);
 											}
 											int pos_aux = tfs.searchFunctionSymbol(in[0]);
@@ -400,7 +402,7 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 											in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1], IN);
 											if (in_inout == -1){
 												//error
-												cout<<"ERROR NAME NULL IN INOUTSYMBOL"<<endl;
+												cout<<"ERROR NAME NULL IN INOUTSYMBOL: "<< in[1] <<endl;
 												exit(1);
 											}
 											// all verfiy

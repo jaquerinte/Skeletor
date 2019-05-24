@@ -11,6 +11,7 @@ const int DEFINITIONVERILOG=2;
 const int VARIABE=3;
 const int FUNCTION=4;
 const int PARAMETERFUNCTION=5;
+const int INOUTSYMBOL=6;
 
 class Symbol
 {
