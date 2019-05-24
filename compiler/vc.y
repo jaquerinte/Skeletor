@@ -437,7 +437,17 @@ SDCallArgs  : coma id SDCallArgs {}
 	;
 CallConnectors  : /*epsilon*/ { }
 /* Expresion */
-Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $1.trad + ":" + $2.trad + "]";}
+Arrayargs   : bral Expr {
+                            if($2.type!=INTEGER){
+                                msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
+                            }
+                        } 
+              twopoints Expr    {
+                                    if($5.type!=INTEGER){
+                                        msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
+                                    }
+                                } 
+              brar {$$.trad = "[" + $2.trad + ":" + $6.trad + "]";}
             | /*epsilon*/ {$$.trad = "";}
     ;
 Expr	:	Econj {$$.trad = $1.trad;} 

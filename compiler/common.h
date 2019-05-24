@@ -31,10 +31,13 @@ typedef struct {
 #define ERRPARAMDEC    22 // ERROR Param module already declared
 #define ERRPARAMNODEC  23 // ERROR param no declared
 
-/* MODULE DEFINTION ERORS */
+/* MODULE DEFINTION ERRORS */
 #define ERRFUNCDEFALDEC  50  // ERROR Function module definition already define
 #define ERRDESCDEFALDEC  51  // ERROR Description module definition already define
 #define ERRORCODDEFALDEC 52  // ERROR Coder module definition already define
-#define ERRORDEFIALDEC   52  // ERROR References module definition already define
+#define ERRORDEFIALDEC   53  // ERROR References module definition already define
+
+/* MODULE SIGNAL ERRORS */
+#define ERRTYPEARGS        8 // ERROR ilegal type for port size
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
