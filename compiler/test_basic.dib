@@ -12,8 +12,8 @@ module a (TransAddrSize, AddrSize){
 
 	in clk;
 	in rts;
-	//in [AddrSize -1 : 0] addr;
-	//out [TransAddrSize-1: 0] taddr;
+	in [AddrSize -1 : 0] addr;
+	out [TransAddrSize-1: 0] taddr;
 	out rdy;
 }
 module b (TransAddrSize, AddrSize){
@@ -24,9 +24,9 @@ module b (TransAddrSize, AddrSize){
 
 	in rstn;                           
     in clk;                            
-    //in [AddrSize-1:0] addr;            
-    //in [AddrSize-1:0] taddr;            
-    //out [TransAddrSize-1:0] taddr;      
+    in [AddrSize-1:0] addr;            
+    in [AddrSize-1:0] taddr;            
+    out [TransAddrSize-1:0] taddr;      
     out rdy;                            
 }
 
@@ -61,13 +61,10 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	in clk;
 	in rts;
 	in [AddrSize -1 : 0] addr;
-	//in [AddrSize : 0] addr; // auxiliar 
-	//out [TransAddrSize-1: 0] taddr;
-	//out [TransAddrSize: 0] taddr;
+	out [TransAddrSize-1: 0] taddr;
 	out rdy;
 
-	//wire [TransAddrSize-1:0] simple_example.taddr -> a.taddr;
-	//wire [TransAddrSize:0] simple_example.taddr -> d.in1; // auxiliar
+	wire [TransAddrSize-1:0] simple_example.taddr -> a.addr;
 	wire a.rdy -> d.in1;
 	wire b.rdy -> d.in2;
 	wire c.rdy -> d.in3;
