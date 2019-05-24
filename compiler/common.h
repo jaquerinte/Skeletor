@@ -38,6 +38,9 @@ typedef struct {
 #define ERRORDEFIALDEC   53  // ERROR References module definition already define
 
 /* MODULE SIGNAL ERRORS */
-#define ERRTYPEARGS        8 // ERROR ilegal type for port size
+#define ERRTYPEARGS      80 // ERROR ilegal type for port size
+#define ERRTYPEBOOL      81 // ERROR ilegal type for bool operation
+#define ERRTYPEINTEGER      82 // ERROR ilegal type for integer operation
+#define ERRTYPEMISMATCH  83 // ERROR Logic comparation of different types 
 
 void msgError(int nerror,int nlin,int ncol,const char *s);

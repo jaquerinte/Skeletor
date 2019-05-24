@@ -262,7 +262,7 @@ MainFunc    : moduledefinition mainmodule id
     ;
 /* Function args */
 SArgs       : DArgs {$$.trad = "";}
-            //| /*epsilon*/ { } 
+            | /*epsilon*/ { } 
     ;
 DArgs       :  id SArBlock SAArgs {
                     string pme = $1.lexeme;
@@ -304,7 +304,6 @@ SArBlock    : opasig Expr {
                         string pme = $2.lexeme; 
                         int pos = ts.shearchSymbol(pme, s1);
                         if($2.type != INTEGER){
-                            msgError()
                         }
                         
                         $$.trad = $2.trad;}
@@ -458,38 +457,103 @@ CallConnectors  : /*epsilon*/ { }
 /* Expresion */
 Arrayargs   : bral Expr {
                             if($2.type!=INTEGER){
+                                cout<<to_string($2.type)<<endl;//DEBUG
                                 msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
                             }
                         } 
               twopoints Expr    {
                                     if($5.type!=INTEGER){
-                                        msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
+                                        cout<<to_string($5.type)<<endl;//DEBUG
+                                        msgError(ERRTYPEARGS, nlin, ncol, $5.trad.c_str());
                                     }
                                 } 
-              brar {$$.trad = "[" + $2.trad + ":" + $6.trad + "]";}
+              brar {$$.trad = "[" + $2.trad + ":" + $5.trad + "]";}
             | /*epsilon*/ {$$.trad = "";}
     ;
-Expr    :   Econj {$$.trad = $1.trad;} 
-        |   Expr obool Econj{}
+Expr    :   Econj   { 
+                        $$.trad = $1.trad;
+                        $$.type = $1.type;
+                    } 
+        |   Expr {
+                    if($1.type!=LOGIC){
+                        msgError(ERRTYPEBOOL, nlin, ncol, $1.trad.c_str());
+                    }
+                 }obool Econj   {
+                                    if($4.type!=LOGIC){
+                                        msgError(ERRTYPEBOOL, nlin, ncol, $4.trad.c_str());
+                                    }
+                                    $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
+                                    $$.type = LOGIC;
+                                }
     ;
-Econj   :   Ecomp {$$.trad = $1.trad;}
-        |   Econj ybool Ecomp {}
+Econj   :   Ecomp { 
+                    $$.trad = $1.trad;
+                    $$.type = $1.type;
+                  }
+        |   Econj   {
+                        if($1.type!=LOGIC){
+                            msgError(ERRTYPEBOOL, nlin, ncol, $1.trad.c_str());
+                        }
+                    }ybool Ecomp   {
+                                        if($4.type!=LOGIC){
+                                            msgError(ERRTYPEBOOL, nlin, ncol, $4.trad.c_str());
+                                        }
+                                        $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
+                                        $$.type = LOGIC;
+                                    }
     ;
 
-Ecomp   : Esimple {$$.trad = $1.trad;}
-        | Esimple oprel Esimple {}
+Ecomp   : Esimple {
+                        $$.trad = $1.trad;
+                        $$.type = $1.type;
+                  }
+        | Esimple oprel Esimple {
+                                        if($1.type!=$3.type){//TODO:what happen here with the strings
+                                            string pme_1 = $1.lexeme;
+                                            string pme_3 = $3.lexeme;
+                                            string text = pme_1+ " type is " + to_string($1.type) + ". Does not match type of " + pme_3;
+                                            msgError(ERRTYPEMISMATCH, nlin, ncol,text.c_str()); 
+                                        }
+                                        $$.trad = $1.trad +" "+ $2.lexeme +" "+ $3.trad;
+                                        $$.type = $1.type;
+                                }
     ;
-Esimple :   opas Term {}
-        |   Term {$$.trad = $1.trad;}
-        |   Esimple opas Term {}
+Esimple :Term {  
+                    $$.trad = $1.trad;
+                    $$.type = $1.type;
+                 }
+        |   Esimple     {
+                            if($1.type!=INTEGER){
+                                msgError(ERRTYPEINTEGER, nlin, ncol, $1.trad.c_str());
+                            }
+                        }
+            opas Term   {
+                            if($4.type!=INTEGER){
+                                msgError(ERRTYPEINTEGER, nlin, ncol, $4.trad.c_str());
+                            }
+                            $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
+                            $$.type = INTEGER;
+                        }
     ;
-Term    :   Factor {$$.trad = $1.trad;} 
-        |   Term opmd Factor {}
+Term    :   Factor {$$.trad = $1.trad;
+                    $$.type = $1.type;} 
+        |   Term{
+                    if($1.type!=INTEGER){
+                        msgError(ERRTYPEINTEGER, nlin, ncol, $1.trad.c_str());
+                    }
+                } opmd Factor    {
+                                    if($4.type!=INTEGER){
+                                        msgError(ERRTYPEINTEGER, nlin, ncol, $4.trad.c_str());
+                                    }
+                                    $$.trad = $1.trad + $3.lexeme + $4.trad;
+                                    $$.type = INTEGER;
+                                }
     ;
 Factor  : Ref   {
                     int pos = ts.shearchSymbol($1.trad, s1);
                     //cout<<"ENTRO: "<< to_string(pos)<< " Name :" << $1.trad <<endl;
                     int type = ts.v_symbols.at(pos).getType();
+                    int type_v = ts.v_symbols.at(pos).getTypeVar();
                     switch(type){
                     case(DEFINITION)://DEFINITION=1
                         $$.trad = ts.v_symbols.at(pos).getValue_S();
@@ -504,6 +568,7 @@ Factor  : Ref   {
                         msgError(ERRNEEDDEF, nlin, ncol, $1.trad.c_str());
                         break;
                     }
+                    $$.type=type_v;
                 }
         | ninteger  {
                         string pme = $1.lexeme;
