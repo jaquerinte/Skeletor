@@ -63,13 +63,16 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	//in [AddrSize -1 : 0] addr;
 	in [AddrSize: 0] addr; // auxiliar 
 	//out [TransAddrSize-1: 0] taddr;
+	out [TransAddrSize: 0] taddr;
 	out rdy;
 
 	//wire [TransAddrSize-1:0] simple_example.taddr -> a.taddr;
-	wire [TransAddrSize:0] simple_example.addr -> d.in1; // auxiliar
+	wire [TransAddrSize:0] simple_example.taddr -> d.in1; // auxiliar
 	wire a.rdy -> d.in1;
 	wire b.rdy -> d.in2;
 	wire c.rdy -> d.in3;
+
+	a(TransAddrSize, AddrSize)[];
 	
 	//a(TransAddrSize, AddrSize)[in clk,in rts,in addr]; // no needs to be in order beacuse names match
 	//b(TransAddrSize, AddrSize)[in rstn=~rts,in clk,in addr,in taddr,out taddr]; // not need to be in orden beacuse use =

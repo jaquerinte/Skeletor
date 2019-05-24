@@ -262,7 +262,7 @@ MainFunc    : moduledefinition mainmodule id
 	;
 /* Function args */
 SArgs       : DArgs {$$.trad = "";}
-			| /*epsilon*/ { } 
+			//| /*epsilon*/ { } 
 	;
 DArgs       :  id SArBlock SAArgs {
 					string pme = $1.lexeme;
@@ -271,7 +271,14 @@ DArgs       :  id SArBlock SAArgs {
 				    if(s1 != "null"){
 				    	ts.addSymbol(pme,PARAMETERFUNCTION,s1);
 				    	int pos  = tfs.searchFunctionSymbol(s1);
-				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+				    	if ($2.trad == ""){
+				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+				    	}
+				    	else{
+				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+				    		tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $2.trad);
+				    	}
+				    	
 				    }
 				}
 	;
@@ -282,12 +289,25 @@ SAArgs 		:  coma id SArBlock SAArgs
 				    if(s1 != "null"){
 				    	ts.addSymbol(pme,PARAMETERFUNCTION,s1);
 				    	int pos  = tfs.searchFunctionSymbol(s1);
-				    	tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+				    	if ($3.trad == ""){
+				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+				    	}
+				    	else{
+				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+				    		tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $3.trad);
+				    	}
 				    }
 				}
 			|/*epsilon*/ { } 
 	;
-SArBlock    : opasig id {string pme = $2.lexeme; $$.trad = pme;}
+SArBlock    : opasig Expr {
+						string pme = $2.lexeme; 
+						int pos = ts.shearchSymbol(pme, s1);
+						if($2.type != INTEGER){
+							msgError()
+						}
+						
+						$$.trad = $2.trad;}
 			| /*epsilon*/ { $$.trad = "";} 
 	;
 /* Block definition and instructions base  */
@@ -360,11 +380,11 @@ EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.
 			| TipoBase Arrayargs id  {
 								string pme = $3.lexeme;
 								// add symbol
-								ts.addSymbol(pme,INOUTSYMBOL,s1);
-								$$.trad = $1.trad + pme;
 								int pos = tfs.searchFunctionSymbol(s1);
+								ts.addSymbol(pme,INOUTSYMBOL,s1);
 								string with = $2.trad ;
 								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
+								$$.trad = $1.trad + pme;
 								}
 			| wiretipe Arrayargs Ref connectwire Ref {
 											string var_out = $3.trad;
@@ -428,7 +448,6 @@ DCallArgs 	:  Expr SDCallArgs {
 							$$.trad = $2.trad;
 							int pos = tfs.searchFunctionSymbol(s1);
 							tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
-
 						}
 	;
 
@@ -437,7 +456,7 @@ SDCallArgs  : coma id SDCallArgs {}
 	;
 CallConnectors  : /*epsilon*/ { }
 /* Expresion */
-Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $1.trad + ":" + $2.trad + "]";}
+Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $2.trad + ":" + $4.trad + "]";}
             | /*epsilon*/ {$$.trad = "";}
     ;
 Expr	:	Econj {$$.trad = $1.trad;} 
