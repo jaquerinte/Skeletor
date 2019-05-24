@@ -39,117 +39,117 @@ string projectFolder = "OUTPUT";
 string init_output();
 
 struct Type {
-	int type;
-	int size;
-	int baseType;
+    int type;
+    int size;
+    int baseType;
 };
 
 struct TableTypes {
-	vector<Type> v_types;
+    vector<Type> v_types;
 
-	string debugTTypes() {
-		string tt_content("");
-		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		tt_content += "// TableTypes\n";
-		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		for (int i = 0; i < v_types.size(); ++i) {
-			tt_content += "// type:" + to_string(v_types.at(i).type) + " tam:" + to_string(v_types.at(i).size) 
-						+ " baseType:" + to_string(v_types.at(i).baseType) + "\n";
-		}
-		tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
-		return tt_content;
-	}
-	void add_primitivetype(int ttype, int tsize,int tbase) {		
-		Type t;
-		t.type = ttype;
-		t.size = tsize;
-		t.baseType = tbase;
-		v_types.push_back(t);
-   	}
+    string debugTTypes() {
+        string tt_content("");
+        tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
+        tt_content += "// TableTypes\n";
+        tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
+        for (int i = 0; i < v_types.size(); ++i) {
+            tt_content += "// type:" + to_string(v_types.at(i).type) + " tam:" + to_string(v_types.at(i).size) 
+                        + " baseType:" + to_string(v_types.at(i).baseType) + "\n";
+        }
+        tt_content += "////////////////////////////////////////////////////////////////////////////////\n";
+        return tt_content;
+    }
+    void add_primitivetype(int ttype, int tsize,int tbase) {        
+        Type t;
+        t.type = ttype;
+        t.size = tsize;
+        t.baseType = tbase;
+        v_types.push_back(t);
+    }
 
-   	int registerType(int tsize,int tbase) {
-   		int _type = v_types.at(v_types.size() - 1).type + 1;
-		Type t;
-		t.type = _type;
-		t.size = tsize;
-		t.baseType = tbase;
-		v_types.push_back(t);
-		return _type;
-   	}
-   	Type search(int type) {
-		Type t;
-		t.type = -1;
-		t.baseType = -1;
-		t.size = -1;
-				
-		for (int i = 0; i < v_types.size(); ++i) {
-			if (v_types.at(i).type == type) {
-				return v_types.at(i);
-			}
-		}
-		return t;
-	}
-	int getTotalSize(int type){
-		int auxType = type; 
-		int size = 1;
-		while (auxType >= LOGIC){
-			size = size * getSize(auxType);
-			auxType = baseType(auxType);
-		}
-		return size;
-	}
+    int registerType(int tsize,int tbase) {
+        int _type = v_types.at(v_types.size() - 1).type + 1;
+        Type t;
+        t.type = _type;
+        t.size = tsize;
+        t.baseType = tbase;
+        v_types.push_back(t);
+        return _type;
+    }
+    Type search(int type) {
+        Type t;
+        t.type = -1;
+        t.baseType = -1;
+        t.size = -1;
+                
+        for (int i = 0; i < v_types.size(); ++i) {
+            if (v_types.at(i).type == type) {
+                return v_types.at(i);
+            }
+        }
+        return t;
+    }
+    int getTotalSize(int type){
+        int auxType = type; 
+        int size = 1;
+        while (auxType >= LOGIC){
+            size = size * getSize(auxType);
+            auxType = baseType(auxType);
+        }
+        return size;
+    }
 
-	int getSizeBaseType(int type) {
-		int bt(baseType(type));
-		return getSize(bt);
-	}
+    int getSizeBaseType(int type) {
+        int bt(baseType(type));
+        return getSize(bt);
+    }
 
-	int getSize(int type) {		
-		for (int i = 0; i < v_types.size(); ++i) {
-			if (v_types.at(i).type == type) {
-				return v_types.at(i).size;
-			}
-		}
-		return -1;
-	}
+    int getSize(int type) {     
+        for (int i = 0; i < v_types.size(); ++i) {
+            if (v_types.at(i).type == type) {
+                return v_types.at(i).size;
+            }
+        }
+        return -1;
+    }
 
-	int baseType(int type) {
-		for (int i = 0; i < v_types.size(); ++i) {
-			if (v_types.at(i).type == type) {
-				return v_types.at(i).baseType;
-			}
-		}
-		return -1;
-	}
-	
-	bool isBase(int type) {
-		for (int i = 0; i < v_types.size(); ++i) {
-			if (v_types.at(i).type == type) {
-				if (v_types.at(i).baseType == 0) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}
-		return false;
-	}
+    int baseType(int type) {
+        for (int i = 0; i < v_types.size(); ++i) {
+            if (v_types.at(i).type == type) {
+                return v_types.at(i).baseType;
+            }
+        }
+        return -1;
+    }
+    
+    bool isBase(int type) {
+        for (int i = 0; i < v_types.size(); ++i) {
+            if (v_types.at(i).type == type) {
+                if (v_types.at(i).baseType == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
 
-	bool isArray(int _type) {
-		return _type > LOGIC; 
-	}
+    bool isArray(int _type) {
+        return _type > LOGIC; 
+    }
 
 };
 
 /* Auxiliary Function */
 vector<std::string> split_ref(string value){
-	istringstream iss(value);
-	std::vector<std::string> tokens;
-	std::string token;
-	while (std::getline(iss, token, '.')) {
-	    if (!token.empty())
-	        tokens.push_back(token);
-	}
+    istringstream iss(value);
+    std::vector<std::string> tokens;
+    std::string token;
+    while (std::getline(iss, token, '.')) {
+        if (!token.empty())
+            tokens.push_back(token);
+    }
 return  tokens;
 }
 /*  Auxiliary Function */
@@ -179,304 +179,314 @@ int yyerror(char *s);
 %}
 
 %%
-SA		: S 	
-		{ 
-			int tk = yylex();
-			if (tk != 0) yyerror("");
-		}
-	;
+SA      : S     
+        { 
+            int tk = yylex();
+            if (tk != 0) yyerror("");
+        }
+    ;
 /* Base syntax */
 ModuleTextDefinition : stringtext { string pme = $1.lexeme; pme.erase(0, 1);pme.erase(pme.size() - 1); $$.trad = pme;}
-				     | Ref {
-				     	int pos = ts.shearchSymbol($1.trad, s1);
-				     	//cout<< "pos " << to_string(pos)<< " On "<< $1.trad << endl;
- 				     	string value = ts.v_symbols.at(pos).getValue_S();
-				     	// TODO ERASE 
-				     	//cout<<"name "<<ts.v_symbols.at(pos).getName() << " type "<< ts.v_symbols.at(pos).getType() << " value " << value << endl;
-				     	$$.trad = value;
-				    	}
-	;
+                     | Ref {
+                        int pos = ts.shearchSymbol($1.trad, s1);
+                        //cout<< "pos " << to_string(pos)<< " On "<< $1.trad << endl;
+                        string value = ts.v_symbols.at(pos).getValue_S();
+                        // TODO ERASE 
+                        //cout<<"name "<<ts.v_symbols.at(pos).getName() << " type "<< ts.v_symbols.at(pos).getType() << " value " << value << endl;
+                        $$.trad = value;
+                        }
+    ;
 
 ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = INTEGER;}
-				| booltoken {string pme = $1.lexeme; $$.trad = pme; $$.size = LOGIC;}
-				| stringtext{string pme = $1.lexeme; $$.trad = pme; $$.size = STRING;}
-	;
+                | booltoken {string pme = $1.lexeme; $$.trad = pme; $$.size = LOGIC;}
+                | stringtext{string pme = $1.lexeme; $$.trad = pme; $$.size = STRING;}
+    ;
 SSuperblock : SSuperblock SSSuperblockDefine id ValueDefinition {
-						string pme = $3.lexeme;
-						ts.addSymbol(pme,$2.size, $4.trad, $4.size, "null");
-						$$.trad = $1.trad;
-						}
-			| SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size, "null");$$.trad = $1.trad;}
-			| /*epsilon*/ { } 
-	;
-SSSuperblockDefine	: definevalue {$$.size = DEFINITION;}
-				   	| definevalueverilog {$$.size = DEFINITIONVERILOG;} 
-	;
+                        string pme = $3.lexeme;
+                        ts.addSymbol(pme,$2.size, $4.trad, $4.size, "null");
+                        $$.trad = $1.trad;
+                        }
+            | SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size, "null");$$.trad = $1.trad;}
+            | /*epsilon*/ { } 
+    ;
+SSSuperblockDefine  : definevalue {$$.size = DEFINITION;}
+                    | definevalueverilog {$$.size = DEFINITIONVERILOG;} 
+    ;
 /* Function agrupation*/
 SSAFunc     : SSAFunc Func {$$.trad = $1.trad + $2.trad;}
-			| Func {$$.trad = $1.trad;}
-	;
+            | Func {$$.trad = $1.trad;}
+    ;
 SAFunc      : SSAFunc MainFunc {$$.trad = $1.trad + $2.trad;}
-	;
+    ;
 /* Function */
-Func 		: moduledefinition id 
-			{
-				/*Add module*/
-				string pme = $2.lexeme;
-				// fist add symbol
-				ts.addSymbol(pme,FUNCTION, "null");
-				// then add symbol
-				tfs.addFunctionSymbol(pme, projectName, projectFolder);
-				s1 = pme;
-				//printf("%s", s1);
-			} 
-			parl SArgs parr  Block 
-			{
-				/* Create file for module*/
-				s1 = "null";
-				string pme = $2.lexeme;
-				int pos = tfs.searchFunctionSymbol(pme);
-				tfs.v_funcSymbols.at(pos).createFileModule();
+Func        : moduledefinition id 
+            {
+                /*Add module*/
+                string pme = $2.lexeme;
+                // fist add symbol
+                ts.addSymbol(pme,FUNCTION, "null");
+                // then add symbol
+                tfs.addFunctionSymbol(pme, projectName, projectFolder);
+                s1 = pme;
+                //printf("%s", s1);
+            } 
+            parl SArgs parr  Block 
+            {
+                /* Create file for module*/
+                s1 = "null";
+                string pme = $2.lexeme;
+                int pos = tfs.searchFunctionSymbol(pme);
+                tfs.v_funcSymbols.at(pos).createFileModule();
 
-			}
-	;
+            }
+    ;
 MainFunc    : moduledefinition mainmodule id
-			{
-				/*Add module*/
-				string pme = $3.lexeme;
-				// fist add symbol
-				ts.addSymbol(pme,FUNCTION,"null");
-				// then add symbol
-				tfs.addFunctionSymbol(pme, projectName, projectFolder);
-				s1 = pme;
-			}  parl SArgs parr Block
-			{
-				/* Create file for module*/
-				s1 = "null";
-				string pme = $3.lexeme;
-				int pos = tfs.searchFunctionSymbol(pme);
-				string base = init_output();
-				tfs.v_funcSymbols.at(pos).createFileModule(ts.getTableSymbols(), ts.createDefinitions());
+            {
+                /*Add module*/
+                string pme = $3.lexeme;
+                // fist add symbol
+                ts.addSymbol(pme,FUNCTION,"null");
+                // then add symbol
+                tfs.addFunctionSymbol(pme, projectName, projectFolder);
+                s1 = pme;
+            }  parl SArgs parr Block
+            {
+                /* Create file for module*/
+                s1 = "null";
+                string pme = $3.lexeme;
+                int pos = tfs.searchFunctionSymbol(pme);
+                string base = init_output();
+                tfs.v_funcSymbols.at(pos).createFileModule(ts.getTableSymbols(), ts.createDefinitions());
 
-			}
-	;
+            }
+    ;
 /* Function args */
 SArgs       : DArgs {$$.trad = "";}
-			//| /*epsilon*/ { } 
-	;
+            //| /*epsilon*/ { } 
+    ;
 DArgs       :  id SArBlock SAArgs {
-					string pme = $1.lexeme;
-				    
-				    //printf("%s", s1);
-				    if(s1 != "null"){
-				    	ts.addSymbol(pme,PARAMETERFUNCTION,s1);
-				    	int pos  = tfs.searchFunctionSymbol(s1);
-				    	if ($2.trad == ""){
-				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
-				    	}
-				    	else{
-				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
-				    		tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $2.trad);
-				    	}
-				    	
-				    }
-				}
-	;
-SAArgs 		:  coma id SArBlock SAArgs 
-				{
-					string pme = $2.lexeme;
-				    FunctionSymbol s;//not used can be removed
-				    if(s1 != "null"){
-				    	ts.addSymbol(pme,PARAMETERFUNCTION,s1);
-				    	int pos  = tfs.searchFunctionSymbol(s1);
-				    	if ($3.trad == ""){
-				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
-				    	}
-				    	else{
-				    		tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
-				    		tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $3.trad);
-				    	}
-				    }
-				}
-			|/*epsilon*/ { } 
-	;
+                    string pme = $1.lexeme;
+                    
+                    //printf("%s", s1);
+                    if(s1 != "null"){
+                        ts.addSymbol(pme,PARAMETERFUNCTION,s1);
+                        int pos  = tfs.searchFunctionSymbol(s1);
+                        if ($2.trad == ""){
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+                        }
+                        else{
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+                            tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $2.trad);
+                        }
+                        
+                    }
+                }
+    ;
+SAArgs      :  coma id SArBlock SAArgs 
+                {
+                    string pme = $2.lexeme;
+                    FunctionSymbol s;//not used can be removed
+                    if(s1 != "null"){
+                        ts.addSymbol(pme,PARAMETERFUNCTION,s1);
+                        int pos  = tfs.searchFunctionSymbol(s1);
+                        if ($3.trad == ""){
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+                        }
+                        else{
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+                            tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParam(pme, $3.trad);
+                        }
+                    }
+                }
+            |/*epsilon*/ { } 
+    ;
 SArBlock    : opasig Expr {
-						string pme = $2.lexeme; 
-						int pos = ts.shearchSymbol(pme, s1);
-						if($2.type != INTEGER){
-							msgError()
-						}
-						
-						$$.trad = $2.trad;}
-			| /*epsilon*/ { $$.trad = "";} 
-	;
+                        string pme = $2.lexeme; 
+                        int pos = ts.shearchSymbol(pme, s1);
+                        if($2.type != INTEGER){
+                            msgError()
+                        }
+                        
+                        $$.trad = $2.trad;}
+            | /*epsilon*/ { $$.trad = "";} 
+    ;
 /* Block definition and instructions base  */
-Block 		: cbl SInstr cbr  {$$.trad = $2.trad;}
-	;
-SInstr		: SInstr Instr {$$.trad = $1.trad + $2.trad;}
-			| Instr  	   {$$.trad = $1.trad;}
-	;
+Block       : cbl SInstr cbr  {$$.trad = $2.trad;}
+    ;
+SInstr      : SInstr Instr {$$.trad = $1.trad + $2.trad;}
+            | Instr        {$$.trad = $1.trad;}
+    ;
 /* Instruction definition  */
 /* TODO THINK TO REDO WITH ONLY 2 RULES*/
-Instr 		: EInstr pyc {$$.trad = $1.trad + ";";}
-			| functionmodule ModuleTextDefinition 
-				{
-					int pos;
-					if(s1 != "null"){
-				    	pos = tfs.searchFunctionSymbol(s1);
-				    	if (tfs.v_funcSymbols.at(pos).getFunction() == ""){
-				    		tfs.v_funcSymbols.at(pos).setFunction($2.trad);
-				    	}else{
-				    		// fail: functionmodule Olreeady defing
-				    		string pme = $1.lexeme;
-							msgError(ERRFUNODEC, nlin, ncol, pme.c_str());
-				    	}
-						
-				    }
-				}
-			| descriptionmodule ModuleTextDefinition {
-					int pos;
-					if(s1 != "null"){
-				    	pos = tfs.searchFunctionSymbol(s1);
-						if (tfs.v_funcSymbols.at(pos).getDescription() == ""){
-				    		tfs.v_funcSymbols.at(pos).setDescription($2.trad);
-				    	}else{
-				    		// fail: functionmodule Olreeady defing
-				    		string pme = $1.lexeme;
-							msgError(ERRDESCDEFALDEC, nlin, ncol, pme.c_str());
-				    	}
-				    }
-				}
-			| codermodule ModuleTextDefinition {
-				    int pos;
-					if(s1 != "null"){
-				    	pos = tfs.searchFunctionSymbol(s1);
-						if (tfs.v_funcSymbols.at(pos).getCode() == ""){
-				    		tfs.v_funcSymbols.at(pos).setCode($2.trad);
-				    	}else{
-				    		// fail: functionmodule Olreeady defing
-				    		string pme = $1.lexeme;
-							msgError(ERRORCODDEFALDEC, nlin, ncol, pme.c_str());
-				    	}
-				    }
-				}
-			| referencesmodule ModuleTextDefinition {
-					if(s1 != "null"){
-						int pos;
-				    	pos = tfs.searchFunctionSymbol(s1);
-						if (tfs.v_funcSymbols.at(pos).getReferences() == ""){
-				    		tfs.v_funcSymbols.at(pos).setReferences($2.trad);
-				    	}else{
-				    		// fail: functionmodule Olreeady defing
-				    		string pme = $1.lexeme;
-							msgError(ERRORDEFIALDEC, nlin, ncol, pme.c_str());
-				    	}
-				    }
-				}
-			|/*epsilon*/ { } 
+Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
+            | functionmodule ModuleTextDefinition 
+                {
+                    int pos;
+                    if(s1 != "null"){
+                        pos = tfs.searchFunctionSymbol(s1);
+                        if (tfs.v_funcSymbols.at(pos).getFunction() == ""){
+                            tfs.v_funcSymbols.at(pos).setFunction($2.trad);
+                        }else{
+                            // fail: functionmodule Olreeady defing
+                            string pme = $1.lexeme;
+                            msgError(ERRFUNODEC, nlin, ncol, pme.c_str());
+                        }
+                        
+                    }
+                }
+            | descriptionmodule ModuleTextDefinition {
+                    int pos;
+                    if(s1 != "null"){
+                        pos = tfs.searchFunctionSymbol(s1);
+                        if (tfs.v_funcSymbols.at(pos).getDescription() == ""){
+                            tfs.v_funcSymbols.at(pos).setDescription($2.trad);
+                        }else{
+                            // fail: functionmodule Olreeady defing
+                            string pme = $1.lexeme;
+                            msgError(ERRDESCDEFALDEC, nlin, ncol, pme.c_str());
+                        }
+                    }
+                }
+            | codermodule ModuleTextDefinition {
+                    int pos;
+                    if(s1 != "null"){
+                        pos = tfs.searchFunctionSymbol(s1);
+                        if (tfs.v_funcSymbols.at(pos).getCode() == ""){
+                            tfs.v_funcSymbols.at(pos).setCode($2.trad);
+                        }else{
+                            // fail: functionmodule Olreeady defing
+                            string pme = $1.lexeme;
+                            msgError(ERRORCODDEFALDEC, nlin, ncol, pme.c_str());
+                        }
+                    }
+                }
+            | referencesmodule ModuleTextDefinition {
+                    if(s1 != "null"){
+                        int pos;
+                        pos = tfs.searchFunctionSymbol(s1);
+                        if (tfs.v_funcSymbols.at(pos).getReferences() == ""){
+                            tfs.v_funcSymbols.at(pos).setReferences($2.trad);
+                        }else{
+                            // fail: functionmodule Olreeady defing
+                            string pme = $1.lexeme;
+                            msgError(ERRORDEFIALDEC, nlin, ncol, pme.c_str());
+                        }
+                    }
+                }
+            |/*epsilon*/ { } 
 
-	;
-EInstr 		: Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
-			| TipoBase Arrayargs id  {
-								string pme = $3.lexeme;
-								// add symbol
-								int pos = tfs.searchFunctionSymbol(s1);
-								ts.addSymbol(pme,INOUTSYMBOL,s1);
-								string with = $2.trad ;
-								tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
-								$$.trad = $1.trad + pme;
-								}
-			| wiretipe Arrayargs Ref connectwire Ref {
-											string var_out = $3.trad;
-											string var_in = $5.trad;
+    ;
+EInstr      : Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
+            | TipoBase Arrayargs id  {
+                                string pme = $3.lexeme;
+                                // add symbol
+                                int pos = tfs.searchFunctionSymbol(s1);
+                                ts.addSymbol(pme,INOUTSYMBOL,s1);
+                                string with = $2.trad ;
+                                tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
+                                $$.trad = $1.trad + pme;
+                                }
+            | wiretipe Arrayargs Ref connectwire Ref {
+                                            string var_out = $3.trad;
+                                            string var_in = $5.trad;
 
-											// decompse the variables.
-											// decompse out var
-											vector<string> out = split_ref(var_out);
-											// decompse in var
-											vector<string> in = split_ref(var_in);
-											// check out function 
-											int pos_base = tfs.searchFunctionSymbol(out[0]);
-											if (pos_base == -1){ 
-												// error 
-												cout<<"ERROR NAME NULL OUT FUNCTION"<<endl;
-												exit(1);
-											}
-											// check InoutSymbol
-											int out_inout;
-											out_inout = tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1], OUT);
-											
-											if (out_inout == -1){
-												//error 
-												cout<<"ERROR NAME NULL OUT INOUTSYMBOL: "<< out[1] <<endl;
-												exit(1);
-											}
-											int pos_aux = tfs.searchFunctionSymbol(in[0]);
-											if (pos_aux == -1){ 
-												// error
-												cout<<"ERROR NAME NULL IN FUNCTION"<<endl;
-												exit(1);
-											}
-											// check InoutSymbol
-											int in_inout;
-											in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1], IN);
-											if (in_inout == -1){
-												//error
-												cout<<"ERROR NAME NULL IN INOUTSYMBOL: "<< in[1] <<endl;
-												exit(1);
-											}
-											// all verfiy
-											// create wire.
-											int pos = tfs.searchFunctionSymbol(s1);
+                                            // decompse the variables.
+                                            // decompse out var
+                                            vector<string> out = split_ref(var_out);
+                                            // decompse in var
+                                            vector<string> in = split_ref(var_in);
+                                            // check out function 
+                                            int pos_base = tfs.searchFunctionSymbol(out[0]);
+                                            if (pos_base == -1){ 
+                                                // error 
+                                                cout<<"ERROR NAME NULL OUT FUNCTION"<<endl;
+                                                exit(1);
+                                            }
+                                            // check InoutSymbol
+                                            int out_inout;
+                                            out_inout = tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1], OUT);
+                                            
+                                            if (out_inout == -1){
+                                                //error 
+                                                cout<<"ERROR NAME NULL OUT INOUTSYMBOL: "<< out[1] <<endl;
+                                                exit(1);
+                                            }
+                                            int pos_aux = tfs.searchFunctionSymbol(in[0]);
+                                            if (pos_aux == -1){ 
+                                                // error
+                                                cout<<"ERROR NAME NULL IN FUNCTION"<<endl;
+                                                exit(1);
+                                            }
+                                            // check InoutSymbol
+                                            int in_inout;
+                                            in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1], IN);
+                                            if (in_inout == -1){
+                                                //error
+                                                cout<<"ERROR NAME NULL IN INOUTSYMBOL: "<< in[1] <<endl;
+                                                exit(1);
+                                            }
+                                            // all verfiy
+                                            // create wire.
+                                            int pos = tfs.searchFunctionSymbol(s1);
 
-											tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad);
+                                            tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad);
 
-										   }
-	;
-CallExpresion	:  opasig Expr {$$.trad = $2.trad;}
-				|  parl CallArgs parr bral CallConnectors brar 
-							{
-								int pos = tfs.searchFunctionSymbol($0.ph);
-							}
-	;
+                                           }
+    ;
+CallExpresion   :  opasig Expr {$$.trad = $2.trad;}
+                |  parl CallArgs parr bral CallConnectors brar 
+                            {
+                                int pos = tfs.searchFunctionSymbol($0.ph);
+                            }
+    ;
 /* Call args */
-CallArgs	: DCallArgs {$$.trad = "";}
-			| /*epsilon*/ { } 
-	;
+CallArgs    : DCallArgs {$$.trad = "";}
+            | /*epsilon*/ { } 
+    ;
 
-DCallArgs 	:  Expr SDCallArgs {
-							$$.trad = $2.trad;
-							int pos = tfs.searchFunctionSymbol(s1);
-							tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
-						}
-	;
+DCallArgs   :  Expr SDCallArgs {
+                            $$.trad = $2.trad;
+                            int pos = tfs.searchFunctionSymbol(s1);
+                            tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+                        }
+    ;
 
 SDCallArgs  : coma id SDCallArgs {}
-			| /*epsilon*/ { } 
-	;
+            | /*epsilon*/ { } 
+    ;
 CallConnectors  : /*epsilon*/ { }
 /* Expresion */
-Arrayargs   : bral Expr twopoints Expr brar {$$.trad = "[" + $2.trad + ":" + $4.trad + "]";}
+Arrayargs   : bral Expr {
+                            if($2.type!=INTEGER){
+                                msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
+                            }
+                        } 
+              twopoints Expr    {
+                                    if($5.type!=INTEGER){
+                                        msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
+                                    }
+                                } 
+              brar {$$.trad = "[" + $2.trad + ":" + $6.trad + "]";}
             | /*epsilon*/ {$$.trad = "";}
     ;
-Expr	:	Econj {$$.trad = $1.trad;} 
-		|	Expr obool Econj{}
-	;
-Econj	:	Ecomp {$$.trad = $1.trad;}
-		|	Econj ybool Ecomp {}
-	;
+Expr    :   Econj {$$.trad = $1.trad;} 
+        |   Expr obool Econj{}
+    ;
+Econj   :   Ecomp {$$.trad = $1.trad;}
+        |   Econj ybool Ecomp {}
+    ;
 
-Ecomp 	: Esimple {$$.trad = $1.trad;}
-		| Esimple oprel	Esimple {}
-	;
-Esimple	:	opas Term {}
-		|	Term {$$.trad = $1.trad;}
-		|	Esimple opas Term {}
-	;
-Term	:	Factor {$$.trad = $1.trad;}	
-		|	Term opmd Factor {}
-	;
-Factor	: Ref   {
+Ecomp   : Esimple {$$.trad = $1.trad;}
+        | Esimple oprel Esimple {}
+    ;
+Esimple :   opas Term {}
+        |   Term {$$.trad = $1.trad;}
+        |   Esimple opas Term {}
+    ;
+Term    :   Factor {$$.trad = $1.trad;} 
+        |   Term opmd Factor {}
+    ;
+Factor  : Ref   {
                     int pos = ts.shearchSymbol($1.trad, s1);
                     //cout<<"ENTRO: "<< to_string(pos)<< " Name :" << $1.trad <<endl;
                     int type = ts.v_symbols.at(pos).getType();
@@ -495,39 +505,39 @@ Factor	: Ref   {
                         break;
                     }
                 }
-		| ninteger  {
+        | ninteger  {
                         string pme = $1.lexeme;
                         $$.type=INTEGER;
                         $$.trad=pme;
                     }
-		| parl Expr parr {  $$.trad="(" + $2.trad + ")";}
-		| nobool Factor	    {
+        | parl Expr parr {  $$.trad="(" + $2.trad + ")";}
+        | nobool Factor     {
                                 if($2.type!=5){
-							        msgError(ERRFUNODEC, nlin, ncol, $2.trad.c_str());
+                                    msgError(ERRFUNODEC, nlin, ncol, $2.trad.c_str());
                                 }
                                 $$.trad = "!" + $2.trad;
                                 $$.type = $2.type;
                             }
-		| booltokentrue     {
+        | booltokentrue     {
                                 $$.type=LOGIC;
                                 $$.trad="false";
                             }
-		| booltokenfalse    {
+        | booltokenfalse    {
                                 $$.type=LOGIC;
                                 $$.trad="true";
                             }
-	;
-Ref		:	id {string pme = $1.lexeme; $$.trad = pme;}
-		|	Ref bral Esimple brar {}
-	;
+    ;
+Ref     :   id {string pme = $1.lexeme; $$.trad = pme;}
+        |   Ref bral Esimple brar {}
+    ;
 /* Tipos */
-TipoBase 	: intype {$$.size = IN;}
-			| outtype {$$.size = OUT;} 
-			| inouttype {$$.size = INOUT;} 
-	;
+TipoBase    : intype {$$.size = IN;}
+            | outtype {$$.size = OUT;} 
+            | inouttype {$$.size = INOUT;} 
+    ;
 
-S 		: SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;tfs.createFiles(projectFolder);ts.printToFile(projectFolder);}
-	;
+S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;tfs.createFiles(projectFolder);ts.printToFile(projectFolder);}
+    ;
 
 %%
 
@@ -542,13 +552,13 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
          case ERRSINT: fprintf(stderr,"in '%s'\n",s);
             break;
          case ERRNODEC: fprintf(stderr, "Variable %s not declared\n",s);
-         	break;
+            break;
          case ERRALDEC: fprintf(stderr, "Variable %s already declared\n",s);
-         	break;
+            break;
           case ERRFUNODEC: fprintf(stderr, "Module %s not declared\n",s);
-         	break;
+            break;
          case ERRFUNALDEC: fprintf(stderr, "Module %s already declared\n",s);
-         	break;
+            break;
         }
      }
      else
@@ -571,7 +581,7 @@ int yyerror(char *s)
     }
 }
 string init_output(){
-	
+    
 string output = "////////////////////////////////////////////////////////////////////////////////\n"+
 std::string("//                                                                              \n")+
 std::string("//                                 -+ydNMMNdy+-                                 \n")+
@@ -615,10 +625,10 @@ std::string("//                              .dNo.oN+                           
 std::string("//                                oNNh.                                         \n")+
 std::string("//                                                                              \n")+
 std::string("////////////////////////////////////////////////////////////////////////////////\n")+
-std::string("//					  THE DICKBUT RTL CONNECTION COMPILER				         \n")+
-std::string("//				    FOR NOT TO MAKE A DICKBUT RTL CONNECTIONS			         \n")+
+std::string("//                   THE DICKBUT RTL CONNECTION COMPILER                        \n")+
+std::string("//                 FOR NOT TO MAKE A DICKBUT RTL CONNECTIONS                    \n")+
 std::string("////////////////////////////////////////////////////////////////////////////////\n");
-	return output;
+    return output;
 }
 
 void print_usage(void)
