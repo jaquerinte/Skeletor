@@ -60,8 +60,8 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 
 	in clk;
 	in rts;
-	//in [AddrSize -1 : 0] addr;
-	in [AddrSize : 0] addr; // auxiliar 
+	in [AddrSize -1 : 0] addr;
+	//in [AddrSize : 0] addr; // auxiliar 
 	//out [TransAddrSize-1: 0] taddr;
 	//out [TransAddrSize: 0] taddr;
 	out rdy;
