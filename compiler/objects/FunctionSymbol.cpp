@@ -115,6 +115,7 @@ bool FunctionSymbol :: addFunctionSymbolParam(string name, string value)
 	FunctionSymbolParam s(name, value);
 	for (int i = 0; i < this -> v_param.size();++i) {
 		if (this ->  v_param.at(i).getName() == s.getName()) { 
+			
 			// fail: Symbol param  already declared
 			//msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
 			return false;

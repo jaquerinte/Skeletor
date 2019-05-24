@@ -3,13 +3,13 @@
 FunctionSymbolParam :: FunctionSymbolParam()
 {
 	this -> name = "null";
-	this -> value = "-1";
+	this -> value = "1";
 }
 
 FunctionSymbolParam :: FunctionSymbolParam(string name)
 {
 	this -> name = name;
-	this -> value = "-1";
+	this -> value = "1";
 }
 
 FunctionSymbolParam :: FunctionSymbolParam(string name, string value)

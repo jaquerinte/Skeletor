@@ -267,7 +267,6 @@ SArgs       : DArgs {$$.trad = "";}
 
 DArgs       : id SArBlock {
                     string pme = $1.lexeme;
-                    
                     //printf("%s", s1);
                     if(s1 != "null"){
                         ts.addSymbol(pme,PARAMETERFUNCTION,$2.trad, INTEGER, s1);
@@ -287,7 +286,7 @@ DArgs       : id SArBlock {
                     if(s1 != "null"){
                         ts.addSymbol(pme,PARAMETERFUNCTION,$4.trad, INTEGER, s1);
                         int pos  = tfs.searchFunctionSymbol(s1);
-                        if ($3.trad == ""){
+                        if ($4.trad == ""){
                             tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
                         }
                         else{
@@ -444,7 +443,7 @@ CallArgs    : DCallArgs {$$.trad = "";}
 DCallArgs   :  Expr SDCallArgs {
                             $$.trad = $2.trad;
                             int pos = tfs.searchFunctionSymbol(s1);
-                            tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+                            //tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
                         }
     ;
 
