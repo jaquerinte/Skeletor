@@ -29,7 +29,7 @@ extern int ncol,nlin,endfile;
 
 /* START FUNCTIONS */
 const int INTEGER=1;
-const int REGISTER=2;
+const int REFERENCE=2;
 const int STRING=3;
 const int LOGIC=5;
 
@@ -275,7 +275,7 @@ DArgs       : id SArBlock {
                             tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
                         }
                         else{
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $2.trad);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $2.trad, $2.size);
                         }
                         
                     }
@@ -290,7 +290,7 @@ DArgs       : id SArBlock {
                             tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
                         }
                         else{
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $4.trad);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $4.trad, $4.size);
                         }
                     }
 
@@ -303,7 +303,8 @@ SArBlock    : opasig Expr {
                             //msgError()
                         }
                         
-                        $$.trad = $2.trad;}
+                        $$.trad = $2.trad;
+                        $$.size = $2.size;}
             | /*epsilon*/ { $$.trad = "";} 
     ;
 /* Block definition and instructions base  */
@@ -470,6 +471,7 @@ Arrayargs   : bral Expr {
 Expr    :   Econj   { 
                         $$.trad = $1.trad;
                         $$.type = $1.type;
+                        $$.size = $1.size;
                     } 
         |   Expr {
                     if($1.type!=LOGIC){
@@ -481,11 +483,13 @@ Expr    :   Econj   {
                                     }
                                     $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
                                     $$.type = LOGIC;
+                                    $$.size = LOGIC;
                                 }
     ;
 Econj   :   Ecomp { 
                     $$.trad = $1.trad;
                     $$.type = $1.type;
+                    $$.size = $1.size;
                   }
         |   Econj   {
                         if($1.type!=LOGIC){
@@ -497,12 +501,14 @@ Econj   :   Ecomp {
                                         }
                                         $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
                                         $$.type = LOGIC;
+                                        $$.size = LOGIC;
                                     }
     ;
 
 Ecomp   : Esimple {
                         $$.trad = $1.trad;
                         $$.type = $1.type;
+                        $$.size = $1.size;
                   }
         | Esimple oprel Esimple {
                                         if($1.type!=$3.type){//TODO:what happen here with the strings
@@ -511,13 +517,19 @@ Ecomp   : Esimple {
                                             string text = pme_1+ " type is " + to_string($1.type) + ". Does not match type of " + pme_3;
                                             msgError(ERRTYPEMISMATCH, nlin, ncol,text.c_str()); 
                                         }
-                                        $$.trad = $1.trad +" "+ $2.lexeme +" "+ $3.trad;
+                                        $$.trad = $1.trad + " " + $2.lexeme + " " + $3.trad;
                                         $$.type = $1.type;
+                                    if ($1.size == INTEGER || $3.size == INTEGER){
+                                        $$.size = INTEGER;
+                                    }else{
+                                        $$.size = REFERENCE;
+                                    }
                                 }
     ;
 Esimple :Term {  
                     $$.trad = $1.trad;
                     $$.type = $1.type;
+                    $$.size = $1.size;
                  }
         |   Esimple     {
                             if($1.type!=INTEGER){
@@ -529,11 +541,17 @@ Esimple :Term {
                                 msgError(ERRTYPEINTEGER, nlin, ncol, $4.trad.c_str());
                             }
                             $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
-                            $$.type = INTEGER;
+                            if ($1.size == INTEGER || $4.size == INTEGER){
+                                    $$.size = INTEGER;
+                                }else{
+                                    $$.size = REFERENCE;
+                                }
+                            
                         }
     ;
 Term    :   Factor {$$.trad = $1.trad;
-                    $$.type = $1.type;} 
+                    $$.type = $1.type;
+                    $$.size = $1.size;} 
         |   Term{
                     if($1.type!=INTEGER){
                         msgError(ERRTYPEINTEGER, nlin, ncol, $1.trad.c_str());
@@ -544,6 +562,11 @@ Term    :   Factor {$$.trad = $1.trad;
                                     }
                                     $$.trad = $1.trad + $3.lexeme + $4.trad;
                                     $$.type = INTEGER;
+                                    if ($1.size == INTEGER || $4.size == INTEGER){
+                                        $$.size = INTEGER;
+                                    }else{
+                                        $$.size = REFERENCE;
+                                    }
                                 }
     ;
 Factor  : Ref   {
@@ -566,11 +589,13 @@ Factor  : Ref   {
                         break;
                     }
                     $$.type=type_v;
+                    $$.size = REFERENCE;
                 }
         | ninteger  {
                         string pme = $1.lexeme;
                         $$.type=INTEGER;
                         $$.trad=pme;
+                        $$.size = INTEGER;
                     }
         | parl Expr parr {  $$.trad="(" + $2.trad + ")";}
         | nobool Factor     {

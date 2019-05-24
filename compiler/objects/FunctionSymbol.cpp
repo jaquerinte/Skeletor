@@ -110,9 +110,9 @@ bool FunctionSymbol :: addFunctionSymbolParam(string name)
 	return true;
 }
 
-bool FunctionSymbol :: addFunctionSymbolParam(string name, string value)
+bool FunctionSymbol :: addFunctionSymbolParam(string name, string value, int type)
 {
-	FunctionSymbolParam s(name, value);
+	FunctionSymbolParam s(name, value, type);
 	for (int i = 0; i < this -> v_param.size();++i) {
 		if (this ->  v_param.at(i).getName() == s.getName()) { 
 			
@@ -216,13 +216,18 @@ void FunctionSymbol ::createFileModuleBase(){
 		this -> output_file_data += "module " + this -> name + " #(\n";
 		// Loop over param
 		for (int i = 0; i < this -> v_param.size();++i) {
+			string value = this -> v_param.at(i).getValue();
+			if (v_param.at(i).getType() == 2){
+				value = "`" + value;
+			}
+							
 			if (i == this -> v_param.size() -1){
 				/* Last parameter */
-				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + this -> v_param.at(i).getValue() + "\n";
+				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + value + "\n";
 			}
 			else{
 				/* Rest parameter */
-				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + this -> v_param.at(i).getValue() + ",\n";
+				this -> output_file_data += "\t\tparameter integer " + this -> v_param.at(i).getName() + " = " + value + ",\n";
 			}
 		}
 		this -> output_file_data += "\t)\n\t(\n";

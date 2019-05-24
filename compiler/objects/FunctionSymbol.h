@@ -26,7 +26,7 @@ public:
 	int searchinoutSymbol(string name);
 	int searchinoutSymbol(string name, int type);
 	bool addFunctionSymbolParam(string name);
-	bool addFunctionSymbolParam(string name, string vale);
+	bool addFunctionSymbolParam(string name, string vale, int type);
 	bool addValueFunctionSymbolParam(string name, string value);
 	void addValueFunctionSymbolParamPos(int pos, string value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
