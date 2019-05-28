@@ -64,14 +64,29 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	out [TransAddrSize-1: 0] taddr;
 	out rdy;
 
-	wire [TransAddrSize-1:0] simple_example.taddr -> a.taddr;
-	wire a.rdy -> d.in1;
-	wire b.rdr -> d.in2;
-	wire c.rdr -> d.in3;
-	
-	a(TransAddrSize, AddrSize)[in clk,in rts,in addr]; // no needs to be in order beacuse names match
-	b(TransAddrSize, AddrSize)[in rstn=~rts,in clk,in addr,in taddr,out taddr]; // not need to be in orden beacuse use =
-	c(N)[in rst, in clk];
-	d()[out rdy];
 
+	a:x(TransAddrSize, AddrSize){
+		in clk = in clk,
+		in rts = in rts,
+		in addr = in addr,
+	}
+
+	b:y(TransAddrSize, AddrSize){
+		in rstn = ~rts,
+		in clk = clk,
+		in addr = addr
+	}
+	c:z(N){
+		in rst = in rst,
+		in clk = in clk
+	}
+	d:w(){
+		out rdy = out rdy;
+	}
+
+	wire [TransAddrSize-1:0] y.taddr -> x.taddr;
+	wire x.rdy -> w.in1;
+	wire y.rdr -> w.in2;
+	wire z.rdr -> w.in3;
+	
 }
