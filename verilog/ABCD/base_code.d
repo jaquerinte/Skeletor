@@ -68,20 +68,20 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	a:x(TransAddrSize, AddrSize){
 		in clk = in clk,
 		in rts = in rts,
-		in addr = in addr,
+		in addr = in addr
 	}
 
 	b:y(TransAddrSize, AddrSize){
-		in rstn = ~rts,
-		in clk = clk,
-		in addr = addr
+		in rstn = in ~rts,
+		in clk = in clk,
+		in addr = in addr
 	}
 	c:z(N){
 		in rst = in rst,
 		in clk = in clk
 	}
 	d:w(){
-		out rdy = out rdy;
+		out rdy = out rdy
 	}
 
 	wire [TransAddrSize-1:0] y.taddr -> x.taddr;
