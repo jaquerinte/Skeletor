@@ -1,5 +1,5 @@
 //testbench  is INCOMPLETE, do  not REUSE
-#include "Vsimple_example.h"
+#include "VsimpleExample.h"
 #include "verilated.h"
 //waveform
 #include "verilated_vcd_c.h"
@@ -13,7 +13,7 @@ double sc_time_stamp(){ //called by $time in verilog
 }
 // debug function to generate waveforms and clock
 // debug function to generate waveforms and clock
-void ticktoc_and_trace(Vsimple_example* module,VerilatedVcdC* tfp){
+void ticktoc_and_trace(VsimpleExample* module,VerilatedVcdC* tfp){
   //waveforms and tick clock
   if (tfp != NULL){
   module->eval();
@@ -37,7 +37,7 @@ void ticktoc_and_trace(Vsimple_example* module,VerilatedVcdC* tfp){
   module->eval();
   }
 }
-void tick_and_trace(Vsimple_example* module,VerilatedVcdC* tfp){
+void tick_and_trace(VsimpleExample* module,VerilatedVcdC* tfp){
   //waveforms and tick clock
   if (tfp != NULL){
   module->eval();
@@ -76,7 +76,7 @@ int main(int argc, char **argv, char **env) {
   VerilatedVcdC* tfp =NULL;
   //declare my module
   Verilated::commandArgs(argc, argv);
-  Vsimple_example* DUT = new Vsimple_example;
+  VsimpleExample* DUT = new VsimpleExample;
   //enable waveforms
   if(vcdTrace)
   {

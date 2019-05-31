@@ -2,7 +2,7 @@
 [*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
 [*] Thu Apr 11 22:44:44 2019
 [*]
-[dumpfile] "/home/bscuser/master/MA/MA_2019/verilog/obj_dir/Vsimple_example.vcd"
+[dumpfile] "/home/bscuser/master/MA/MA_2019/verilog/obj_dir/VsimpleExample.vcd"
 [dumpfile_mtime] "Thu Apr 11 22:42:28 2019"
 [dumpfile_size] 2420
 [savefile] "/home/bscuser/master/MA/MA_2019/verilog/TEST_CONFIG.gtkw"
@@ -11,94 +11,94 @@
 [pos] 0 27
 *-1.042800 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
-[treeopen] TOP.simple_example.
+[treeopen] TOP.simpleExample.
 [sst_width] 240
 [signals_width] 358
 [sst_expanded] 1
 [sst_vpaned_height] 680
 @22
-TOP.simple_example.AddrSize[31:0]
-TOP.simple_example.TransAddrSize[31:0]
-TOP.simple_example.addr_i[31:0]
+TOP.simpleExample.AddrSize[31:0]
+TOP.simpleExample.TransAddrSize[31:0]
+TOP.simpleExample.addr_i[31:0]
 @28
-TOP.simple_example.clk_i
-TOP.simple_example.rdy_a_d
-TOP.simple_example.rdy_b_d_int
-TOP.simple_example.rdy_c_d_int
-TOP.simple_example.rdy_o
-TOP.simple_example.rst_i
+TOP.simpleExample.clk_i
+TOP.simpleExample.rdy_a_d
+TOP.simpleExample.rdy_b_d_int
+TOP.simpleExample.rdy_c_d_int
+TOP.simpleExample.rdy_o
+TOP.simpleExample.rst_i
 @22
 [color] 3
-TOP.simple_example.taddr_a_b[31:0]
+TOP.simpleExample.taddr_a_b[31:0]
 [color] 3
-TOP.simple_example.taddr_o[31:0]
+TOP.simpleExample.taddr_o[31:0]
 [color] 3
-TOP.simple_example.inst_a.AddrSize[31:0]
+TOP.simpleExample.inst_a.AddrSize[31:0]
 [color] 3
-TOP.simple_example.inst_a.TransAddrSize[31:0]
+TOP.simpleExample.inst_a.TransAddrSize[31:0]
 [color] 3
-TOP.simple_example.inst_a.addr_i[31:0]
+TOP.simpleExample.inst_a.addr_i[31:0]
 @28
 [color] 3
-TOP.simple_example.inst_a.clk_i
+TOP.simpleExample.inst_a.clk_i
 @22
 [color] 3
-TOP.simple_example.inst_a.prev_addr_d[31:0]
+TOP.simpleExample.inst_a.prev_addr_d[31:0]
 @28
 [color] 3
-TOP.simple_example.inst_a.prev_rst_d
+TOP.simpleExample.inst_a.prev_rst_d
 [color] 3
-TOP.simple_example.inst_a.rdy_o
+TOP.simpleExample.inst_a.rdy_o
 [color] 3
-TOP.simple_example.inst_a.rst_i
+TOP.simpleExample.inst_a.rst_i
 @22
 [color] 1
-TOP.simple_example.inst_a.taddr_o[31:0]
+TOP.simpleExample.inst_a.taddr_o[31:0]
 [color] 1
-TOP.simple_example.inst_b.AddrSize[31:0]
+TOP.simpleExample.inst_b.AddrSize[31:0]
 [color] 1
-TOP.simple_example.inst_b.TransAddrSize[31:0]
+TOP.simpleExample.inst_b.TransAddrSize[31:0]
 [color] 1
-TOP.simple_example.inst_b.addr_i[31:0]
+TOP.simpleExample.inst_b.addr_i[31:0]
 @28
 [color] 1
-TOP.simple_example.inst_b.clk_i
+TOP.simpleExample.inst_b.clk_i
 @22
 [color] 1
-TOP.simple_example.inst_b.prev_addr_d[31:0]
+TOP.simpleExample.inst_b.prev_addr_d[31:0]
 @28
 [color] 1
-TOP.simple_example.inst_b.prev_rst_d
+TOP.simpleExample.inst_b.prev_rst_d
 [color] 1
-TOP.simple_example.inst_b.rdy_o
+TOP.simpleExample.inst_b.rdy_o
 [color] 1
-TOP.simple_example.inst_b.rstn_i
+TOP.simpleExample.inst_b.rstn_i
 @22
 [color] 1
-TOP.simple_example.inst_b.taddr_i[31:0]
+TOP.simpleExample.inst_b.taddr_i[31:0]
 [color] 1
-TOP.simple_example.inst_b.taddr_o[31:0]
+TOP.simpleExample.inst_b.taddr_o[31:0]
 @28
 [color] 6
-TOP.simple_example.inst_c.clk_i
+TOP.simpleExample.inst_c.clk_i
 @22
 [color] 6
-TOP.simple_example.inst_c.n[31:0]
+TOP.simpleExample.inst_c.n[31:0]
 @28
 [color] 6
-TOP.simple_example.inst_c.rdy_o
+TOP.simpleExample.inst_c.rdy_o
 [color] 6
-TOP.simple_example.inst_c.rst_i
+TOP.simpleExample.inst_c.rst_i
 [color] 6
-TOP.simple_example.inst_c.value[1:0]
+TOP.simpleExample.inst_c.value[1:0]
 @29
 [color] 2
-TOP.simple_example.inst_d.in1_i
+TOP.simpleExample.inst_d.in1_i
 [color] 2
-TOP.simple_example.inst_d.in2_i
+TOP.simpleExample.inst_d.in2_i
 [color] 2
-TOP.simple_example.inst_d.in3_i
+TOP.simpleExample.inst_d.in3_i
 [color] 2
-TOP.simple_example.inst_d.out_o
+TOP.simpleExample.inst_d.out_o
 [pattern_trace] 1
 [pattern_trace] 0

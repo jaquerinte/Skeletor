@@ -1,3 +1,7 @@
+*.swp
+verilog/ABCD/tb/questa_sim/simpleExample/
+transcript
+*.wlf
 *.o
 obj_dir
 rtlcompiler

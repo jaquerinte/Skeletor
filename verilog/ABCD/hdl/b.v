@@ -19,7 +19,7 @@ module b #(
         input rstn_i,                           //Active low reset
         input clk_i,                            //Clock
         input [AddrSize-1:0] addr_i,            //Address 
-        input [AddrSize-1:0] taddr_i,           //Translated address 
+        input [TransAddrSize-1:0] taddr_i,           //Translated address 
         output [TransAddrSize-1:0] taddr_o,     //Translated address 
         output rdy_o                            //Ready 
     );
@@ -29,6 +29,11 @@ module b #(
     //      this must happen at the positive edge of the clock.
     //      After reset all internal registers must be set to 0.
     //      rdy_0 must be low at reset and one cycle after.
+    reg [TransAddrSize-1:0] taddr_int;
+    reg rdy_int;
+    
+    assign rdy_o = rdy_int; 
+    assign taddr_o = taddr_int;
     
     reg [AddrSize-1:0] prev_addr_d; //Input registers are sufixed with d
     reg prev_rst_d;                 //Input registers are sufixed with d
@@ -36,18 +41,18 @@ module b #(
         if(!rstn_i) begin
             prev_rst_d <= 1;
             prev_addr_d <= 0;
-            rdy_o <= 0;
+            rdy_int <= 0;
         end
         else if(prev_rst_d) begin
             prev_rst_d <= 0;
             prev_addr_d <= taddr_i;
-            taddr_o <= prev_addr_d | addr_i;
-            rdy_o <= 0; 
+            taddr_int <= prev_addr_d | addr_i;
+            rdy_int <= 0; 
         end
         else begin
             prev_addr_d <= taddr_i;
-            taddr_o <= prev_addr_d | addr_i;
-            rdy_o <= 1; 
+            taddr_int <= prev_addr_d | addr_i;
+            rdy_int <= 1; 
         end
     end
 endmodule
