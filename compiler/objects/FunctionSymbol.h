@@ -1,13 +1,8 @@
 #ifndef FUNCTIONSYMBOL_H
 #define FUNCTIONSYMBOL_H
 
-#include <string.h>
-#include <string>
-#include <vector>
 
-
-#include "FunctionSymbolParam.h"
-#include "WireSymbol.h"
+#include "InstanceSymbol.h"
 
 using namespace std;
 
@@ -32,7 +27,9 @@ public:
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
 	bool addWireConnection(string function_out, string function_in, int out, int in,string with_out);
-
+	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
+	//int shearchWireConnection(string func, string inout);
+	
 	void createFileModule();
 	void createFileModule(string base, bool verilog_def);
 	void printToFile();
@@ -61,6 +58,7 @@ private:
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;
+	vector<InstanceSymbol> v_instances;
 	vector<InoutSymbol> v_inoutwires;
 	vector<FunctionSymbolParam> v_param;
 	vector<WireSymbol> v_wire;

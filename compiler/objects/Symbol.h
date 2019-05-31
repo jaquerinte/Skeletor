@@ -12,6 +12,7 @@ const int VARIABE=3;
 const int FUNCTION=4;
 const int PARAMETERFUNCTION=5;
 const int INOUTSYMBOL=6;
+const int INSTANCESYMBOL=7;
 
 class Symbol
 {

@@ -173,6 +173,7 @@ extern char *yytext;
 extern FILE *yyin;
 
 string s1;
+string s2;
 
 int yyerror(char *s);
 
@@ -431,27 +432,92 @@ EInstr      : Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = 
                                            }
     ;
 CallExpresion   :  opasig Expr {$$.trad = $2.trad;}
-                |  parl CallArgs parr bral CallConnectors brar 
-                            {
-                                int pos = tfs.searchFunctionSymbol($0.ph);
-                            }
+                |  {    int pos = tfs.searchFunctionSymbol($0.ph);
+                        if (pos == -1){
+                            // TODO chaneg for properly error 
+                            cout<< "FUNCTION SYMBOL NOT DECLARED"<<endl;
+                            exit(1);
+                        }
+                        s2 = $0.ph;
+                    }
+                twopoints id {
+                    string pme = $3.lexeme;
+                    int pos = ts.shearchSymbol(pme,s1);
+                    if (pos != -1){
+                        // TODO chaneg for properly error 
+                        cout<< "INSTANCE SYMBOL DECLARED"<<endl;
+                        exit(1);
+                    }
+                }
+                parl CallArgs parr bral CallConnectors brar 
+                {
+                    string pme = $3.lexeme;
+                    string pme_name = $0.ph;
+                    ts.addSymbol(pme,INSTANCESYMBOL,s1);
+                    s2 = "null";
+                    int pos = tfs.searchFunctionSymbol(s1);
+
+                    //(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance)
+                    //tfs.v_funcSymbols.at(pos).addInstance()
+                }
     ;
 /* Call args */
 CallArgs    : DCallArgs {$$.trad = "";}
             | /*epsilon*/ { } 
     ;
 
-DCallArgs   :  Expr SDCallArgs {
-                            $$.trad = $2.trad;
-                            int pos = tfs.searchFunctionSymbol(s1);
-                            //tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
-                        }
+DCallArgs   : Expr DCallArgsExtension{
+                string pme = $2.trad;
+                $$.trad = "";
+                int pos = tfs.searchFunctionSymbol(s2);
+                if (pme == ""){
+                    // made by position
+                    $$.ph = "position";
+                    // if access  a position is the 0 position
+                    tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+                }else{
+                    // asigned by name
+                    $$.ph = "name";
+                }
+                $$.counter = 0;
+            }
+            | DCallArgs coma Expr DCallArgsExtension {
+                int pos = tfs.searchFunctionSymbol(s2);
+                $$.trad = "";
+                // transition beetween continous by position
+                if ($1.ph == "position" && $4.trad == ""){
+                    $$.ph = "position";
+                }
+                // transition beetween position and name
+                else if ($1.ph == "position" && $4.trad != ""){
+                        $$.ph = "name";
+                }
+                // transition beetween continous by position
+                else if ($1.ph == "name" && $4.trad != ""){
+                        $$.ph = "name";
+                }
+                else{
+                    // TODO ERROR positional argument in a name position
+                    cout << "ERROR positional argument in a name position" << endl;
+                    exit(1);
+                }
+                // process arguments
+                if($$.ph == "position"){
+                    tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+                }
+                else{
+                    // procces by name 
+                }
+                $$.counter = + $1.counter + 1;
+            }
     ;
 
-SDCallArgs  : coma id SDCallArgs {}
-            | /*epsilon*/ { } 
+DCallArgsExtension  : opasig Expr {$$.trad = $2.trad;}
+                    | /*epsilon*/ { $$.trad = "";} 
     ;
+
 CallConnectors  : /*epsilon*/ { }
+
 /* Expresion */
 Arrayargs   : bral Expr {
                             if($2.type!=INTEGER){

@@ -9,6 +9,7 @@ typedef struct {
                     //REGISTER=2
                     //STRING=3
                     //LOGIC=5
+   int counter; // counts the number of parameters of a instance
 } BASETYPE;
 
 #define YYSTYPE BASETYPE
