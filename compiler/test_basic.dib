@@ -1,10 +1,10 @@
-'define T_ADDR_SIZE 32
-'define ADDR_SIZE 32
+`define T_ADDR_SIZE 32
+`define ADDR_SIZE 32
 #define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
 #define WORKER1 "G.Cabo"
 #define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
 
-module a (TransAddrSize, AddrSize){
+module a (TransAddrSize , AddrSize = 64){
 	#function "AND current addr_i with previous addr_i"
 	#description GENERALDESCIPTION
 	#coder  WORKER1
@@ -63,18 +63,35 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	in [AddrSize -1 : 0] addr;
 	out [TransAddrSize-1: 0] taddr;
 	out rdy;
-
-	wire [TransAddrSize-1:0] simple_example.taddr -> a.addr;
-	wire a.rdy -> d.in1;
-	wire b.rdy -> d.in2;
-	wire c.rdy -> d.in3;
-
-	a(TransAddrSize, AddrSize)[];
 	
-	//a(TransAddrSize, AddrSize)[in clk,in rts,in addr]; // no needs to be in order beacuse names match
-	//b(TransAddrSize, AddrSize)[in rstn=~rts,in clk,in addr,in taddr,out taddr]; // not need to be in orden beacuse use =
-	//c(N)[in rst, in clk];
-	//d()[out rdy];
+    a:x(TransAddrSize=32){//this shall use the default parameters for all but TransAddrSize
+		//conexions to top module
+        in clk = in clk,
+		in rts = in rts,
+		in addr = in addr
+        //if no input or output declared here non connected
+	}
+
+	b:y(){//this shall use the default values for the parameters
+		//conexions to top module
+		in rstn = in ~rts,
+		in clk = in clk,
+		in addr = in addr
+	}
+	c:z(n=8){
+		//conexions to top module
+		in rst = in rst,
+		in clk = in clk
+	}
+	d:w(){
+		//conexions to top module
+		out rdy = out rdy;
+	}
+
+	wire [TransAddrSize-1:0] y.taddr -> x.taddr;
+	wire x.rdy -> w.in1;
+	wire y.rdr -> w.in2;
+	wire z.rdr -> w.in3;
 
 }
 
