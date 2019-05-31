@@ -584,6 +584,9 @@ Factor  : Ref   {
                     case(PARAMETERFUNCTION)://PARAMETERFUNCTION=5
                         $$.trad = ts.v_symbols.at(pos).getName();
                         break;
+                    case(INSTANCESYMBOL)://INSTANCESYMBOL=7
+                        $$.trad = ts.v_symbols.at(pos).getName();
+                        break;
                     default: //VARIABE=3 FUNCTION=4 or someting else
                         msgError(ERRNEEDDEF, nlin, ncol, $1.trad.c_str());
                         break;

@@ -6,12 +6,13 @@
 
 using namespace std;
 
-const int DEFINITION=1;
-const int DEFINITIONVERILOG=2;
+const int DEFINITION=1;//defines of our lenguaje. Worker, project, descriptions 
+const int DEFINITIONVERILOG=2;//Defines that are translated to Verilog
 const int VARIABE=3;
 const int FUNCTION=4;
 const int PARAMETERFUNCTION=5;
 const int INOUTSYMBOL=6;
+const int INSTANCESYMBOL=7;//IDs of instances
 
 class Symbol
 {
