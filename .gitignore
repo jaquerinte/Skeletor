@@ -1,3 +1,4 @@
+*.o
 obj_dir
 rtlcompiler
 compiler/bin/
