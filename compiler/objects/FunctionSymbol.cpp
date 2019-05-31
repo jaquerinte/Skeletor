@@ -165,6 +165,20 @@ bool FunctionSymbol :: addWireConnection(string function_out, string function_in
 	//cout << "wire " << wire.getFuncionOut() << " " << wire.getFuncionIn() << " " << wire.getInoutSymbolOut().getName() << " " << wire.getInoutSymbolIn().getName();
 	this -> v_wire.push_back(wire);
 }
+/*int FunctionSymbol :: shearchWireConnection(string func, string inout){
+
+	for (int i = 0; i < this -> v_wire.size();++i) {
+		if (this -> v_wire.at(i).getName() == name and ) { 
+			return this -> v_wire.at(i);
+		}
+	}
+	return -1;
+}*/
+
+bool FunctionSymbol :: addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance){
+	InstanceSymbol instance(v_inoutwires,v_param, this -> v_wire, name_module, name_instance);
+	this -> v_instances.push_back(instance);
+}
 
 void FunctionSymbol :: createFileModule()
 {
@@ -259,6 +273,10 @@ void FunctionSymbol ::createFileModuleBase(){
 	}
 	/* End inputs and outputs */
 	this -> output_file_data += "\t);\n";
+	/* Add instances */
+	for (int i = 0; i < this -> v_instances.size(); ++i){
+		this -> output_file_data += this -> v_instances.at(i).generateInstance();
+	}
 
 	/* Add Wires */
 	for (int i = 0; i < this -> v_wire.size(); ++i){
