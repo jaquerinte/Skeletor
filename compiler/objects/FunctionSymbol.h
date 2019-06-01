@@ -28,7 +28,7 @@ public:
 
 	bool addWireConnection(string function_out, string function_in, int out, int in,string with_out);
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
-	//int shearchWireConnection(string func, string inout);
+	int searchInstance(string name);
 	
 	void createFileModule();
 	void createFileModule(string base, bool verilog_def);
@@ -44,6 +44,8 @@ public:
 	string getProjectName();
 	string getReferences();
 	string getOutputFileData();
+	vector<FunctionSymbolParam> getFunctionSymbolParam();
+	vector<InoutSymbol> getInoutSymbol();
 
 	//setters
 
@@ -54,11 +56,12 @@ public:
 	void setProjectName(string projectName);
 	void setReferences(string references);
 
+	vector<InstanceSymbol> v_instances;
+
 private:
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;
-	vector<InstanceSymbol> v_instances;
 	vector<InoutSymbol> v_inoutwires;
 	vector<FunctionSymbolParam> v_param;
 	vector<WireSymbol> v_wire;

@@ -24,9 +24,11 @@ public:
 	string getNameVerilog();
 	int getType();
 	string getWith();
+	string getValue();
 	void setName(string name);
 	void setType(int type);
 	void setWith(int width);
+	void setValue(string value);
 
 
 private:
@@ -35,6 +37,7 @@ private:
 	string name_verilog;
 	int typeconnection;
 	string width; // TODO CHECK
+	string value;
 	
 };
 

@@ -374,7 +374,13 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
             |/*epsilon*/ { } 
 
     ;
-EInstr      : Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
+EInstr      : Ref {    int pos = tfs.searchFunctionSymbol($0.ph);
+                        if (pos == -1){
+                            // TODO chaneg for properly error 
+                            cout<< "FUNCTION SYMBOL NOT DECLARED"<<endl;
+                            exit(1);
+                        }
+                    string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
             | TipoBase Arrayargs id  {
                                 string pme = $3.lexeme;
                                 // add symbol
@@ -431,27 +437,24 @@ EInstr      : Ref {string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = 
 
                                            }
     ;
-CallExpresion   :  opasig Expr {$$.trad = $2.trad;}
-                |  {    int pos = tfs.searchFunctionSymbol($0.ph);
-                        if (pos == -1){
-                            // TODO chaneg for properly error 
-                            cout<< "FUNCTION SYMBOL NOT DECLARED"<<endl;
-                            exit(1);
-                        }
-                        s2 = $0.ph;
-                    }
-                twopoints id {
-                    string pme = $3.lexeme;
+CallExpresion   :  twopoints id {
+                    string pme = $2.lexeme;
                     int pos = ts.shearchSymbol(pme,s1);
                     if (pos != -1){
                         // TODO chaneg for properly error 
                         cout<< "INSTANCE SYMBOL DECLARED"<<endl;
                         exit(1);
                     }
+                    int pos_instance = tfs.searchFunctionSymbol(s1);
+                    int pos_module = tfs.searchFunctionSymbol($0.ph);
+                    s2 = pme;
+                    //cout<< "pos module " << pos_instance << endl;
+                    tfs.v_funcSymbols.at(pos_instance).addInstance(tfs.v_funcSymbols.at(pos_module).getInoutSymbol(), tfs.v_funcSymbols.at(pos_module).getFunctionSymbolParam(), $0.ph, pme);
                 }
-                parl CallArgs parr bral CallConnectors brar 
+
+                parl CallArgs parr cbl CallConnectors cbr 
                 {
-                    string pme = $3.lexeme;
+                    string pme = $2.lexeme;
                     string pme_name = $0.ph;
                     ts.addSymbol(pme,INSTANCESYMBOL,s1);
                     s2 = "null";
@@ -469,20 +472,23 @@ CallArgs    : DCallArgs {$$.trad = "";}
 DCallArgs   : Expr DCallArgsExtension{
                 string pme = $2.trad;
                 $$.trad = "";
-                int pos = tfs.searchFunctionSymbol(s2);
+                int pos = tfs.searchFunctionSymbol(s1);
                 if (pme == ""){
                     // made by position
                     $$.ph = "position";
-                    // if access  a position is the 0 position
-                    tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+                    // if access a position is the 0 position
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParamPos(0, $1.trad);
                 }else{
                     // asigned by name
                     $$.ph = "name";
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($1.trad, $2.trad);
                 }
-                $$.counter = 0;
+                $$.counter = 1;
             }
             | DCallArgs coma Expr DCallArgsExtension {
-                int pos = tfs.searchFunctionSymbol(s2);
+                int pos = tfs.searchFunctionSymbol(s1);
                 $$.trad = "";
                 // transition beetween continous by position
                 if ($1.ph == "position" && $4.trad == ""){
@@ -503,10 +509,16 @@ DCallArgs   : Expr DCallArgsExtension{
                 }
                 // process arguments
                 if($$.ph == "position"){
-                    tfs.v_funcSymbols.at(pos).addValueFunctionSymbolParamPos(0, $1.trad);
+                    
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                    //cout << "POS" << pos << endl;
+                    //cout << "POS Instance" << pos_instance << endl;
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParamPos($$.counter, $3.trad);
                 }
                 else{
                     // procces by name 
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($4.trad, $3.trad);
                 }
                 $$.counter = + $1.counter + 1;
             }
@@ -516,7 +528,31 @@ DCallArgsExtension  : opasig Expr {$$.trad = $2.trad;}
                     | /*epsilon*/ { $$.trad = "";} 
     ;
 
-CallConnectors  : /*epsilon*/ { }
+CallConnectors  : DCallArgsConn {$$.trad = $1.trad;}
+                | /*epsilon*/ { }
+    ;
+DCallArgsConn   : TipoBase id opasig TipoBase id 
+                {
+                    // TODO ERROR CHECKING THAT ID EXISTS AND TYPES ARE VALID
+                int pos = tfs.searchFunctionSymbol(s1);
+                int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                string pme_name = $2.lexeme;
+                string pme_value = $5.lexeme;
+                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value);
+                string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
+                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog);
+                }
+                | DCallArgsConn coma TipoBase id opasig TipoBase id 
+                {
+                int pos = tfs.searchFunctionSymbol(s1);
+                int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                string pme_name = $4.lexeme;
+                string pme_value = $7.lexeme;
+                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value);
+                string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
+                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog);
+                }
+    ;
 
 /* Expresion */
 Arrayargs   : bral Expr {

@@ -2,10 +2,12 @@
 InstanceSymbol :: InstanceSymbol(){
 	this -> nameModule = "null";
 	this -> nameInstance = "null";
+	this -> nameInstanceVerilog = "null";
 }
 InstanceSymbol :: InstanceSymbol(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param,vector<WireSymbol> v_wire, string nameModule,string nameInstance){
 	this -> nameModule = nameModule;
 	this -> nameInstance = nameInstance;
+	this -> nameInstanceVerilog = "inst_" + nameInstance;
 	this -> v_inoutwires = v_inoutwires;
 	this -> v_param = v_param;
 	this -> v_wire = v_wire;
@@ -13,6 +15,7 @@ InstanceSymbol :: InstanceSymbol(vector<InoutSymbol> v_inoutwires, vector<Functi
 InstanceSymbol :: InstanceSymbol(const InstanceSymbol &In){
 	this -> nameModule = In.nameModule;
 	this -> nameInstance = In.nameInstance;
+	this -> nameInstanceVerilog = In.nameInstanceVerilog;
 	this -> v_inoutwires = In.v_inoutwires;
 	this -> v_param = In.v_param;
 	this -> v_wire = In.v_wire;
@@ -27,11 +30,46 @@ InstanceSymbol& InstanceSymbol ::operator = (const InstanceSymbol &In){
 	}
 }
 
-string InstanceSymbol ::getName(){return this-> nameModule;}
-string InstanceSymbol ::getNameInstance(){return this-> nameInstance;}
-string InstanceSymbol ::generateInstance(){
+bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value)
+{
+	FunctionSymbolParam s(name);
+	for (int i = 0; i < this -> v_param.size();++i) {
+		if (this -> v_param.at(i).getName() == s.getName()) { 
+			this -> v_param.at(i).setValue(value);
+			return true;
+		}
+	}
+	// fail: Symbol param  not declared
+	//msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
+	return false;
+}
+bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value)
+{
+	
+	for (int i = 0; i < this -> v_inoutwires.size();++i) {
+		if (this -> v_inoutwires.at(i).getName() == name) { 
+			this -> v_inoutwires.at(i).setValue(value);
+			return true;
+		}
+	}
+	// fail: Symbol param  not declared
+	//msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
+	return false;
+}
+
+void InstanceSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
+{
+	if (pos < v_param.size()){
+		this -> v_param.at(pos).setValue(value);
+	}
+	
+}
+string InstanceSymbol :: getName(){return this-> nameModule;}
+string InstanceSymbol :: getNameInstance(){return this-> nameInstance;}
+string InstanceSymbol :: getNameInstanceVerilog(){return this-> nameInstanceVerilog;}
+string InstanceSymbol :: generateInstance(){
 	string output = "";
-	output += "\t\t" + this -> nameModule;
+	output += "\t" + this -> nameModule;
 	// add parameters
 	if (v_param.size() != 0){
 		output += " #(\n";
@@ -43,15 +81,18 @@ string InstanceSymbol ::generateInstance(){
 				output += "\t\t." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + "),\n";
 			}
 		}
-		output += ")\n\t";
+		output += "\t)\n\t";
 	}
-	output+= " " +  this -> nameInstance + "(\n";
+	else{
+		output+= " ";
+	}
+	output+= this -> nameInstanceVerilog + "(\n";
 		for (int i = 0; i < this -> v_inoutwires.size();++i) {
 			if (i == this -> v_inoutwires.size() -1){
-				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "()\n" ;
+				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t(" + v_inoutwires.at(i).getValue() + ")\n" ;
 			}
 			else{
-				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "(),\n" ;
+				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t(" + v_inoutwires.at(i).getValue() + "),\n" ;
 			}
 		}
 	output += "\t);\n";

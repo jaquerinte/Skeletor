@@ -37,6 +37,7 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
 	this -> v_inoutwires = In.v_inoutwires;
 	this -> v_param = In.v_param;
 	this -> v_wire = In.v_wire;
+	this -> v_instances = In.v_instances;
 }
 FunctionSymbol :: ~FunctionSymbol(){}
 
@@ -180,6 +181,18 @@ bool FunctionSymbol :: addInstance(vector<InoutSymbol> v_inoutwires, vector<Func
 	this -> v_instances.push_back(instance);
 }
 
+int FunctionSymbol :: searchInstance(string name){
+	for (int i = 0; i <  this -> v_instances.size();++i) {
+		if ( this -> v_instances.at(i).getNameInstance() == name) {
+			return  i;
+		}
+	}
+	// fail: instance  not declared
+	//msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+	return -1;
+
+}
+
 void FunctionSymbol :: createFileModule()
 {
 	/* Start wriking the file */
@@ -317,7 +330,9 @@ string FunctionSymbol :: getDescription() {return this -> description;}
 string FunctionSymbol :: getCode() {return this -> code;}
 string FunctionSymbol :: getProjectName() {return this -> projectName;}
 string FunctionSymbol :: getReferences() {return this -> references;}
-string FunctionSymbol :: getOutputFileData() {return this -> output_file_data;};
+string FunctionSymbol :: getOutputFileData() {return this -> output_file_data;}
+vector<FunctionSymbolParam> FunctionSymbol :: getFunctionSymbolParam(){return this -> v_param;}
+vector<InoutSymbol> FunctionSymbol :: getInoutSymbol(){return this -> v_inoutwires;}
 
 //setters
 

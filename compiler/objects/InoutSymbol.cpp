@@ -6,6 +6,7 @@ InoutSymbol :: InoutSymbol()
 	this -> typeconnection = -1;
 	this -> width = "";
 	this -> name_verilog = "";
+	this -> value = "";
 }
 
 InoutSymbol :: InoutSymbol(const string name,const int typeconnection,const string width) 
@@ -25,12 +26,14 @@ InoutSymbol :: InoutSymbol(const string name,const int typeconnection,const stri
             break;
 
 	}
+	this -> value = "";
 }
 InoutSymbol :: InoutSymbol(const InoutSymbol &In){
 	this -> name = In.name;
 	this -> typeconnection = In.typeconnection;
 	this -> width = In.width;
 	this -> name_verilog = In.name_verilog;
+	this -> value = In.value;
 }
 InoutSymbol :: ~InoutSymbol(){}
 InoutSymbol& InoutSymbol :: operator = (const InoutSymbol &In) {
@@ -46,6 +49,7 @@ string InoutSymbol :: getName(){return this->name;}
 string InoutSymbol :: getNameVerilog(){return this -> name_verilog;}
 int InoutSymbol :: getType(){return this->typeconnection;}
 string InoutSymbol :: getWith(){return this->width;}
+string InoutSymbol :: getValue(){return this -> value;}
 void InoutSymbol :: setType(int type){this -> typeconnection = type;}
 void InoutSymbol :: setWith(int width){this -> width = width;}
 void InoutSymbol :: setName(string name){
@@ -63,3 +67,4 @@ void InoutSymbol :: setName(string name){
 
 	}
 }
+void InoutSymbol :: setValue(string value){ this -> value = value;}
