@@ -76,7 +76,7 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 		in clk = in clk,
 		in addr = in addr
 	};
-	c:z(N){
+	c:z(2){
 		in rst = in rst,
 		in clk = in clk
 	};

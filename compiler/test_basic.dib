@@ -1,10 +1,10 @@
-'define T_ADDR_SIZE 32
-'define ADDR_SIZE 32
+`define T_ADDR_SIZE 32
+`define ADDR_SIZE 32
 #define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
 #define WORKER1 "G.Cabo"
 #define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
 
-module a (TransAddrSize, AddrSize){
+module a (TransAddrSize , AddrSize = 64){
 	#function "AND current addr_i with previous addr_i"
 	#description GENERALDESCIPTION
 	#coder  WORKER1
@@ -63,6 +63,14 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	in [AddrSize -1 : 0] addr;
 	out [TransAddrSize-1: 0] taddr;
 	out rdy;
+	
+    a:x(TransAddrSize=32){//this shall use the default parameters for all but TransAddrSize
+		//conexions to top module
+        in clk = in clk,
+		in rts = in rts,
+		in addr = in addr
+        //if no input or output declared here non connected
+	}
 
 	a:x(TransAddrSize, AddrSize){
 		in clk = in clk,
@@ -84,6 +92,7 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	d:w(){
 		out rdy = out rdy
 	};
+
 
 }
 

@@ -31,22 +31,28 @@ module a #(
    
     reg [AddrSize-1:0] prev_addr_d; //Input registers are sufixed with d
     reg prev_rst_d;                 //Input registers are sufixed with d
+    reg [TransAddrSize-1:0] taddr_int;
+    reg rdy_int;
+    
+    assign rdy_o = rdy_int; 
+    assign taddr_o = taddr_int;
+
     always@(posedge clk_i) begin
         if(rst_i) begin
             prev_rst_d <= 1;
             prev_addr_d <= 0;
-            rdy_o <= 0;
+            rdy_int <= 0;
         end
         else if(prev_rst_d) begin
             prev_rst_d <= 0;
             prev_addr_d <= addr_i;
-            taddr_o <= prev_addr_d & addr_i;
-            rdy_o <= 0; 
+            taddr_int <= prev_addr_d & addr_i;
+            rdy_int <= 0; 
         end
         else begin
             prev_addr_d <= addr_i;
-            taddr_o <= prev_addr_d & addr_i;
-            rdy_o <= 1; 
+            taddr_int <= prev_addr_d & addr_i;
+            rdy_int <= 1; 
         end
     end
 endmodule
