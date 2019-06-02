@@ -1,5 +1,6 @@
-#define T_ADDR_SIZE 32
-#define ADDR_SIZE 32
+'define T_ADDR_SIZE 32
+'define ADDR_SIZE 32
+#define N 2
 #define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
 #define WORKER1 "G.Cabo"
 #define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
@@ -36,7 +37,7 @@ module c(n){
 	#coder  WORKER1
 	#references GENRALREFERENCE
 
-	in rst;
+	in rts;
 	in clk;
 	out rdy;
 }
@@ -72,12 +73,12 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 	};
 
 	b:y(TransAddrSize, AddrSize){
-		in rstn = in ~rts,
+		in rstn = in rts,
 		in clk = in clk,
 		in addr = in addr
 	};
-	c:z(2){
-		in rst = in rst,
+	c:z(N){
+		in rts = in rts,
 		in clk = in clk
 	};
 	d:w(){

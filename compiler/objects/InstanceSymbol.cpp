@@ -39,15 +39,16 @@ bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value)
 			return true;
 		}
 	}
+
 	// fail: Symbol param  not declared
 	//msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 	return false;
 }
-bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value)
+bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int type)
 {
 	
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
-		if (this -> v_inoutwires.at(i).getName() == name) { 
+		if (this -> v_inoutwires.at(i).getName() == name && this -> v_inoutwires.at(i).getType() == type) { 
 			this -> v_inoutwires.at(i).setValue(value);
 			return true;
 		}
@@ -63,6 +64,23 @@ void InstanceSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
 		this -> v_param.at(pos).setValue(value);
 	}
 	
+}
+int InstanceSymbol :: searchinoutSymbol(string name, int type)
+{
+	for (int i = 0; i <  this -> v_inoutwires.size();++i) {
+		if ( this -> v_inoutwires.at(i).getName() == name) {
+			if (v_inoutwires.at(i).getType() == type || v_inoutwires.at(i).getType() == INOUT){
+				return  i;
+			}
+			else{
+				return -1;
+			}
+			
+		}
+	}
+	// fail: connection not declared
+	//msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+	return -1;
 }
 string InstanceSymbol :: getName(){return this-> nameModule;}
 string InstanceSymbol :: getNameInstance(){return this-> nameInstance;}
@@ -89,10 +107,10 @@ string InstanceSymbol :: generateInstance(){
 	output+= this -> nameInstanceVerilog + "(\n";
 		for (int i = 0; i < this -> v_inoutwires.size();++i) {
 			if (i == this -> v_inoutwires.size() -1){
-				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t(" + v_inoutwires.at(i).getValue() + ")\n" ;
+				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t\t(" + v_inoutwires.at(i).getValue() + ")\n" ;
 			}
 			else{
-				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t(" + v_inoutwires.at(i).getValue() + "),\n" ;
+				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t\t(" + v_inoutwires.at(i).getValue() + "),\n" ;
 			}
 		}
 	output += "\t);\n";

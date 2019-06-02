@@ -26,7 +26,7 @@ public:
 	void addValueFunctionSymbolParamPos(int pos, string value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
-	bool addWireConnection(string function_out, string function_in, int out, int in,string with_out);
+	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string with_out, string name_wire, string out_name, string in_name);
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
 	int searchInstance(string name);
 	

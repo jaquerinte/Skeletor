@@ -257,7 +257,7 @@ MainFunc    : moduledefinition mainmodule id
                 string pme = $3.lexeme;
                 int pos = tfs.searchFunctionSymbol(pme);
                 string base = init_output();
-                tfs.v_funcSymbols.at(pos).createFileModule(ts.getTableSymbols(), ts.createDefinitions());
+                tfs.v_funcSymbols.at(pos).createFileModule(init_output(), ts.createDefinitions());
 
             }
     ;
@@ -387,55 +387,63 @@ EInstr      : Ref {    int pos = tfs.searchFunctionSymbol($0.ph);
                                 int pos = tfs.searchFunctionSymbol(s1);
                                 ts.addSymbol(pme,INOUTSYMBOL,s1);
                                 string with = $2.trad ;
-                                tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
+                                bool value = tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
                                 $$.trad = $1.trad + pme;
                                 }
             | wiretipe Arrayargs Ref connectwire Ref {
-                                            string var_out = $3.trad;
-                                            string var_in = $5.trad;
+                                string var_out = $3.trad;
+                                string var_in = $5.trad;
+                                // get functionsymbol that stores instantce
+                                int pos = tfs.searchFunctionSymbol(s1);
 
-                                            // decompse the variables.
-                                            // decompse out var
-                                            vector<string> out = split_ref(var_out);
-                                            // decompse in var
-                                            vector<string> in = split_ref(var_in);
-                                            // check out function 
-                                            int pos_base = tfs.searchFunctionSymbol(out[0]);
-                                            if (pos_base == -1){ 
-                                                // error 
-                                                cout<<"ERROR NAME NULL OUT FUNCTION"<<endl;
-                                                exit(1);
-                                            }
-                                            // check InoutSymbol
-                                            int out_inout;
-                                            out_inout = tfs.v_funcSymbols.at(pos_base).searchinoutSymbol(out[1], OUT);
-                                            
-                                            if (out_inout == -1){
-                                                //error 
-                                                cout<<"ERROR NAME NULL OUT INOUTSYMBOL: "<< out[1] <<endl;
-                                                exit(1);
-                                            }
-                                            int pos_aux = tfs.searchFunctionSymbol(in[0]);
-                                            if (pos_aux == -1){ 
-                                                // error
-                                                cout<<"ERROR NAME NULL IN FUNCTION"<<endl;
-                                                exit(1);
-                                            }
-                                            // check InoutSymbol
-                                            int in_inout;
-                                            in_inout = tfs.v_funcSymbols.at(pos_aux).searchinoutSymbol(in[1], IN);
-                                            if (in_inout == -1){
-                                                //error
-                                                cout<<"ERROR NAME NULL IN INOUTSYMBOL: "<< in[1] <<endl;
-                                                exit(1);
-                                            }
-                                            // all verfiy
-                                            // create wire.
-                                            int pos = tfs.searchFunctionSymbol(s1);
+                                // decompse the variables.
+                                // decompse out var
+                                vector<string> out = split_ref(var_out);
+                                // decompse in var
+                                vector<string> in = split_ref(var_in);
+                                // check out function 
+                                int pos_base = tfs.v_funcSymbols.at(pos).searchInstance(out[0]);
 
-                                            tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad);
+                                if (pos_base == -1){ 
+                                    // error 
+                                    cout<<"ERROR NAME NULL OUT FUNCTION"<<endl;
+                                    exit(1);
+                                }
+                                // check InoutSymbol
+                                int out_inout;
+                                out_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).searchinoutSymbol(out[1], OUT);
+                                
+                                if (out_inout == -1){
+                                    //error 
+                                    cout<<"ERROR NAME NULL OUT INOUTSYMBOL: "<< out[1] <<endl;
+                                    exit(1);
+                                }
+                                int pos_aux = tfs.v_funcSymbols.at(pos).searchInstance(in[0]);
+                                if (pos_aux == -1){ 
+                                    // error
+                                    cout<<"ERROR NAME NULL IN FUNCTION"<<endl;
+                                    exit(1);
+                                }
+                                // check InoutSymbol
+                                int in_inout;
+                                in_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).searchinoutSymbol(in[1], IN);
+                                if (in_inout == -1){
+                                    //error
+                                    cout<<"ERROR NAME NULL IN INOUTSYMBOL: "<< in[1] <<endl;
+                                    exit(1);
+                                }
+                                // all verfiy
+                                // create wire.
+                                // add values instance and store wire
+                                string name_wire = out[1] + "_" + out[0] + "_" + in[0];
+                                // add and instace out
+                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT);
+                                // add and instace in
+                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, IN);
+                                // add wire
+                                tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i");
 
-                                           }
+                               }
     ;
 CallExpresion   :  twopoints id {
                     string pme = $2.lexeme;
@@ -458,7 +466,6 @@ CallExpresion   :  twopoints id {
                     string pme_name = $0.ph;
                     ts.addSymbol(pme,INSTANCESYMBOL,s1);
                     s2 = "null";
-                    int pos = tfs.searchFunctionSymbol(s1);
 
                     //(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance)
                     //tfs.v_funcSymbols.at(pos).addInstance()
@@ -477,10 +484,12 @@ DCallArgs   : Expr DCallArgsExtension{
                     // made by position
                     $$.ph = "position";
                     // if access a position is the 0 position
+                    //cout << "Entro Position" << endl;
                     int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParamPos(0, $1.trad);
                 }else{
                     // asigned by name
+                    //cout << "Entro Name" << endl;
                     $$.ph = "name";
                     int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($1.trad, $2.trad);
@@ -533,14 +542,19 @@ CallConnectors  : DCallArgsConn {$$.trad = $1.trad;}
     ;
 DCallArgsConn   : TipoBase id opasig TipoBase id 
                 {
-                    // TODO ERROR CHECKING THAT ID EXISTS AND TYPES ARE VALID
+                // TODO ERROR CHECKING THAT ID EXISTS AND TYPES ARE VALID
                 int pos = tfs.searchFunctionSymbol(s1);
                 int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
                 string pme_name = $2.lexeme;
                 string pme_value = $5.lexeme;
                 int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value);
+                
+                if (pos_inout == -1){
+                    cout << "SYMBOL NOT DEFINE" << endl;
+                    exit(1);
+                }
                 string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
-                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog);
+                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $1.size);
                 }
                 | DCallArgsConn coma TipoBase id opasig TipoBase id 
                 {
@@ -549,8 +563,12 @@ DCallArgsConn   : TipoBase id opasig TipoBase id
                 string pme_name = $4.lexeme;
                 string pme_value = $7.lexeme;
                 int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value);
+                 if (pos_inout == -1){
+                    cout << "SYMBOL NOT DEFINE" << endl;
+                    exit(1);
+                }
                 string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
-                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog);
+                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $3.size);
                 }
     ;
 
