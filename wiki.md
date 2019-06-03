@@ -47,10 +47,211 @@ For now generated code follows the following rules:
         ```
 Basic usage
 --------------------------------------------------------
-KEYWORDS
-* build.sbt: Configuration to download Chisel and for the Chisel project
-* \*.scala: File or files that contain the the description of your hardware
-* Makefile: This file is optional but recommended for avoid type in the commands that perform the build process
+*KEYWORDS* 
+
+* "//": One line comment 
+* "/ \* My comment \*/": Multiline comment
+* "module": starts definition  of a module
+* "in":input of a module 
+* "out":Output of a module
+* "`define": Define that will be translated to Verilog
+* "#define": Define for pseudo code, it will not be transalted 
+* "#function": Field of each module. Short description of function
+* "#description": Field of each module. Detailed description
+* "#coder": Assigned programer
+* "#references": References to help understand your design
+* "true":Bool state
+* "false":Bool state
+* "wire": Connexion between modules
+* "->": Assign connections between ports and wires
+* "top": Top module of your project 
+* "+"                           {return ret(opas);}
+* "-"                           {return ret(opas);}
+* "++"                          {return ret(opasinc);}
+* "--"                          {return ret(opasinc);}
+* "("                           {return ret(parl);}
+* ")"                           {return ret(parr);}
+* ";"                           {return ret(pyc);}
+* ":"                           {return ret(twopoints);}
+* "~"                           {return ret(nyooperator);}
+* ","                           {return ret(coma);}
+* "=="                          {return ret(oprel);}
+* "!="                          {return ret(oprel);}
+* "<"                           {return ret(oprel);}
+* ">"                           {return ret(oprel);}
+* "<="                          {return ret(oprel);}
+* ">="                          {return ret(oprel);}
+* "*"                           {return ret(opmd);}
+* "/"                           {return ret(opmd);}
+* "="                           {return ret(opasig);}
+* "["                           {return ret(bral);}
+* "]"                           {return ret(brar);}
+* "{"                           {return ret(cbl);}
+* "}"                           {return ret(cbr);}
+* "&"                           {return ret(amp);}
+* "&&"                          {return ret(ybool);}
+* "||"                          {return ret(obool);}
+* "!"                           {return ret(nobool);}
+* "int"                         {return ret(inttype);}
+* "inout"                       {return ret(inouttype);}
+
+*EXAMPLES*
+By usign as reference the file ```test_basic```
+
+First we have the defines that are going to be transalted to verilog. All this
+defines will be placed in a header file.
+
+```
+`define T_ADDR_SIZE 32
+`define ADDR_SIZE 32
+```
+
+Next we have defines that will be used in the pseudocode, it allows to write
+descriptions of that are called more than once, as workers or References
+
+```
+#define N 2
+#define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
+#define WORKER1 "G.Cabo"
+#define GENRALREFERENCE "https://github.com/jaquerinte/MA\_2019.git"
+``` 
+
+Next we have instances of modules. We have to start with the ones that are not
+the top file, think about them as a a definition of a class. This modules shall
+be defined before instancde them.
+
+```
+module a (TransAddrSize, AddrSize){
+    #function "AND current addr_i with previous addr_i"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in clk;
+    in rts;
+    in [AddrSize -1 : 0] addr;
+    out [TransAddrSize-1: 0] taddr;
+    out rdy;
+}
+```
+
+Module definition starts with *Module*, next we have the name and *parameters*.
+The paramaters have a default value of 0, but a value can be specified as in the
+following example. In this case the default value of TransAddrSize is defined by
+T_ADDR_SIZE that is a verilog constant.
+
+```
+module top simple\_example(TransAddrSize = T\_ADDR\_SIZE, AddrSize = ADDR\_SIZE){
+```
+
+We open the body of the module with brackets. Inside of it we can specify the
+values for #function, #description, #coder, #references. This values will be
+transalted to comments in the generated code. Is not mandatory to fill them but
+it is recommended.
+
+Next we have the inputs and outputs of the module. Prefixes and posfixes will be
+added by the compiler. To keep naming conventions use only lower case for the
+names. Size of the inputs or outputs can be specified as you would do it in
+verilog, and `defines or parameters of the module can be used.
+```
+    #function "AND current addr\_i with previous addr\_i"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in clk;
+    in rts;
+    in [AddrSize -1 : 0] addr;
+    out [TransAddrSize-1: 0] taddr;
+```
+
+Finally we have the top of the  project. This module has the aditional keyword
+*top*. Despite that, the same rules as normal module definitions apply.
+ 
+```
+module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
+    #function  "Module to provide a reference output"
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in clk;
+    in rts;
+    in [AddrSize -1 : 0] addr;
+    out [TransAddrSize-1: 0] taddr;
+    out rdy;
+    
+
+    a:x(TransAddrSize, AddrSize){
+        in clk = in clk,
+        in rts = in rts,
+        in addr = in addr
+    };
+
+    b:y(TransAddrSize, AddrSize){
+        in rstn = in rts,
+        in clk = in clk,
+        in addr = in addr,
+        out taddr = out taddr
+    };
+    
+    c:z(N){
+        in rts = in rts,
+        in clk = in clk
+    };
+
+    d:w(){
+        out out1 = out rdy
+    };
+    
+    wire [TransAddrSize-1:0] x.taddr -> y.taddr;
+    wire x.rdy -> w.in1;
+    wire y.rdy -> w.in2;
+    wire z.rdy -> w.in3;
+}
+```
+
+In the previous pice of code two new functionalities of this lenguaje have been
+introduced. Let's start with instances.
+
+Instances generate a new module inside the definition of a module. Instances may
+have a different name that the one of the module definition. Paramaters of the
+modules can be used  when instantiated. Valid values for a parameter of an
+instance are pseudocode defines, verilog defines, integers or parameters of the
+parent module. If the parameter is empty the default values will be used.
+
+```
+    c:z(N){
+        in rts = in rts,
+        in clk = in clk
+    };
+``` 
+Parameters can be defined by position or by name
+```
+    a:x(TransAddrSize = 32, AddrSize = 64){
+        in clk = in clk,
+        in rts = in rts,
+        in addr = in addr
+    };
+```
+
+Inputs and outputs that are connected to the parent module shall be specified in
+the instance. The compiler will check that the type of connection is allowed.
+Note that the last input of the instance does not have *,*  at the end.
+
+```
+    c:z(){
+        in rts = in rts,
+        in clk = in clk
+    };
+```
+Finally, wires connect inputs and outputs between instances. The port on the
+left side of the *->* shall be the driver and the one at the right the driven.
+```    
+    wire [TransAddrSize-1:0] x.taddr -> y.taddr;
+    wire x.rdy -> w.in1;
+    wire y.rdy -> w.in2;
+    wire z.rdy -> w.in3;
+``` 
 
 Coders
 --------------------------------------------------------
