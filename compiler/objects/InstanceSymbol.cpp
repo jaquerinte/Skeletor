@@ -1,4 +1,8 @@
 #include "InstanceSymbol.h"
+//TODO:Put this in a better place. Set tab format with flags
+//style parameters
+string tabulate = "    ";
+
 InstanceSymbol :: InstanceSymbol(){
 	this -> nameModule = "null";
 	this -> nameInstance = "null";
@@ -87,19 +91,19 @@ string InstanceSymbol :: getNameInstance(){return this-> nameInstance;}
 string InstanceSymbol :: getNameInstanceVerilog(){return this-> nameInstanceVerilog;}
 string InstanceSymbol :: generateInstance(){
 	string output = "";
-	output += "\t" + this -> nameModule;
+	output += tabulate + this -> nameModule;
 	// add parameters
 	if (v_param.size() != 0){
 		output += " #(\n";
 		for (int i = 0; i < this -> v_param.size();++i) {
 			if (i == this -> v_param.size() -1){
-				output += "\t\t." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + ")\n";
+				output += tabulate + tabulate + "." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + ")\n";
 			}
 			else{
-				output += "\t\t." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + "),\n";
+				output += tabulate + tabulate + "." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + "),\n";
 			}
 		}
-		output += "\t)\n\t";
+		output += tabulate + ")" + "\n" + tabulate;
 	}
 	else{
 		output+= " ";
@@ -107,13 +111,13 @@ string InstanceSymbol :: generateInstance(){
 	output+= this -> nameInstanceVerilog + "(\n";
 		for (int i = 0; i < this -> v_inoutwires.size();++i) {
 			if (i == this -> v_inoutwires.size() -1){
-				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t\t(" + v_inoutwires.at(i).getValue() + ")\n" ;
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + tabulate + tabulate + "(" + v_inoutwires.at(i).getValue() + ")\n" ;
 			}
 			else{
-				output += "\t\t." + v_inoutwires.at(i).getNameVerilog() + "\t\t(" + v_inoutwires.at(i).getValue() + "),\n" ;
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + tabulate + tabulate + "(" + v_inoutwires.at(i).getValue() + "),\n" ;
 			}
 		}
-	output += "\t);\n";
+	output += tabulate + ");\n\n";
 	return output;
 	// add connections
 }

@@ -33,6 +33,7 @@ const int REFERENCE=2;
 const int STRING=3;
 const int LOGIC=5;
 
+
 /* Global project Name */
 string projectName = "a.out";
 string projectFolder = "OUTPUT";

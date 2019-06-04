@@ -9,6 +9,10 @@
 #include "FunctionSymbolParam.h"
 #include "WireSymbol.h"
 
+//TODO:Put this in a better place. Set tab format with flags
+//style parameters
+extern string tabulate;
+
 class InstanceSymbol
 {
 public:

@@ -17,7 +17,7 @@ public:
 	~FunctionSymbol();
 	FunctionSymbol& operator = (const FunctionSymbol &In);
 
-	bool addConnectionFunctionSymbol(string name, int size, string with);
+	bool addConnectionFunctionSymbol(string name, int size, string width);
 	int searchinoutSymbol(string name);
 	int searchinoutSymbol(string name, int type);
 	bool addFunctionSymbolParam(string name);
@@ -26,7 +26,7 @@ public:
 	void addValueFunctionSymbolParamPos(int pos, string value);
 	FunctionSymbolParam& searchFunctionSymbolParam(string name);
 
-	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string with_out, string name_wire, string out_name, string in_name);
+	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name);
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
 	int searchInstance(string name);
 	

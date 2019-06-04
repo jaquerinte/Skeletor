@@ -2,7 +2,7 @@
 verilog/ABCD/tb/questa_sim/simpleExample/
 transcript
 *.wlf
-*.o
+*/*.o
 obj_dir
 rtlcompiler
 compiler/bin/

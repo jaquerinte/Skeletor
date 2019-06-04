@@ -6,24 +6,29 @@
 #define GENRALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
 
 module a (TransAddrSize, AddrSize){
-	#function "AND current addr_i with previous addr_i"
-	#description GENERALDESCIPTION
-	#coder  WORKER1
-	#references GENRALREFERENCE
+    #function "AND current addr_i with previous addr_i"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
 
-	in clk;
-	in rts;
-	in [AddrSize -1 : 0] addr;
-	out [TransAddrSize-1: 0] taddr;
-	out rdy;
+    in clk;
+    in rts;
+    in [AddrSize -1 : 0] addr;
+    out [TransAddrSize-1: 0] taddr;
+    out rdy;
+    in A;
+    in BB;
+    in CCC;
+    in DDDD;
+    in EEEEE;
 }
 module b (TransAddrSize, AddrSize){
-	#function "OR current addr_i with previous addr_i"
-	#description GENERALDESCIPTION
-	#coder  WORKER1
-	#references GENRALREFERENCE
+    #function "OR current addr_i with previous addr_i"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
 
-	in rstn;                           
+    in rstn;                           
     in clk;                            
     in [AddrSize-1:0] addr;            
     in [TransAddrSize-1:0] taddr;            
@@ -32,65 +37,65 @@ module b (TransAddrSize, AddrSize){
 }
 
 module c(n){
-	#function "rdy_o is high when a n bit counter overflow "
-	#description GENERALDESCIPTION
-	#coder  WORKER1
-	#references GENRALREFERENCE
+    #function "rdy_o is high when a n bit counter overflow "
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
 
-	in rts;
-	in clk;
-	out rdy;
+    in rts;
+    in clk;
+    out rdy;
 }
 
 module d(){
-	#function  "Three way AND gate"
-	#description GENERALDESCIPTION
-	#coder  WORKER1
-	#references GENRALREFERENCE
+    #function  "Three way AND gate"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
 
-	in in1;
-	in in2;
-	in in3;
-	out out1; // no puede ser out porque es una palabra reservada
+    in in1;
+    in in2;
+    in in3;
+    out out1; // no puede ser out porque es una palabra reservada
 }
 
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
-	#function  "Module to provide a reference output"
-	#coder  WORKER1
-	#references GENRALREFERENCE
+    #function  "Module to provide a reference output"
+    #coder  WORKER1
+    #references GENRALREFERENCE
 
-	in clk;
-	in rts;
-	in [AddrSize -1 : 0] addr;
-	out [TransAddrSize-1: 0] taddr;
-	out rdy;
-	
+    in clk;
+    in rts;
+    in [AddrSize -1 : 0] addr;
+    out [TransAddrSize-1: 0] taddr;
+    out rdy;
+    
 
-	a:x(TransAddrSize, AddrSize){
-		in clk = in clk,
-		in rts = in rts,
-		in addr = in addr
-	};
+    a:x(TransAddrSize, AddrSize){
+        in clk = in clk,
+        in rts = in rts,
+        in addr = in addr
+    };
 
-	b:y(TransAddrSize, AddrSize){
-		in rstn = in rts,
-		in clk = in clk,
-		in addr = in addr,
-		out taddr = out taddr
-	};
-	
-	c:z(N){
-		in rts = in rts,
-		in clk = in clk
-	};
+    b:y(TransAddrSize, AddrSize){
+        in rstn = in rts,
+        in clk = in clk,
+        in addr = in addr,
+        out taddr = out taddr
+    };
+    
+    c:z(N){
+        in rts = in rts,
+        in clk = in clk
+    };
 
-	d:w(){
-		out out1 = out rdy
-	};
-	
-	wire [TransAddrSize-1:0] x.taddr -> y.taddr;
-	wire x.rdy -> w.in1;
-	wire y.rdy -> w.in2;
-	wire z.rdy -> w.in3;
-	
+    d:w(){
+        out out1 = out rdy
+    };
+    
+    wire [TransAddrSize-1:0] x.taddr -> y.taddr;
+    wire x.rdy -> w.in1;
+    wire y.rdy -> w.in2;
+    wire z.rdy -> w.in3;
+    
 }

@@ -11,7 +11,7 @@ class WireSymbol
 {
 public:
 	WireSymbol();
-	WireSymbol(string function_out, string function_in ,int pos_out, int pos_in, string with_out,string name_wire, string out_name, string in_name);
+	WireSymbol(string function_out, string function_in ,int pos_out, int pos_in, string width_out,string name_wire, string out_name, string in_name);
 	~WireSymbol();
 	WireSymbol(const WireSymbol &In);
 	WireSymbol& operator = (const WireSymbol &In);
@@ -20,7 +20,7 @@ public:
 	string getFuncionIn();
 	int getInoutSymbolOut();
 	int getInoutSymbolIn();
-	string getWithOut();
+	string getWidthOut();
 	string getNameWire();
 	string getNameOut();
     string getNameIn();
@@ -30,7 +30,7 @@ private:
 	string function_in;
 	int pos_out;
 	int pos_in;
-	string with_out;
+	string width_out;
 	string name_wire;
 	string in_name;
 	string out_name;
