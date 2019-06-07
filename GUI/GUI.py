@@ -25,6 +25,8 @@ optY = 0
 wiringA=0
 wiringB=0
 wiringW=0
+draw_selecting_area=0
+sa_pos=[0,0,0,0]
 
 class SchematicWindow(Gtk.Window):
 
@@ -65,8 +67,12 @@ class DrawingArea(Gtk.DrawingArea):
         global modules_selected
         global enable_movement
         global multiple_selected
+        global draw_selecting_area
+
         multiple_selected=0
         enable_movement=0
+        if move==1:
+            draw_selecting_area=0
         if move == 1 and modules_selected==1:
             modules_selected=0
             for item in modules:
@@ -97,7 +103,15 @@ class DrawingArea(Gtk.DrawingArea):
         global move
         global modules_selected
         global enable_movement
-        if move == 1 and modules_selected==1 and enable_movement==1 and edit==0:
+        global draw_selecting_area
+        global sa_pos
+
+        if draw_selecting_area==1:
+            sa_pos[2]=event.x
+            sa_pos[3]=event.y
+            self.queue_draw()
+
+        elif move == 1 and modules_selected==1 and enable_movement==1 and edit==0:
             for item in modules:
                 if item.selected==1:
                     item.posXNow = item.orgX - (optX-event.x)
@@ -111,7 +125,7 @@ class DrawingArea(Gtk.DrawingArea):
                             w.posYB=item.posYNow+(item.height/2)
             self.queue_draw()
 
-        if wire==1 and modules_selected == 1:
+        elif wire==1 and modules_selected == 1:
             for w in wires:
                 if w.idB == 0:
                     w.posXB=event.x
@@ -133,7 +147,8 @@ class DrawingArea(Gtk.DrawingArea):
         global wiringA
         global wiringB
         global wiringW
-
+        global draw_selecting_area
+        global sa_pos
 
         if event.button == 1 and move == 1 and edit==1:
             edit=0
@@ -145,10 +160,10 @@ class DrawingArea(Gtk.DrawingArea):
             optX = event.x
             optY = event.y
             
-            idModule = uuid.uuid1().int
-            modules.append(Module(idModule,optX,optY,100,100,0,optX,optY))
-            self.queue_draw()
-            # TO DO: optwin.show_all()
+            #idModule = uuid.uuid1().int
+            #modules.append(Module(idModule,optX,optY,100,100,0,optX,optY))
+            #self.queue_draw()
+            optwin.show_all()
 
         #Selecting Single Module
         elif event.button == 1 and move==1 and modules_selected==0:
@@ -161,6 +176,13 @@ class DrawingArea(Gtk.DrawingArea):
                         modules_selected=1
                         enable_movement=1
                     break
+            if modules_selected == 0:
+
+                draw_selecting_area=1
+                sa_pos[0] = optX
+                sa_pos[1] = optY
+                sa_pos[2] = optX
+                sa_pos[3] = optY
             self.queue_draw()
 
         #Grabbing Multiple Selected Modules
@@ -168,6 +190,7 @@ class DrawingArea(Gtk.DrawingArea):
             optX = event.x
             optY = event.y
             enable_movement=1
+
 
         #Start wiring
         elif event.button==1 and wire==1 and modules_selected==0:
@@ -178,6 +201,7 @@ class DrawingArea(Gtk.DrawingArea):
                     modules_selected=1
                     wires.append( Wire(item.id,(item.posXNow+item.width),(item.posYNow+(item.height/2)),0,optX,optY) )
                     break
+
             self.queue_draw()
 
         #Finish Wiring
@@ -258,6 +282,9 @@ class DrawingArea(Gtk.DrawingArea):
         global wires
         global topConnections
         global edit
+        global draw_selecting_area
+        global sa_pos
+
         inputSpacing = 0
         outputSpacing= 0
         portStartX=0
@@ -270,21 +297,29 @@ class DrawingArea(Gtk.DrawingArea):
         outputportSpacing=0
         inoutportSpacing=0
         portSpace=10
-
-
+        layout = PangoCairo.create_layout(cr)
+        if draw_selecting_area==1:
+            cr.set_source_rgba(0,0,1,0.5)
+            rec = cr.rectangle(sa_pos[0],sa_pos[1],sa_pos[2]-sa_pos[0],sa_pos[3]-sa_pos[1])
+            cr.fill()
         for item in modules:
             inputportSpacing=0
             outputportSpacing=0
             inoutportSpacing=0
             if item.deletion>=1:
                 continue
-            if item.selected == 1:
-                cr.set_source_rgba(0,0,255,0.5)
-            else: cr.set_source_rgba(0,0,0,1)
+            
             if item.nPorts*portSpace > item.height:
                 item.height = item.nPorts*portSpace
+            cr.set_source_rgba(0,0,0,1)
+            layout.set_text(item.name,-1)
+            cr.move_to(item.posXNow,item.posYNow+item.width/2-10)
+            PangoCairo.show_layout(cr,layout)
+            if item.selected == 1:
+                cr.set_source_rgba(0,0,1,0.5)
+            else: cr.set_source_rgba(1,0.647,0.278,1)
             rec = cr.rectangle(item.posXNow,item.posYNow,item.width,item.height)
-            cr.fill()
+            cr.stroke()
             #Draw Ports...
             for port in item.portInfo:
                 #Inputs
@@ -554,20 +589,12 @@ class OptionWindow(Gtk.Window):
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.add(vbox)
 
-        self.inputs = Gtk.Entry()
-        self.outputs = Gtk.Entry()
-        inputsLabel = Gtk.Label("Name")
-        outputsLabel = Gtk.Label("Number of Outputs")
-        ibox = Gtk.Box(spacing=12) 
-        obox = Gtk.Box(spacing=12)
-        ibox.pack_start(inputsLabel,True,True,0)
-        ibox.pack_start(self.inputs,True,True,0)
-
-        obox.pack_start(outputsLabel,True,True,0)
-        obox.pack_start(self.outputs,True,True,0)
-        
+        self.nameInput = Gtk.Entry()
+        nameLabel = Gtk.Label("Name")
+        ibox = Gtk.Box(spacing=12)
+        ibox.pack_start(nameLabel,True,True,0)
+        ibox.pack_start(self.nameInput,True,True,0)
         vbox.pack_start(ibox, True, True, 0)
-        vbox.pack_start(obox, True, True, 0)
 
         bBox = Gtk.ButtonBox()
 
@@ -583,10 +610,9 @@ class OptionWindow(Gtk.Window):
     def acceptbutton_press_event(self, widget, event):
         global optwin
         idModule = uuid.uuid1().int
-        modules.append(Module(idModule,optX,optY,100,100,0,optX,optY))
+        modules.append(Module(idModule,optX,optY,100,100,0,optX,optY,optwin.nameInput.get_text()))
         if event.button == 1:
-            optwin.inputs.set_text("")
-            optwin.outputs.set_text("")
+            optwin.nameInput.set_text("")
             optwin.hide()
         
         win.drawing_area.queue_draw()
@@ -673,7 +699,7 @@ class TopConnectionWindow(Gtk.Window):
 
 class Module(object):
 
-    def __init__(self,idModule,posXN,posYN,modWidth,modHeight,selected,orgX,orgY):
+    def __init__(self,idModule,posXN,posYN,modWidth,modHeight,selected,orgX,orgY,name):
         self.id = idModule
         self.nPorts = 0
         self.posXNow = posXN
@@ -683,6 +709,7 @@ class Module(object):
         self.selected = selected
         self.orgX = orgX
         self.orgY = orgY
+        self.name = name
         self.deletion = 0
         self.toAdd = 0
         self.toMod = 0
@@ -758,19 +785,19 @@ class AddPortWindow(Gtk.Window):
 
         bBox = Gtk.ButtonBox()
 
-        self.acceptButton = Gtk.Button("Accept")
-        self.cancelButton = Gtk.Button("Cancel")
-        bBox.pack_start(self.cancelButton,True,True,0)
-        bBox.pack_start(self.acceptButton,True,True,0)
+        self.addButton = Gtk.Button("Add")
+        self.exitButton = Gtk.Button("Exit")
+        bBox.pack_start(self.exitButton,True,True,0)
+        bBox.pack_start(self.addButton,True,True,0)
         vbox.pack_start(bBox,True,True,0)
 
-        self.acceptButton.connect("button-press-event", self.acceptbutton_press_event)
-        self.cancelButton.connect("button-press-event", self.cancelbutton_press_event)
+        self.addButton.connect("button-press-event", self.addbutton_press_event)
+        self.exitButton.connect("button-press-event", self.exitbutton_press_event)
 
     def on_port_combo_changed(self, combo):
         self.connection_type = combo.get_active()
 
-    def acceptbutton_press_event(self, widget, event):
+    def addbutton_press_event(self, widget, event):
         global win
         global edit
         #edit=0
@@ -779,15 +806,15 @@ class AddPortWindow(Gtk.Window):
                 item.selected=0
                 if item.toAdd:
                     item.addPort(self.name.get_text(),int(self.bitWidth.get_text()),self.connection_type)
-                    item.toAdd=0
+                    #item.toAdd=0
             self.name.set_text("")
             self.bitWidth.set_text("")
-            self.hide()
+            #self.hide()
             win.buttonArea.pop.hide()
         
             win.drawing_area.queue_draw()
 
-    def cancelbutton_press_event(self, widget, event):
+    def exitbutton_press_event(self, widget, event):
         global edit
         #edit=0
         if event.button == 1:
