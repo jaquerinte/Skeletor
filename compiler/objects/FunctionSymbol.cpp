@@ -290,9 +290,9 @@ void FunctionSymbol ::createFileModuleBase(){
         else{
             /* Rest INOUT parameter */
             if(this -> v_inoutwires.at(i).getWidth() == ""){
-                this -> output_file_data += tabulate + tabulate + type + " " + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
+                this -> output_file_data += tabulate + tabulate + type + " " + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
             }else{
-                this -> output_file_data += tabulate + tabulate + type + " " + this -> v_inoutwires.at(i).getWidth() + " " + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
+                this -> output_file_data += tabulate + tabulate + type + " " + this -> v_inoutwires.at(i).getWidth() + " " + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
             }
         }
     }
