@@ -10,6 +10,7 @@ FunctionSymbol :: FunctionSymbol()
     this -> projectName = "";
     this -> filename_asociated = "./output/" + name + ".v";
     this -> output_file_data = "";
+    this -> projectFolder = "";
 }
 
 
@@ -21,6 +22,7 @@ FunctionSymbol :: FunctionSymbol(string name, string projectName, string project
     this -> code = "";
     this -> projectName = projectName;
     this -> filename_asociated = "./" + projectFolder + "/" + name + ".v";
+    this -> projectFolder = "./" + projectFolder + "/";
     //this -> filename_asociated = "./objects/" + name + ".v";
     this -> output_file_data = "";
 }
@@ -35,11 +37,11 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
     this -> filename_asociated = In.filename_asociated;
     //modulos individuales pero no el top
     this -> output_file_data = In.output_file_data;
-    //cout << In.output_file_data << endl;
     this -> v_inoutwires = In.v_inoutwires;
     this -> v_param = In.v_param;
     this -> v_wire = In.v_wire;
     this -> v_instances = In.v_instances;
+    this -> projectFolder = In.projectFolder;
 }
 FunctionSymbol :: ~FunctionSymbol(){}
 
@@ -325,6 +327,47 @@ void FunctionSymbol ::createFileModuleBase(){
     /* finish file */
     this -> output_file_data += "endmodule\n";
 }
+
+void FunctionSymbol :: createRunTest(){
+	this->createTbFolder();
+	this->createQuestaSimFolder();
+	this->createTbRun();
+
+
+
+}
+
+void FunctionSymbol :: createTbFolder(){
+	string output_folder = this -> projectFolder + "tb";
+	if (mkdir(output_folder.c_str(), 0777) == -1) 
+		cerr << "Error : " << strerror(errno) << endl; 
+}
+
+void FunctionSymbol :: createQuestaSimFolder(){
+	string output_folder = this -> projectFolder + "tb/questa_sim";
+	if (mkdir(output_folder.c_str(), 0777) == -1) 
+		cerr << "Error : " << strerror(errno) << endl;
+}
+
+void FunctionSymbol :: createTbRun(){
+	string output_file = this -> projectFolder + "tb/questa_sim/runtest.sh";
+	// create file
+	string output = "vlib " + this -> name + "\n";
+	output += "vmap work $PWD/" + this -> name + "\n";
+	output += "vlog +incdir+../../hdl/ ../../hdl/*.v ../../hdl/*.vh tb_" + this -> name + ".v" + "\n";
+	output += "vmake "+ this -> name +"/ > Makefile" + "\n";
+	output += "vsim";
+	char buf[0x100];
+    snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+    FILE *f = fopen(buf, "w");
+    fprintf(f, output.c_str());
+    fclose(f);
+
+}
+void FunctionSymbol :: createTbVerilog(){
+
+}
+
 
 void FunctionSymbol :: printToFile()
 {

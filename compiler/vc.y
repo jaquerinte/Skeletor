@@ -38,6 +38,7 @@ const int LOGIC=5;
 string projectName = "a.out";
 string projectFolder = "OUTPUT";
 bool db = false;
+bool tb = false;
 string init_output(bool);
 
 struct Type {
@@ -176,6 +177,7 @@ extern FILE *yyin;
 
 string s1;
 string s2;
+string name_function_main;
 
 int yyerror(char *s);
 
@@ -252,6 +254,7 @@ MainFunc    : moduledefinition mainmodule id
                 // then add symbol
                 tfs.addFunctionSymbol(pme, projectName, projectFolder);
                 s1 = pme;
+                name_function_main = pme;
             }  parl SArgs parr Block
             {
                 /* Create file for module*/
@@ -260,6 +263,9 @@ MainFunc    : moduledefinition mainmodule id
                 int pos = tfs.searchFunctionSymbol(pme);
                 string base = init_output(db);
                 tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitions());
+
+                
+                
 
             }
     ;
@@ -747,7 +753,14 @@ TipoBase    : intype {$$.size = IN;}
             | inouttype {$$.size = INOUT;} 
     ;
 
-S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;tfs.createFiles(projectFolder);ts.printToFile(projectFolder);}
+S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
+                                tfs.createFiles(projectFolder);
+                                ts.printToFile(projectFolder);
+                                if(tb){
+                                    int pos = tfs.searchFunctionSymbol(name_function_main);
+                                    tfs.v_funcSymbols.at(pos).createRunTest();
+                                }
+                            }
     ;
 
 %%
@@ -853,6 +866,7 @@ void print_usage(void)
     printf("-h, --help, help        Print this message\n");
     printf("-d                      Output directory name\n");
     printf("-n                      Set project name\n");
+    printf("-t                      Make the testbench\n");
 }
 int arguments_handler(int argc, char ** argv){
     string str1 ;
@@ -878,7 +892,10 @@ int arguments_handler(int argc, char ** argv){
             //Ivan need this
             case 'Y' :
                 db = true;
-                break; 
+                break;
+            case 't' :
+                tb = true;
+                break;
             //default
             default:
                 printf("argc %d \n", argc);

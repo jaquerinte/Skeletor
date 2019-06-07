@@ -3,6 +3,7 @@
 
 
 #include "InstanceSymbol.h"
+#include <sys/stat.h> 
 
 using namespace std;
 
@@ -32,6 +33,11 @@ public:
 	
 	void createFileModule();
 	void createFileModule(string base, bool verilog_def);
+	void createRunTest();
+    void createTbFolder();
+    void createQuestaSimFolder();
+    void createTbRun();
+    void createTbVerilog();
 	void printToFile();
 
 	// getters
@@ -72,6 +78,7 @@ private:
 	string projectName;
 	string references;
 	string output_file_data;
+	string projectFolder;
 	
 };
 
