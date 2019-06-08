@@ -758,7 +758,7 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
                                 ts.printToFile(projectFolder);
                                 if(tb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main);
-                                    tfs.v_funcSymbols.at(pos).createRunTest();
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig());
                                 }
                             }
     ;

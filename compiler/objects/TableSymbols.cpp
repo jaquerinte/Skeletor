@@ -101,6 +101,8 @@ void TableSymbols :: printToFile(string projectFolder)
 
 }
 
+bool TableSymbols :: getVerilogDefig(){return this -> verilogDefig;}
+
 string TableSymbols :: getTableSymbols()
 {
 	string out = "//-----------------------------------------------------\n";

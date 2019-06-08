@@ -328,10 +328,11 @@ void FunctionSymbol ::createFileModuleBase(){
     this -> output_file_data += "endmodule\n";
 }
 
-void FunctionSymbol :: createRunTest(){
+void FunctionSymbol :: createRunTest(bool definitions){
 	this->createTbFolder();
 	this->createQuestaSimFolder();
 	this->createTbRun();
+	this->createTbVerilog(definitions);
 
 
 
@@ -357,6 +358,7 @@ void FunctionSymbol :: createTbRun(){
 	output += "vlog +incdir+../../hdl/ ../../hdl/*.v ../../hdl/*.vh tb_" + this -> name + ".v" + "\n";
 	output += "vmake "+ this -> name +"/ > Makefile" + "\n";
 	output += "vsim";
+    // create file
 	char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
@@ -364,7 +366,170 @@ void FunctionSymbol :: createTbRun(){
     fclose(f);
 
 }
-void FunctionSymbol :: createTbVerilog(){
+void FunctionSymbol :: createTbVerilog(bool definitions){
+	string output_file = this -> projectFolder + "tb/questa_sim/tb_" + this->name + ".v";
+	string output = "";
+	output += "//-----------------------------------------------------\n";
+    output += "// Project Name : " + this -> projectName + "\n";
+    output += "//File Name tb_" + this->name + ".v\n";
+    if (this -> function != ""){
+        output += "// Function     : " + this -> function + "\n";
+    }
+    if (this -> description != ""){
+        output += "// Description  : " + this -> description + "\n";
+    }
+    if (this -> code != ""){
+        output += "// Coder        : " + this -> code + "\n";
+    }
+    if (this -> references != ""){
+        output += "// References   : " + this -> references + "\n";
+    }
+    output += "\n";
+    output += "//***Headers***\n";
+    // header finish
+    // definition
+    if (definitions){
+    	output += "`include \"defines.vh\"\n";
+    }
+    output += "//***Test bench***\n";
+    // test bench definition
+    output += "module tb_" + this -> name + "();\n";
+    // parameters
+    output += "//***Parameters***\n";
+    // defult parameters
+    output += tabulate + "parameter CLK_PERIOD      = 2;\n";
+    output += tabulate + "parameter CLK_HALF_PERIOD = CLK_PERIOD / 2;\n";
+    // custom parameters
+    for (int i = 0; i < this -> v_param.size();++i) {
+            string value = this -> v_param.at(i).getValue();
+            if (v_param.at(i).getType() == 2){
+                value = "`" + value;
+            }       
+            if (i == this -> v_param.size() -1){
+                /* Last parameter */
+                output += tabulate +"localparam integer " + this -> v_param.at(i).getName() + " = " + value + "\n";
+            }
+            else{
+                /* Rest parameter */
+                output += tabulate +"localparam integer " + this -> v_param.at(i).getName() + " = " + value + ",\n";
+            }
+    }
+    // Signals IN and OUTS
+    output += "//***Signals***\n";
+    for (int i = 0; i < this -> v_inoutwires.size();++i) {
+        string type = "";
+            if (this -> v_inoutwires.at(i).getType() == IN){
+                type = "reg ";
+            }
+            else if (this -> v_inoutwires.at(i).getType() == OUT){
+                type = "wire";
+            }
+            else if (this -> v_inoutwires.at(i).getType() == INOUT){
+                type = "wire ";
+            }
+        if (i == this -> v_inoutwires.size() -1){
+            /* Last INOUT parameter */
+            if(this -> v_inoutwires.at(i).getWidth() == ""){
+                output += tabulate +  type + " tb_" + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
+            }else{
+                output += tabulate +  type + " tb_" + this -> v_inoutwires.at(i).getWidth() + " " + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
+            }
+        }
+        else{
+            /* Rest INOUT parameter */
+            if(this -> v_inoutwires.at(i).getWidth() == ""){
+                output += tabulate + type + " tb_" + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
+            }else{
+                output += tabulate + type + " tb_" + this -> v_inoutwires.at(i).getWidth() + " " + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
+            }
+        }
+    }
+    // create Module
+    output += "//***Module***\n";
+    output += tabulate + this -> name;
+    // add parameters
+    if (v_param.size() != 0){
+        output += " #(\n";
+        for (int i = 0; i < this -> v_param.size();++i) {
+            if (i == this -> v_param.size() -1){
+                output += tabulate + tabulate + "." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + ")\n";
+            }
+            else{
+                output += tabulate + tabulate + "." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + "),\n";
+            }
+        }
+        output += tabulate + ")" + "\n" + tabulate;
+    }
+    else{
+        output+= " ";
+    }
+    output+= tabulate + "dut_" + this -> name + "(\n";
+        for (int i = 0; i < this -> v_inoutwires.size();++i) {
+            if (i == this -> v_inoutwires.size() -1){
+                output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + tabulate + tabulate + "(tb_" + v_inoutwires.at(i).getNameVerilog() + ")\n" ;
+            }
+            else{
+                output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + tabulate + tabulate + "(tb_" + v_inoutwires.at(i).getNameVerilog() + "),\n" ;
+            }
+        }
+    output += tabulate + ");\n\n";
+    // end create module
+    // create static part
+    output += "//***clk_gen***\n";
+    output += tabulate +"initial tb_clk_i = 0;\n";
+    output += tabulate +"always #CLK_HALF_PERIOD tb_clk_i = !tb_clk_i;\n";
+    output += "\n";
+    output += "//***task reset_dut***\n";
+    output += tabulate +"task reset_dut;\n";
+    output += tabulate +tabulate + "begin\n";
+    output += tabulate +tabulate + tabulate +"$display(\"*** Toggle reset.\");\n";
+    output += tabulate +tabulate + tabulate +"//*** TODO ***\n";
+    output += tabulate +tabulate +"end\n";
+    output += tabulate +"endtask\n";
+    output += "\n";
+    output += "//***task init_sim***\n";
+    output += tabulate +"task init_sim;\n";
+    output += tabulate +tabulate + "begin\n";
+    output += tabulate +tabulate + tabulate +"$display(\"*** init sim.\");\n";
+    output += tabulate +tabulate + tabulate +"//*** TODO ***\n";
+    output += tabulate +tabulate +"end\n";
+    output += tabulate +"endtask\n";
+    output += "\n";
+    output += "//***task init_dump***\n";
+    output += tabulate +"task init_dump;\n";
+    output += tabulate +tabulate + "begin\n";
+    output += tabulate +tabulate + tabulate +"$dumpfile(\"test.vcd\");\n";
+    output += tabulate +tabulate + tabulate +"$dumpvars(0,dut_" + this->name +");\n";
+    output += tabulate +tabulate +"end\n";
+    output += tabulate +"endtask\n";
+    output += "\n";
+    output += "//***task test_sim***\n";
+    output += tabulate +"task test_sim;\n";
+    output += tabulate +tabulate + "begin\n";
+    output += tabulate +tabulate + tabulate +"$display(\"*** test_sim.\");\n";
+    output += tabulate +tabulate + tabulate +"//***Handcrafted test***\n";
+    output += tabulate +tabulate +"end\n";
+    output += tabulate +"endtask\n";
+    output += "\n";
+    output += "\n";
+    output += "//***init_sim***\n";
+    output += tabulate +"initial begin\n";
+    output += tabulate +tabulate + "init_sim();\n";
+    output += tabulate +tabulate + "init_dump();\n";
+    output += tabulate +tabulate + "reset_dut();\n";
+    output += tabulate +tabulate + "test_sim();\n";
+    output += tabulate +"end\n";
+    output += "\n";
+    output += "endmodule\n";
+
+
+
+    // cretate file
+    char buf[0x100];
+    snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+    FILE *f = fopen(buf, "w");
+    fprintf(f, output.c_str());
+    fclose(f);
 
 }
 
