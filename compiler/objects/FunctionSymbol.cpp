@@ -419,13 +419,13 @@ void FunctionSymbol :: createTbVerilog(bool definitions){
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         string type = "";
             if (this -> v_inoutwires.at(i).getType() == IN){
-                type = "reg ";
+                type = "reg";
             }
             else if (this -> v_inoutwires.at(i).getType() == OUT){
                 type = "wire";
             }
             else if (this -> v_inoutwires.at(i).getType() == INOUT){
-                type = "wire ";
+                type = "reg";
             }
         if (i == this -> v_inoutwires.size() -1){
             /* Last INOUT parameter */
