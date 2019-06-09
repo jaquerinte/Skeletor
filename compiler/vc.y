@@ -738,6 +738,8 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
             break;
          case ERRFUNALDEC: fprintf(stderr, "Module %s already declared\n",s);
             break;
+         case ERRCONNNODEC: fprintf(stderr, "Connection %s not declared\n",s);
+            break;
         }
      }
      else

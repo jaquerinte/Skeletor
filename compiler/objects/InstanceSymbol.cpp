@@ -76,11 +76,11 @@ int InstanceSymbol :: searchinoutSymbol(string name, int type, int nlin, int nco
 			if (v_inoutwires.at(i).getType() == type || v_inoutwires.at(i).getType() == INOUT){
 				return  i;
 			}
-			else{
+			/*else{
 				// fail: connection not declared
 				msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
 				return -1;
-			}
+			}*/
 			
 		}
 	}

@@ -93,9 +93,9 @@ int FunctionSymbol :: searchinoutSymbol(string name, int type, int nlin,int ncol
             if (v_inoutwires.at(i).getType() == type || v_inoutwires.at(i).getType() == INOUT){
                 return  i;
             }
-            else{
+            /*else{
                 return -1;
-            }
+            }*/
             
         }
     }
