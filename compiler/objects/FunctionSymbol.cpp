@@ -299,7 +299,7 @@ void FunctionSymbol ::createFileModuleBase(){
         }
     }
     /* End inputs and outputs */
-    this -> output_file_data += tabulate + ")\n\n";
+    this -> output_file_data += tabulate + ");\n\n";
 
 
     /* Add Wires */
@@ -458,7 +458,7 @@ void FunctionSymbol :: createTbVerilog(bool definitions){
                 output += tabulate + tabulate + "." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + "),\n";
             }
         }
-        output += tabulate + ")" + "\n" + tabulate;
+        output += tabulate + ");" + "\n" + tabulate;
     }
     else{
         output+= " ";

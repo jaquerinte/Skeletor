@@ -16,11 +16,6 @@ module a (TransAddrSize, AddrSize){
     in [AddrSize -1 : 0] addr;
     out [TransAddrSize-1: 0] taddr;
     out rdy;
-    in A;
-    in BB;
-    in CCC;
-    in DDDD;
-    in EEEEE;
 }
 module b (TransAddrSize, AddrSize){
     #function "OR current addr_i with previous addr_i"
