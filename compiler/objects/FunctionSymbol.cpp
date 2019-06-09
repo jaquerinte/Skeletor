@@ -405,14 +405,7 @@ void FunctionSymbol :: createTbVerilog(bool definitions){
             if (v_param.at(i).getType() == 2){
                 value = "`" + value;
             }       
-            if (i == this -> v_param.size() -1){
-                /* Last parameter */
-                output += tabulate +"localparam integer " + this -> v_param.at(i).getName() + " = " + value + "\n";
-            }
-            else{
-                /* Rest parameter */
-                output += tabulate +"localparam integer " + this -> v_param.at(i).getName() + " = " + value + ",\n";
-            }
+            output += tabulate +"localparam integer " + this -> v_param.at(i).getName() + " = " + value + ";\n";
     }
     // Signals IN and OUTS
     output += "//***Signals***\n";
@@ -429,19 +422,13 @@ void FunctionSymbol :: createTbVerilog(bool definitions){
             }
         if (i == this -> v_inoutwires.size() -1){
             /* Last INOUT parameter */
-            if(this -> v_inoutwires.at(i).getWidth() == ""){
-                output += tabulate +  type + " tb_" + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
-            }else{
-                output += tabulate +  type + " tb_" + this -> v_inoutwires.at(i).getWidth() + " " + this -> v_inoutwires.at(i).getNameVerilog() + "\n";
-            }
+            output += tabulate +  type + " tb_" + this -> v_inoutwires.at(i).getNameVerilog() + ";\n";
+           
         }
         else{
             /* Rest INOUT parameter */
-            if(this -> v_inoutwires.at(i).getWidth() == ""){
-                output += tabulate + type + " tb_" + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
-            }else{
-                output += tabulate + type + " tb_" + this -> v_inoutwires.at(i).getWidth() + " " + this -> v_inoutwires.at(i).getNameVerilog() + ",\n";
-            }
+            output += tabulate + type + " " + this -> v_inoutwires.at(i).getWidth() + " tb_" + this -> v_inoutwires.at(i).getNameVerilog() + ";\n";
+           
         }
     }
     // create Module
@@ -458,7 +445,7 @@ void FunctionSymbol :: createTbVerilog(bool definitions){
                 output += tabulate + tabulate + "." + this -> v_param.at(i).getName() + " (" + this -> v_param.at(i).getValue() + "),\n";
             }
         }
-        output += tabulate + ");" + "\n" + tabulate;
+        output += tabulate + ")" + "\n" + tabulate;
     }
     else{
         output+= " ";
