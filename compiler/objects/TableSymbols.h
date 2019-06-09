@@ -5,6 +5,7 @@
 #include "Symbol.h"
 #include <vector>
 #include <iostream>
+#include "../common.h"
 using namespace std;
 
 class TableSymbols
@@ -13,9 +14,9 @@ class TableSymbols
 public:
 	TableSymbols();
 	~TableSymbols();
-	bool addSymbol(string name, int type, string module);
-	bool addSymbol(string name, int type, string value,int type_var, string module);
-	int shearchSymbol(string name, string module);
+	bool addSymbol(string name, int type, string module, int nlin, int ncol);
+	bool addSymbol(string name, int type, string value,int type_var, string module, int nlin, int ncol);
+	int shearchSymbol(string name, string module, int nlin, int ncol);
 	string getTableSymbols();
 	bool createDefinitions();
 	bool getVerilogDefig();

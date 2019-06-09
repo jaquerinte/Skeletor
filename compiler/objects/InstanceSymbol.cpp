@@ -34,7 +34,7 @@ InstanceSymbol& InstanceSymbol ::operator = (const InstanceSymbol &In){
 	}
 }
 
-bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value)
+bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value, int nlin, int ncol)
 {
 	FunctionSymbolParam s(name);
 	for (int i = 0; i < this -> v_param.size();++i) {
@@ -45,10 +45,10 @@ bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value)
 	}
 
 	// fail: Symbol param  not declared
-	//msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
+	msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 	return false;
 }
-bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int type)
+bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int type, int nlin, int ncol)
 {
 	
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
@@ -58,7 +58,7 @@ bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int t
 		}
 	}
 	// fail: Symbol param  not declared
-	//msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
+	msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 	return false;
 }
 
@@ -69,7 +69,7 @@ void InstanceSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
 	}
 	
 }
-int InstanceSymbol :: searchinoutSymbol(string name, int type)
+int InstanceSymbol :: searchinoutSymbol(string name, int type, int nlin, int ncol)
 {
 	for (int i = 0; i <  this -> v_inoutwires.size();++i) {
 		if ( this -> v_inoutwires.at(i).getName() == name) {
@@ -77,13 +77,15 @@ int InstanceSymbol :: searchinoutSymbol(string name, int type)
 				return  i;
 			}
 			else{
+				// fail: connection not declared
+				msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
 				return -1;
 			}
 			
 		}
 	}
 	// fail: connection not declared
-	//msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+	msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
 	return -1;
 }
 string InstanceSymbol :: getName(){return this-> nameModule;}

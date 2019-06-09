@@ -58,15 +58,13 @@ FunctionSymbol& FunctionSymbol :: operator = (const FunctionSymbol &In)
 }
 
 
-bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string width)
+bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string width, int nlin,int ncol)
 {
     InoutSymbol s(name, size, width);
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         if (this -> v_inoutwires.at(i).getName() == s.getName() && this -> v_inoutwires.at(i).getType() == s.getType()) { 
             // fail: connection alrady declared
-            cout << "CONNECTION ALREADY DECLARED " << s.getName() << endl;
-            exit(1);
-            //msgError(ERRCONNDEC, nlin, ncol - name.length(), name.c_str());
+            msgError(ERRCONNDEC, nlin, ncol - name.length(), name.c_str());
             return false;
         }
     }
@@ -75,7 +73,7 @@ bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string
 
 }
 
-int FunctionSymbol :: searchinoutSymbol(string name)
+int FunctionSymbol :: searchinoutSymbol(string name, int nlin,int ncol)
 {
     for (int i = 0; i <  this -> v_inoutwires.size();++i) {
         if ( this -> v_inoutwires.at(i).getName() == name) {
@@ -83,12 +81,12 @@ int FunctionSymbol :: searchinoutSymbol(string name)
         }
     }
     // fail: connection not declared
-    //msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+    msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
     return -1;
 }
 
 
-int FunctionSymbol :: searchinoutSymbol(string name, int type)
+int FunctionSymbol :: searchinoutSymbol(string name, int type, int nlin,int ncol)
 {
     for (int i = 0; i <  this -> v_inoutwires.size();++i) {
         if ( this -> v_inoutwires.at(i).getName() == name) {
@@ -102,17 +100,17 @@ int FunctionSymbol :: searchinoutSymbol(string name, int type)
         }
     }
     // fail: connection not declared
-    //msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+    msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
     return -1;
 }
 
-bool FunctionSymbol :: addFunctionSymbolParam(string name)
+bool FunctionSymbol :: addFunctionSymbolParam(string name, int nlin,int ncol)
 {
     FunctionSymbolParam s(name);
     for (int i = 0; i < this -> v_param.size();++i) {
         if (this ->  v_param.at(i).getName() == s.getName()) { 
             // fail: Symbol param  already declared
-            //msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
+            msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
             return false;
         }
     }
@@ -120,14 +118,14 @@ bool FunctionSymbol :: addFunctionSymbolParam(string name)
     return true;
 }
 
-bool FunctionSymbol :: addFunctionSymbolParam(string name, string value, int type)
+bool FunctionSymbol :: addFunctionSymbolParam(string name, string value, int type, int nlin,int ncol)
 {
     FunctionSymbolParam s(name, value, type);
     for (int i = 0; i < this -> v_param.size();++i) {
         if (this ->  v_param.at(i).getName() == s.getName()) { 
             
             // fail: Symbol param  already declared
-            //msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
+            msgError(ERRPARAMDEC, nlin, ncol - name.length(), name.c_str());
             return false;
         }
     }
@@ -135,7 +133,7 @@ bool FunctionSymbol :: addFunctionSymbolParam(string name, string value, int typ
     return true;
 }
 
-bool FunctionSymbol :: addValueFunctionSymbolParam(string name, string value)
+bool FunctionSymbol :: addValueFunctionSymbolParam(string name, string value, int nlin,int ncol)
 {
     FunctionSymbolParam s(name);
     for (int i = 0; i < this -> v_param.size();++i) {
@@ -145,19 +143,20 @@ bool FunctionSymbol :: addValueFunctionSymbolParam(string name, string value)
         }
     }
     // fail: Symbol param  not declared
-    //msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
+    msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
     return false;
 }
 
-void FunctionSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
+void FunctionSymbol :: addValueFunctionSymbolParamPos(int pos, string value, int nlin,int ncol)
 {
     if (pos < v_param.size()){
         this -> v_param.at(pos).setValue(value);
     }
-    
+    else
+    msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 }
 
-FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name)
+FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, int nlin,int ncol)
 {
     FunctionSymbolParam s;
     for (int i = 0; i < this -> v_param.size();++i) {
@@ -166,38 +165,28 @@ FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name)
         }
     }
     // fail: Symbol param  not declared
-    //msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
+    msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
     return s;
 }
 
 bool FunctionSymbol :: addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name){
     WireSymbol wire(function_out,function_in, pos_out, pos_in,width_out, name_wire, out_name, in_name);
-    //cout << "wire " << wire.getFuncionOut() << " " << wire.getFuncionIn() << " " << wire.getInoutSymbolOut().getName() << " " << wire.getInoutSymbolIn().getName();
     this -> v_wire.push_back(wire);
 }
-/*int FunctionSymbol :: shearchWireConnection(string func, string inout){
-
-    for (int i = 0; i < this -> v_wire.size();++i) {
-        if (this -> v_wire.at(i).getName() == name and ) { 
-            return this -> v_wire.at(i);
-        }
-    }
-    return -1;
-}*/
 
 bool FunctionSymbol :: addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance){
     InstanceSymbol instance(v_inoutwires,v_param, this -> v_wire, name_module, name_instance);
     this -> v_instances.push_back(instance);
 }
 
-int FunctionSymbol :: searchInstance(string name){
+int FunctionSymbol :: searchInstance(string name, int nlin,int ncol){
     for (int i = 0; i <  this -> v_instances.size();++i) {
         if ( this -> v_instances.at(i).getNameInstance() == name) {
             return  i;
         }
     }
     // fail: instance  not declared
-    //msgError(ERRCONNNODEC, nlin, ncol - name.length(), name.c_str());
+    msgError(ERRINSNOTFOUND, nlin, ncol - name.length(), name.c_str());
     return -1;
 
 }

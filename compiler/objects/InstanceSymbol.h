@@ -8,6 +8,7 @@
 
 #include "FunctionSymbolParam.h"
 #include "WireSymbol.h"
+#include "../common.h"
 
 //TODO:Put this in a better place. Set tab format with flags
 //style parameters
@@ -20,10 +21,10 @@ public:
 	InstanceSymbol(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, vector<WireSymbol> v_wire, string nameModule,string nameInstance);
 	InstanceSymbol(const InstanceSymbol &In);
 	~InstanceSymbol();
-	bool addValueInoutSymbolParam(string name, string value, int type);
-	bool addValueFunctionSymbolParam(string name, string value);
+	bool addValueInoutSymbolParam(string name, string value, int type, int nlin, int ncol);
+	bool addValueFunctionSymbolParam(string name, string value, int nlin, int ncol);
 	void addValueFunctionSymbolParamPos(int pos, string value);
-	int searchinoutSymbol(string name, int type);
+	int searchinoutSymbol(string name, int type, int nlin, int ncol);
 
 	InstanceSymbol& operator = (const InstanceSymbol &In);
 	string getName();

@@ -4,17 +4,15 @@ TableSymbols :: TableSymbols(){
 	this -> output_file_data = "";
 }
 TableSymbols :: ~TableSymbols(){}
-bool TableSymbols :: addSymbol(string name, int type, string module)
+bool TableSymbols :: addSymbol(string name, int type, string module, int nlin, int ncol)
 {
 	Symbol s(name,type, module);
-	//cout<<"TRY DEFING "<< name <<endl;
 	for (int i = 0; i < v_symbols.size();++i) {
 		if (v_symbols.at(i).getName() == s.getName()) { 
 			if (v_symbols.at(i).getModule() == "null")
 			{
-				// fail: Symbol var ya decl
-			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
-				//cout<<"ERROR ALREAY DEFING"<< name <<endl;
+			// fail: Symbol var ya decl
+			msgError(ERRORSIMALDEC, nlin, ncol - name.length(), name.c_str());
 			return false;
 			}
 			else{
@@ -28,17 +26,16 @@ bool TableSymbols :: addSymbol(string name, int type, string module)
 	return true;
 
 }
-bool TableSymbols :: addSymbol(string name, int type, string value, int type_var, string module)
+bool TableSymbols :: addSymbol(string name, int type, string value, int type_var, string module, int nlin, int ncol)
 {
 	Symbol s(name,type,value,type_var, module);
-	//cout<<"TRY DEFING "<< name <<endl;
 	for (int i = 0; i < v_symbols.size();++i) {
 		if (v_symbols.at(i).getName() == s.getName()) { 
 			if (v_symbols.at(i).getModule() == "null")
 			{
 				// fail: Symbol var ya decl
-			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
-				//cout<<"ERROR ALREAY DEFING"<< name <<endl;
+			msgError(ERRORSIMALDEC, nlin, ncol - name.length(), name.c_str());
+			
 			return false;
 			}
 			else{
@@ -52,20 +49,19 @@ bool TableSymbols :: addSymbol(string name, int type, string value, int type_var
 	return true;
 
 }
-int TableSymbols :: shearchSymbol(string name, string module)
+int TableSymbols :: shearchSymbol(string name, string module, int nlin, int ncol)
 {
 	for (int i = 0; i < v_symbols.size();++i) {
-		if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == module) { 
-			// fail: Symbol var ya decl
-			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+		if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == module) {
 			return i;
 		}
 		else if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == "null"){
-			// fail: Symbol var ya decl
-			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+			
 			return i;
 		}
 	}
+	// fail: Symbol var no decl
+	msgError(ERRORSIMBNODEC, nlin, ncol - name.length(), name.c_str());
 	return -1;
 }
 

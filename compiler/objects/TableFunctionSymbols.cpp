@@ -8,21 +8,21 @@ TableFunctionSymbols :: TableFunctionSymbols(){}
 
 TableFunctionSymbols :: ~TableFunctionSymbols(){}
 
-bool TableFunctionSymbols :: addFunctionSymbol(string name, string projectName, string projectFolder)
+bool TableFunctionSymbols :: addFunctionSymbol(string name, string projectName, string projectFolder,int nlin,int ncol)
 
 {
 	FunctionSymbol s(name, projectName, projectFolder );
 	for (int i = 0; i < v_funcSymbols.size();++i) {
 		if (v_funcSymbols.at(i).getName() == s.getName()) { 
 			// fail: func var ya decl
-			//msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
+			msgError(ERRFUNALDEC, nlin, ncol - name.length(), name.c_str());
 			return false;
 		}
 	}
 	v_funcSymbols.push_back(s);
 	return true;
 }
-int TableFunctionSymbols :: searchFunctionSymbol(string name)
+int TableFunctionSymbols :: searchFunctionSymbol(string name,int nlin,int ncol)
 {
 	for (int i = 0; i < v_funcSymbols.size();++i) {
 		if (v_funcSymbols.at(i).getName() == name) {
@@ -30,7 +30,7 @@ int TableFunctionSymbols :: searchFunctionSymbol(string name)
 		}
 	}
 	// fail: func var no decl
-	//msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
+	msgError(ERRFUNODEC, nlin, ncol - name.length(), name.c_str());
 	return 0;
 }
 

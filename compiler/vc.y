@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#include "common.h"
+//#include "common.h"
 #include "./objects/TableFunctionSymbols.h"
 #include "./objects/TableSymbols.h"
 
@@ -193,11 +193,8 @@ SA      : S
 /* Base syntax */
 ModuleTextDefinition : stringtext { string pme = $1.lexeme; pme.erase(0, 1);pme.erase(pme.size() - 1); $$.trad = pme;}
                      | Ref {
-                        int pos = ts.shearchSymbol($1.trad, s1);
-                        //cout<< "pos " << to_string(pos)<< " On "<< $1.trad << endl;
+                        int pos = ts.shearchSymbol($1.trad, s1, nlin,ncol);
                         string value = ts.v_symbols.at(pos).getValue_S();
-                        // TODO ERASE 
-                        //cout<<"name "<<ts.v_symbols.at(pos).getName() << " type "<< ts.v_symbols.at(pos).getType() << " value " << value << endl;
                         $$.trad = value;
                         }
     ;
@@ -208,10 +205,10 @@ ValueDefinition : ninteger  {string pme = $1.lexeme; $$.trad = pme; $$.size = IN
     ;
 SSuperblock : SSuperblock SSSuperblockDefine id ValueDefinition {
                         string pme = $3.lexeme;
-                        ts.addSymbol(pme,$2.size, $4.trad, $4.size, "null");
+                        ts.addSymbol(pme,$2.size, $4.trad, $4.size, "null", nlin, ncol);
                         $$.trad = $1.trad;
                         }
-            | SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size, "null");$$.trad = $1.trad;}
+            | SSSuperblockDefine id ValueDefinition{string pme = $2.lexeme; ts.addSymbol(pme,$1.size, $3.trad, $3.size, "null", nlin, ncol);$$.trad = $1.trad;}
             | /*epsilon*/ { } 
     ;
 SSSuperblockDefine  : definevalue {$$.size = DEFINITION;}
@@ -229,9 +226,9 @@ Func        : moduledefinition id
                 /*Add module*/
                 string pme = $2.lexeme;
                 // fist add symbol
-                ts.addSymbol(pme,FUNCTION, "null");
+                ts.addSymbol(pme,FUNCTION, "null", nlin, ncol);
                 // then add symbol
-                tfs.addFunctionSymbol(pme, projectName, projectFolder);
+                tfs.addFunctionSymbol(pme, projectName, projectFolder, nlin, ncol);
                 s1 = pme;
                 //printf("%s", s1);
             } 
@@ -240,7 +237,7 @@ Func        : moduledefinition id
                 /* Create file for module*/
                 s1 = "null";
                 string pme = $2.lexeme;
-                int pos = tfs.searchFunctionSymbol(pme);
+                int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
                 tfs.v_funcSymbols.at(pos).createFileModule();
 
             }
@@ -250,9 +247,9 @@ MainFunc    : moduledefinition mainmodule id
                 /*Add module*/
                 string pme = $3.lexeme;
                 // fist add symbol
-                ts.addSymbol(pme,FUNCTION,"null");
+                ts.addSymbol(pme,FUNCTION,"null", nlin, ncol);
                 // then add symbol
-                tfs.addFunctionSymbol(pme, projectName, projectFolder);
+                tfs.addFunctionSymbol(pme, projectName, projectFolder, nlin, ncol);
                 s1 = pme;
                 name_function_main = pme;
             }  parl SArgs parr Block
@@ -260,7 +257,7 @@ MainFunc    : moduledefinition mainmodule id
                 /* Create file for module*/
                 s1 = "null";
                 string pme = $3.lexeme;
-                int pos = tfs.searchFunctionSymbol(pme);
+                int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
                 string base = init_output(db);
                 tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitions());
 
@@ -278,13 +275,13 @@ DArgs       : id SArBlock {
                     string pme = $1.lexeme;
                     //printf("%s", s1);
                     if(s1 != "null"){
-                        ts.addSymbol(pme,PARAMETERFUNCTION,$2.trad, INTEGER, s1);
-                        int pos  = tfs.searchFunctionSymbol(s1);
+                        ts.addSymbol(pme,PARAMETERFUNCTION,$2.trad, INTEGER, s1, nlin, ncol);
+                        int pos  = tfs.searchFunctionSymbol(s1, nlin, ncol);
                         if ($2.trad == ""){
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, nlin, ncol);
                         }
                         else{
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $2.trad, $2.size);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $2.trad, $2.size, nlin, ncol);
                         }
                         
                     }
@@ -293,13 +290,13 @@ DArgs       : id SArBlock {
             | DArgs  coma id SArBlock {
                  string pme = $3.lexeme;
                     if(s1 != "null"){
-                        ts.addSymbol(pme,PARAMETERFUNCTION,$4.trad, INTEGER, s1);
-                        int pos  = tfs.searchFunctionSymbol(s1);
+                        ts.addSymbol(pme,PARAMETERFUNCTION,$4.trad, INTEGER, s1, nlin, ncol);
+                        int pos  = tfs.searchFunctionSymbol(s1, nlin, ncol);
                         if ($4.trad == ""){
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, nlin, ncol);
                         }
                         else{
-                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $4.trad, $4.size);
+                            tfs.v_funcSymbols.at(pos).addFunctionSymbolParam(pme, $4.trad, $4.size, nlin, ncol);
                         }
                     }
 
@@ -307,7 +304,7 @@ DArgs       : id SArBlock {
     ;
 SArBlock    : opasig Expr {
                          
-                        int pos = ts.shearchSymbol($2.trad, s1);
+                        int pos = ts.shearchSymbol($2.trad, s1,nlin,ncol);
                         if($2.type != INTEGER){
                             //msgError()
                         }
@@ -329,7 +326,7 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
                 {
                     int pos;
                     if(s1 != "null"){
-                        pos = tfs.searchFunctionSymbol(s1);
+                        pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                         if (tfs.v_funcSymbols.at(pos).getFunction() == ""){
                             tfs.v_funcSymbols.at(pos).setFunction($2.trad);
                         }else{
@@ -343,7 +340,7 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
             | descriptionmodule ModuleTextDefinition {
                     int pos;
                     if(s1 != "null"){
-                        pos = tfs.searchFunctionSymbol(s1);
+                        pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                         if (tfs.v_funcSymbols.at(pos).getDescription() == ""){
                             tfs.v_funcSymbols.at(pos).setDescription($2.trad);
                         }else{
@@ -356,7 +353,7 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
             | codermodule ModuleTextDefinition {
                     int pos;
                     if(s1 != "null"){
-                        pos = tfs.searchFunctionSymbol(s1);
+                        pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                         if (tfs.v_funcSymbols.at(pos).getCode() == ""){
                             tfs.v_funcSymbols.at(pos).setCode($2.trad);
                         }else{
@@ -369,7 +366,7 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
             | referencesmodule ModuleTextDefinition {
                     if(s1 != "null"){
                         int pos;
-                        pos = tfs.searchFunctionSymbol(s1);
+                        pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                         if (tfs.v_funcSymbols.at(pos).getReferences() == ""){
                             tfs.v_funcSymbols.at(pos).setReferences($2.trad);
                         }else{
@@ -382,72 +379,44 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
             |/*epsilon*/ { } 
 
     ;
-EInstr      : Ref {    int pos = tfs.searchFunctionSymbol($0.ph);
-                        if (pos == -1){
-                            // TODO chaneg for properly error 
-                            cout<< "FUNCTION SYMBOL NOT DECLARED"<<endl;
-                            exit(1);
-                        }
-                    string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
+EInstr      : Ref {    
+                       string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
             | TipoBase Arrayargs id  {
                                 string pme = $3.lexeme;
                                 // add symbol
-                                int pos = tfs.searchFunctionSymbol(s1);
-                                ts.addSymbol(pme,INOUTSYMBOL,s1);
+                                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                                ts.addSymbol(pme,INOUTSYMBOL,s1, nlin, ncol);
                                 string with = $2.trad ;
-                                bool value = tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with);
+                                tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with, nlin, ncol);
                                 $$.trad = $1.trad + pme;
                                 }
             | wiretipe Arrayargs Ref connectwire Ref {
                                 string var_out = $3.trad;
                                 string var_in = $5.trad;
                                 // get functionsymbol that stores instantce
-                                int pos = tfs.searchFunctionSymbol(s1);
-
+                                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                                 // decompse the variables.
                                 // decompse out var
                                 vector<string> out = split_ref(var_out);
                                 // decompse in var
                                 vector<string> in = split_ref(var_in);
                                 // check out function 
-                                int pos_base = tfs.v_funcSymbols.at(pos).searchInstance(out[0]);
-
-                                if (pos_base == -1){ 
-                                    // error 
-                                    cout<<"ERROR NAME NULL OUT FUNCTION"<<endl;
-                                    exit(1);
-                                }
+                                int pos_base = tfs.v_funcSymbols.at(pos).searchInstance(out[0], nlin, ncol);
                                 // check InoutSymbol
                                 int out_inout;
-                                out_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).searchinoutSymbol(out[1], OUT);
-                                
-                                if (out_inout == -1){
-                                    //error 
-                                    cout<<"ERROR NAME NULL OUT INOUTSYMBOL: "<< out[1] <<endl;
-                                    exit(1);
-                                }
-                                int pos_aux = tfs.v_funcSymbols.at(pos).searchInstance(in[0]);
-                                if (pos_aux == -1){ 
-                                    // error
-                                    cout<<"ERROR NAME NULL IN FUNCTION"<<endl;
-                                    exit(1);
-                                }
+                                out_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).searchinoutSymbol(out[1], OUT, nlin, ncol);
+                                int pos_aux = tfs.v_funcSymbols.at(pos).searchInstance(in[0], nlin, ncol);
                                 // check InoutSymbol
                                 int in_inout;
-                                in_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).searchinoutSymbol(in[1], IN);
-                                if (in_inout == -1){
-                                    //error
-                                    cout<<"ERROR NAME NULL IN INOUTSYMBOL: "<< in[1] <<endl;
-                                    exit(1);
-                                }
+                                in_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).searchinoutSymbol(in[1], IN, nlin, ncol);
                                 // all verfiy
                                 // create wire.
                                 // add values instance and store wire
                                 string name_wire = out[1] + "_" + out[0] + "_" + in[0];
                                 // add and instace out
-                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT);
+                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT, nlin,ncol);
                                 // add and instace in
-                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, IN);
+                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, IN, nlin,ncol);
                                 // add wire
                                 tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i");
 
@@ -455,16 +424,16 @@ EInstr      : Ref {    int pos = tfs.searchFunctionSymbol($0.ph);
     ;
 CallExpresion   :  twopoints id {
                     string pme = $2.lexeme;
-                    int pos = ts.shearchSymbol(pme,s1);
-                    if (pos != -1){
+                    //int pos = ts.shearchSymbol(pme,s1, nlin,ncol);
+                    //if (pos != -1){
                         // TODO chaneg for properly error 
-                        cout<< "INSTANCE SYMBOL DECLARED"<<endl;
-                        exit(1);
-                    }
-                    int pos_instance = tfs.searchFunctionSymbol(s1);
-                    int pos_module = tfs.searchFunctionSymbol($0.ph);
+                      //  cout<< "INSTANCE SYMBOL DECLARED"<<endl;
+                       // exit(1);
+                    //}
+                    ts.addSymbol(pme,INSTANCESYMBOL,s1, nlin, ncol);
+                    int pos_instance = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                    int pos_module = tfs.searchFunctionSymbol($0.ph, nlin, ncol);
                     s2 = pme;
-                    //cout<< "pos module " << pos_instance << endl;
                     tfs.v_funcSymbols.at(pos_instance).addInstance(tfs.v_funcSymbols.at(pos_module).getInoutSymbol(), tfs.v_funcSymbols.at(pos_module).getFunctionSymbolParam(), $0.ph, pme);
                 }
 
@@ -472,7 +441,7 @@ CallExpresion   :  twopoints id {
                 {
                     string pme = $2.lexeme;
                     string pme_name = $0.ph;
-                    ts.addSymbol(pme,INSTANCESYMBOL,s1);
+                    ts.addSymbol(pme,INSTANCESYMBOL,s1, nlin, ncol);
                     s2 = "null";
 
                     //(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance)
@@ -487,25 +456,25 @@ CallArgs    : DCallArgs {$$.trad = "";}
 DCallArgs   : Expr DCallArgsExtension{
                 string pme = $2.trad;
                 $$.trad = "";
-                int pos = tfs.searchFunctionSymbol(s1);
+                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                 if (pme == ""){
                     // made by position
                     $$.ph = "position";
                     // if access a position is the 0 position
                     //cout << "Entro Position" << endl;
-                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParamPos(0, $1.trad);
                 }else{
                     // asigned by name
                     //cout << "Entro Name" << endl;
                     $$.ph = "name";
-                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
-                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($1.trad, $2.trad);
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($1.trad, $2.trad, nlin, ncol);
                 }
                 $$.counter = 1;
             }
             | DCallArgs coma Expr DCallArgsExtension {
-                int pos = tfs.searchFunctionSymbol(s1);
+                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                 $$.trad = "";
                 // transition beetween continous by position
                 if ($1.ph == "position" && $4.trad == ""){
@@ -521,21 +490,18 @@ DCallArgs   : Expr DCallArgsExtension{
                 }
                 else{
                     // TODO ERROR positional argument in a name position
-                    cout << "ERROR positional argument in a name position" << endl;
-                    exit(1);
+                    msgError(ERRINSNOTFOUND, nlin, ncol -  $3.trad.length(),  $3.trad.c_str());
                 }
                 // process arguments
                 if($$.ph == "position"){
                     
-                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
-                    //cout << "POS" << pos << endl;
-                    //cout << "POS Instance" << pos_instance << endl;
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParamPos($$.counter, $3.trad);
                 }
                 else{
                     // procces by name 
-                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
-                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($4.trad, $3.trad);
+                    int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueFunctionSymbolParam($4.trad, $3.trad, nlin, ncol);
                 }
                 $$.counter = + $1.counter + 1;
             }
@@ -551,45 +517,35 @@ CallConnectors  : DCallArgsConn {$$.trad = $1.trad;}
 DCallArgsConn   : TipoBase id opasig TipoBase id 
                 {
                 // TODO ERROR CHECKING THAT ID EXISTS AND TYPES ARE VALID
-                int pos = tfs.searchFunctionSymbol(s1);
-                int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
                 string pme_name = $2.lexeme;
                 string pme_value = $5.lexeme;
-                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value);
+                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
                 
-                if (pos_inout == -1){
-                    cout << "SYMBOL NOT DEFINE" << endl;
-                    exit(1);
-                }
                 string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
-                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $1.size);
+                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $1.size, nlin,ncol);
                 }
                 | DCallArgsConn coma TipoBase id opasig TipoBase id 
                 {
-                int pos = tfs.searchFunctionSymbol(s1);
-                int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2);
+                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
                 string pme_name = $4.lexeme;
                 string pme_value = $7.lexeme;
-                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value);
-                 if (pos_inout == -1){
-                    cout << "SYMBOL NOT DEFINE" << endl;
-                    exit(1);
-                }
+                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
                 string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
-                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $3.size);
+                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $3.size, nlin,ncol);
                 }
     ;
 
 /* Expresion */
 Arrayargs   : bral Expr {
                             if($2.type!=INTEGER){
-                                cout<<to_string($2.type)<<endl;//DEBUG
                                 msgError(ERRTYPEARGS, nlin, ncol, $2.trad.c_str());
                             }
                         } 
               twopoints Expr    {
                                     if($5.type!=INTEGER){
-                                        cout<<to_string($5.type)<<endl;//DEBUG
                                         msgError(ERRTYPEARGS, nlin, ncol, $5.trad.c_str());
                                     }
                                 } 
@@ -698,8 +654,7 @@ Term    :   Factor {$$.trad = $1.trad;
                                 }
     ;
 Factor  : Ref   {
-                    int pos = ts.shearchSymbol($1.trad, s1);
-                    //cout<<"ENTRO: "<< to_string(pos)<< " Name :" << $1.trad <<endl;
+                    int pos = ts.shearchSymbol($1.trad, s1, nlin,ncol);
                     int type = ts.v_symbols.at(pos).getType();
                     int type_v = ts.v_symbols.at(pos).getTypeVar();
                     switch(type){
@@ -757,7 +712,7 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
                                 tfs.createFiles(projectFolder);
                                 ts.printToFile(projectFolder);
                                 if(tb){
-                                    int pos = tfs.searchFunctionSymbol(name_function_main);
+                                    int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
                                     tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig());
                                 }
                             }

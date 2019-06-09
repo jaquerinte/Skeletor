@@ -3,6 +3,7 @@
 
 
 #include "InstanceSymbol.h"
+#include "../common.h"
 #include <sys/stat.h> 
 
 using namespace std;
@@ -18,18 +19,18 @@ public:
 	~FunctionSymbol();
 	FunctionSymbol& operator = (const FunctionSymbol &In);
 
-	bool addConnectionFunctionSymbol(string name, int size, string width);
-	int searchinoutSymbol(string name);
-	int searchinoutSymbol(string name, int type);
-	bool addFunctionSymbolParam(string name);
-	bool addFunctionSymbolParam(string name, string vale, int type);
-	bool addValueFunctionSymbolParam(string name, string value);
-	void addValueFunctionSymbolParamPos(int pos, string value);
-	FunctionSymbolParam& searchFunctionSymbolParam(string name);
+	bool addConnectionFunctionSymbol(string name, int size, string width,int nlin,int ncol);
+	int searchinoutSymbol(string name, int nlin,int ncol);
+	int searchinoutSymbol(string name, int type,int nlin,int ncol);
+	bool addFunctionSymbolParam(string name, int nlin,int ncol);
+	bool addFunctionSymbolParam(string name, string vale, int type, int nlin,int ncol);
+	bool addValueFunctionSymbolParam(string name, string value,int nlin,int ncol);
+	void addValueFunctionSymbolParamPos(int pos, string value, int nlin,int ncol);
+	FunctionSymbolParam& searchFunctionSymbolParam(string name, int nlin,int ncol);
 
 	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name);
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
-	int searchInstance(string name);
+	int searchInstance(string name, int nlin,int ncol);
 	
 	void createFileModule();
 	void createFileModule(string base, bool verilog_def);

@@ -1,3 +1,6 @@
+#ifndef COMMON_H
+#define COMMON_H
+
 typedef struct {
    char *lexeme;
    int nlin,ncol;
@@ -25,6 +28,8 @@ typedef struct {
 #define ERRFUNALDEC     7 // ERROR Module already declared
 #define ERRNEEDBOOL     8 // ERROR Bool required but something else founded
 #define ERRNEEDDEF      9 // ERROR DEFINITION or DEFINITIONVERILOG needed but something else founded 
+#define ERRORSIMALDEC   10 // ERROR Simbol already defined
+#define ERRORSIMBNODEC  11 // ERROR Simbol not defined
 
 /* MODULE ERRORS */
 #define ERRCONNDEC     20 // ERROR Connection already declared
@@ -42,6 +47,11 @@ typedef struct {
 #define ERRTYPEARGS      80 // ERROR ilegal type for port size
 #define ERRTYPEBOOL      81 // ERROR ilegal type for bool operation
 #define ERRTYPEINTEGER      82 // ERROR ilegal type for integer operation
-#define ERRTYPEMISMATCH  83 // ERROR Logic comparation of different types 
+#define ERRTYPEMISMATCH  83 // ERROR Logic comparation of different types
+/* INSTANCE ERROR */
+#define ERRINSNOTFOUND   100 // ERROR Instance not found
+/* ARGUMENTS ERROR */
+#define ERRARGUMENTPOSNONAME 120 // ERROR positional ARGUMENT un a name argument
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
+#endif
