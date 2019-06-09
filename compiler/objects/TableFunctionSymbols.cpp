@@ -38,9 +38,14 @@ int TableFunctionSymbols :: searchFunctionSymbol(string name)
 void TableFunctionSymbols :: createFiles(string projectFolder)
 {
 	// Creating a directory 
-	if (mkdir(projectFolder.c_str(), 0777) == -1) 
+	if (mkdir(projectFolder.c_str(), 0777) == -1){
 		cerr << "Error : " << strerror(errno) << endl; 
-	
+    }   
+    string temp = projectFolder +"/hdl";
+	if (mkdir(temp.c_str(), 0777) == -1)
+		cerr << "Error : " << strerror(errno) << endl; 
+   
+
     for (int i = 0; i < v_funcSymbols.size();++i) {
 		//mandarlo a la carpeta
         v_funcSymbols.at(i).printToFile();

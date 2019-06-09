@@ -91,7 +91,7 @@ return this -> verilogDefig;
 
 void TableSymbols :: printToFile(string projectFolder)
 {
-	string output_file = projectFolder +"/defines.vh";
+	string output_file = projectFolder +"/hdl/defines.vh";
 	/* create file */
 	char buf[0x100];
 	snprintf(buf, sizeof(buf), "%s", output_file.c_str());

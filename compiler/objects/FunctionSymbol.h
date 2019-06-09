@@ -75,6 +75,7 @@ private:
 	string function;
 	string description;
 	string code;
+	string projectFolderName;
 	string projectName;
 	string references;
 	string output_file_data;
