@@ -548,14 +548,31 @@ Arrayargs   : bral Expr {
                                     if($5.type!=INTEGER){
                                         msgError(ERRTYPEARGS, nlin, ncol, $5.trad.c_str());
                                     }
-                                } 
-              brar {$$.trad = "[" + $2.trad + " : " + $5.trad + "]";}
+                                }
+              brar {
+                    string expr_1 = "";
+                    string expr_2 = "";
+                    if ($2.ph == to_string(DEFINITIONVERILOG)){
+                        expr_1 = "`" + $2.trad;
+                    }
+                    else{
+                        expr_1 = $2.trad;
+                    }
+                    if($5.ph == to_string(DEFINITIONVERILOG)){
+                        expr_2 = "`" + $5.trad;
+                    }
+                    else{
+                         expr_2 = $5.trad;
+                    }
+                    $$.trad = "[" + expr_1 + " : " + expr_2 + "]";
+                    }
             | /*epsilon*/ {$$.trad = "";}
     ;
 Expr    :   Econj   { 
                         $$.trad = $1.trad;
                         $$.type = $1.type;
                         $$.size = $1.size;
+                        $$.ph = $1.ph;
                     } 
         |   Expr {
                     if($1.type!=LOGIC){
@@ -568,12 +585,14 @@ Expr    :   Econj   {
                                     $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
                                     $$.type = LOGIC;
                                     $$.size = LOGIC;
+                                    $$.ph = $1.ph;
                                 }
     ;
 Econj   :   Ecomp { 
                     $$.trad = $1.trad;
                     $$.type = $1.type;
                     $$.size = $1.size;
+                    $$.ph = $1.ph;
                   }
         |   Econj   {
                         if($1.type!=LOGIC){
@@ -586,6 +605,7 @@ Econj   :   Ecomp {
                                         $$.trad = $1.trad +" "+ $3.lexeme +" "+ $4.trad;
                                         $$.type = LOGIC;
                                         $$.size = LOGIC;
+                                        $$.ph = $1.ph;
                                     }
     ;
 
@@ -593,6 +613,7 @@ Ecomp   : Esimple {
                         $$.trad = $1.trad;
                         $$.type = $1.type;
                         $$.size = $1.size;
+                        $$.ph = $1.ph;
                   }
         | Esimple oprel Esimple {
                                         if($1.type!=$3.type){//TODO:what happen here with the strings
@@ -608,12 +629,14 @@ Ecomp   : Esimple {
                                     }else{
                                         $$.size = REFERENCE;
                                     }
+                                    $$.ph = $1.ph;
                                 }
     ;
 Esimple :Term {  
                     $$.trad = $1.trad;
                     $$.type = $1.type;
                     $$.size = $1.size;
+                    $$.ph = $1.ph;
                  }
         |   Esimple     {
                             if($1.type!=INTEGER){
@@ -635,7 +658,8 @@ Esimple :Term {
     ;
 Term    :   Factor {$$.trad = $1.trad;
                     $$.type = $1.type;
-                    $$.size = $1.size;} 
+                    $$.size = $1.size;
+                    $$.ph = $1.ph;} 
         |   Term{
                     if($1.type!=INTEGER){
                         msgError(ERRTYPEINTEGER, nlin, ncol, $1.trad.c_str());
@@ -651,6 +675,7 @@ Term    :   Factor {$$.trad = $1.trad;
                                     }else{
                                         $$.size = REFERENCE;
                                     }
+                                    $$.ph = $1.ph;
                                 }
     ;
 Factor  : Ref   {
@@ -675,6 +700,7 @@ Factor  : Ref   {
                         break;
                     }
                     $$.type=type_v;
+                    $$.ph = to_string(type);
                     $$.size = REFERENCE;
                 }
         | ninteger  {
