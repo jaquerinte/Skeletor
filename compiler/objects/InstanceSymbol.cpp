@@ -111,15 +111,40 @@ string InstanceSymbol :: generateInstance(){
 		output+= " ";
 	}
 	output+= this -> nameInstanceVerilog + "(\n";
+        int maxspace;
+        maxspace = this -> getmaxNameVerilog();
+        string thisspace;
 		for (int i = 0; i < this -> v_inoutwires.size();++i) {
-			if (i == this -> v_inoutwires.size() -1){
-				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + tabulate + tabulate + "(" + v_inoutwires.at(i).getValue() + ")\n" ;
+	        thisspace = currentspace(v_inoutwires.at(i).getNameVerilog(),maxspace);	
+            if (i == this -> v_inoutwires.size() -1){
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() +thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + ")\n" ;
 			}
 			else{
-				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + tabulate + tabulate + "(" + v_inoutwires.at(i).getValue() + "),\n" ;
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + "),\n" ;
 			}
 		}
 	output += tabulate + ");\n\n";
 	return output;
 	// add connections
 }
+
+string InstanceSymbol :: currentspace(string a, int max){
+    int nspaces= max - a.length();
+    string padding;
+    for(int i =0 ; i< nspaces; i++){
+       padding+=" ";
+    }
+    return padding;
+}
+int InstanceSymbol :: getmaxNameVerilog(){
+		int max=0;
+        for (int i = 0; i < this -> v_inoutwires.size();++i) {
+            if(v_inoutwires.at(i).getNameVerilog().length()>max)
+                max=v_inoutwires.at(i).getNameVerilog().length();    
+        }
+        max+=1; 
+        if((max) %4 != 0)
+            max += max %4;
+        return max+1;
+}
+

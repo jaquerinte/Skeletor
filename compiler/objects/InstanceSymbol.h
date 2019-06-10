@@ -39,7 +39,8 @@ private:
 	vector<InoutSymbol> v_inoutwires; // of the module to connect
 	vector<FunctionSymbolParam> v_param; // of the module to connect
 	vector<WireSymbol> v_wire; // of the actual module that is calling
-	
+    string currentspace(string a, int max);
+    int getmaxNameVerilog();
 };
 
 #endif

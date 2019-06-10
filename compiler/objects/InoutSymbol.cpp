@@ -10,7 +10,7 @@ InoutSymbol :: InoutSymbol()
 }
 string InoutSymbol :: getPadding(string name)
 {
-    string padding;
+    /*string padding;
     int size = name.size()+4;//+3 because "_i ","_o " or "_io". +1 beacause of . of instance
     if(size % 4 != 0){
         for(int i=0; i< 4-(size % 4); i++){
@@ -19,7 +19,8 @@ string InoutSymbol :: getPadding(string name)
     }
     else{
         padding="";
-    }
+    }*/
+    string padding = "";
     return padding;
 }
 
@@ -63,7 +64,7 @@ InoutSymbol& InoutSymbol :: operator = (const InoutSymbol &In) {
 string InoutSymbol :: getName(){return this->name;}
 string InoutSymbol :: getNameVerilog(){return this -> name_verilog;}
 int InoutSymbol :: getType(){return this->typeconnection;}
-string InoutSymbol :: getWidth(){return this->width;}
+string InoutSymbol :: getWidth(){return this -> width;}
 string InoutSymbol :: getValue(){return this -> value;}
 void InoutSymbol :: setType(int type){this -> typeconnection = type;}
 void InoutSymbol :: setWidth(int width){this -> width = width;}

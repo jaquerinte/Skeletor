@@ -29,7 +29,7 @@ module decode (AddrSize){
     in [AddrSize-1:0] instruction;            
     in [BITS_REGFILE-1:0] destination;            
     in [AddrSize-1:0] datareg;            
-    in writereg;            
+    in wreg;            
     out wreg;            
     out m2reg;            
     out wmem;            
