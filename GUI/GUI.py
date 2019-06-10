@@ -27,6 +27,8 @@ wiringB=0
 wiringW=0
 draw_selecting_area=0
 sa_pos=[0,0,0,0]
+gridGranularity = 20
+initial_nPorts = 2
 
 class SchematicWindow(Gtk.Window):
 
@@ -105,6 +107,7 @@ class DrawingArea(Gtk.DrawingArea):
         global enable_movement
         global draw_selecting_area
         global sa_pos
+        global gridGranularity
 
         if draw_selecting_area==1:
             sa_pos[2]=event.x
@@ -128,8 +131,8 @@ class DrawingArea(Gtk.DrawingArea):
         elif wire==1 and modules_selected == 1:
             for w in wires:
                 if w.idB == 0:
-                    w.posXB=event.x
-                    w.posYB=event.y
+                    w.posXB=(event.x-(event.x%gridGranularity))
+                    w.posYB=(event.y-(event.y%gridGranularity))
                     break
             self.queue_draw()
 
@@ -149,6 +152,7 @@ class DrawingArea(Gtk.DrawingArea):
         global wiringW
         global draw_selecting_area
         global sa_pos
+        global gridGranularity
 
         if event.button == 1 and move == 1 and edit==1:
             edit=0
@@ -269,8 +273,13 @@ class DrawingArea(Gtk.DrawingArea):
                                 break 
                             wire_index=wire_index+1  
                         break
-            wireDefWin.update_port_list()
-            wireDefWin.show_all()
+            if connected == 0:
+                for w in wires:
+                    if w.idB==0:
+                        w.path.append([(event.x-(event.x%gridGranularity)),(event.y-(event.y%gridGranularity))])
+            if connected==1:
+                wireDefWin.update_port_list()
+                wireDefWin.show_all()
             self.queue_draw()
 
         #New Input/Output
@@ -284,6 +293,7 @@ class DrawingArea(Gtk.DrawingArea):
         global edit
         global draw_selecting_area
         global sa_pos
+        global gridGranularity
 
         inputSpacing = 0
         outputSpacing= 0
@@ -296,7 +306,7 @@ class DrawingArea(Gtk.DrawingArea):
         inputportSpacing=0
         outputportSpacing=0
         inoutportSpacing=0
-        portSpace=10
+        portSpace=gridGranularity
         layout = PangoCairo.create_layout(cr)
         if draw_selecting_area==1:
             cr.set_source_rgba(0,0,1,0.5)
@@ -308,12 +318,13 @@ class DrawingArea(Gtk.DrawingArea):
             inoutportSpacing=0
             if item.deletion>=1:
                 continue
-            
-            if item.nPorts*portSpace > item.height:
-                item.height = item.nPorts*portSpace
+            if (item.nPortsV-1)*portSpace > item.height:
+                item.height = item.nPortsV*portSpace
+            if (item.nPortsH-1)*portSpace > item.width:
+                item.width = item.nPortsH*portSpace
             cr.set_source_rgba(0,0,0,1)
             layout.set_text(item.name,-1)
-            cr.move_to(item.posXNow,item.posYNow+item.width/2-10)
+            cr.move_to(item.posXNow,item.posYNow+item.height/2-10)
             PangoCairo.show_layout(cr,layout)
             if item.selected == 1:
                 cr.set_source_rgba(0,0,1,0.5)
@@ -325,18 +336,18 @@ class DrawingArea(Gtk.DrawingArea):
                 #Inputs
                 if port[2] == 0:
                     portStartX = item.posXNow
-                    portStartY = item.posYNow + strokeWidth + inputportSpacing
+                    portStartY = item.posYNow + inputportSpacing
                     portFinalX = portStartX - portLength
                     portFinalY = portStartY
                     inputportSpacing = inputportSpacing  + portSpace
                 elif port[2] == 1:
                     portStartX = item.posXNow + item.width
-                    portStartY = item.posYNow + strokeWidth + outputportSpacing
+                    portStartY = item.posYNow + outputportSpacing
                     portFinalX = portStartX + portLength
                     portFinalY = portStartY
                     outputportSpacing += portSpace
                 elif port[2] == 2:
-                    portStartX = item.posXNow + strokeWidth + inoutportSpacing
+                    portStartX = item.posXNow + inoutportSpacing
                     portStartY = item.posYNow + item.height
                     portFinalX = portStartX
                     portFinalY = portStartY + portLength
@@ -375,9 +386,34 @@ class DrawingArea(Gtk.DrawingArea):
                         w.posYB = w.posYA
         for w in wires:
             cr.set_source_rgba(0,0,0,1)
-            cr.move_to(w.posXB,w.posYB)
-            cr.line_to(w.posXA,w.posYA)
+            cr.move_to(w.posXA,w.posYA)
+            baseX = w.posXA
+            baseY = w.posYA
+            for p in w.path:
+                if (p[0]-baseX)**2 < (p[1]-baseY)**2: 
+                    cr.line_to(baseX,p[1])
+                    cr.stroke()
+                    cr.move_to(baseX,p[1])
+                else :
+                    cr.line_to(p[0],baseY)
+                    cr.stroke()
+                    cr.move_to(p[0],baseY)
+                cr.line_to(p[0],p[1])
+                cr.stroke()
+                cr.move_to(p[0],p[1])
+                baseX = p[0]
+                baseY = p[1]
+            if (w.posXB-baseX)**2 < (w.posYB-baseY)**2: 
+                cr.line_to(baseX,w.posYB)
+                cr.stroke()
+                cr.move_to(baseX,w.posYB)
+            else :
+                cr.line_to(w.posXB,baseY)
+                cr.stroke()
+                cr.move_to(w.posXB,baseY)
+            cr.line_to(w.posXB,w.posYB)
             cr.stroke()
+
         return False
 
 class ButtonArea(Gtk.ButtonBox):
@@ -609,8 +645,12 @@ class OptionWindow(Gtk.Window):
 
     def acceptbutton_press_event(self, widget, event):
         global optwin
+        global gridGranularity
+        global initial_nPorts
         idModule = uuid.uuid1().int
-        modules.append(Module(idModule,optX,optY,100,100,0,optX,optY,optwin.nameInput.get_text()))
+        X = (optX-(optX%gridGranularity)) 
+        Y = (optY-(optY%gridGranularity))
+        modules.append(Module(idModule,X,Y,gridGranularity*initial_nPorts,gridGranularity*initial_nPorts,0,X,Y,optwin.nameInput.get_text()))
         if event.button == 1:
             optwin.nameInput.set_text("")
             optwin.hide()
@@ -701,7 +741,8 @@ class Module(object):
 
     def __init__(self,idModule,posXN,posYN,modWidth,modHeight,selected,orgX,orgY,name):
         self.id = idModule
-        self.nPorts = 0
+        self.nPortsH = 0
+        self.nPortsV = 0
         self.posXNow = posXN
         self.posYNow = posYN
         self.width = modWidth
@@ -717,6 +758,10 @@ class Module(object):
 
     def addPort(self,name,width,connectionType):
         self.portInfo.append([name,width,connectionType,uuid.uuid1().int])
+        if connectionType == 2:
+            self.nPortsH = self.nPortsH+1
+        else:
+            self.nPortsV = self.nPortsV+1
 
 class TopConnection(object):
 
@@ -745,6 +790,7 @@ class Wire(object):
         self.posYB = posYB
         self.deletion = 0
         self.width = 0
+        self.path = [[self.posXA,self.posYA]]
 
 class AddPortWindow(Gtk.Window):
 
