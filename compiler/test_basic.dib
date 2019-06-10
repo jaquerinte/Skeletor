@@ -66,7 +66,7 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     out rdy;
     
 
-    a:x(TransAddrSize, AddrSize){
+    a:x(AddrSize = AddrSize, TransAddrSize = TransAddrSize){
         in clk = in clk,
         in rts = in rts,
         in addr = in addr

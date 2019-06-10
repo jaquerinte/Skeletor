@@ -719,7 +719,6 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
     ;
 
 %%
-
 void msgError(int nerror,int nlin,int ncol,const char *s)
 {
      if (nerror != ERREOF)
@@ -730,6 +729,7 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
             break;
          case ERRSINT: fprintf(stderr,"in '%s'\n",s);
             break;
+        /* GENERAL ERRORS */
          case ERRNODEC: fprintf(stderr, "Variable %s not declared\n",s);
             break;
          case ERRALDEC: fprintf(stderr, "Variable %s already declared\n",s);
@@ -738,7 +738,49 @@ void msgError(int nerror,int nlin,int ncol,const char *s)
             break;
          case ERRFUNALDEC: fprintf(stderr, "Module %s already declared\n",s);
             break;
+         case ERRNEEDBOOL: fprintf(stderr, "Bool required but %s founded\n",s);
+            break;
+         case ERRNEEDDEF: fprintf(stderr, "DEFINITION or DEFINITIONVERILOG needed but %s founded\n",s);
+            break;
+         case ERRORSIMALDEC: fprintf(stderr, "Simbol %s already defined\n",s);
+            break;     
+         case ERRORSIMBNODEC: fprintf(stderr, "Simbol %s not defined\n",s);
+            break;
+        /* MODULE ERRORS */
+         case ERRCONNDEC: fprintf(stderr, "Connection %s already declared\n",s);
+            break;
          case ERRCONNNODEC: fprintf(stderr, "Connection %s not declared\n",s);
+            break;
+         case ERRPARAMDEC: fprintf(stderr, "Param module %s already declared\n",s);
+            break;
+         case ERRPARAMNODEC: fprintf(stderr, "Param module %s not declared\n",s);
+            break;
+        /* MODULE DEFINTION ERRORS */
+         case ERRFUNCDEFALDEC: fprintf(stderr, "Function module definition %s already declared\n",s);
+            break;
+         case ERRDESCDEFALDEC: fprintf(stderr, "Description module definition %s already declared\n",s);
+            break;
+         case ERRORCODDEFALDEC: fprintf(stderr, "Coder module definition %s already declared\n",s);
+            break;
+         case ERRORDEFIALDEC: fprintf(stderr, "References module definition %s already declared\n",s);
+            break;
+        /* MODULE SIGNAL ERRORS */
+         case ERRTYPEARGS: fprintf(stderr, "%s ilegal type for port size\n",s);
+            break;
+         case ERRTYPEBOOL: fprintf(stderr, "%s ilegal type for bool operation\n",s);
+            break;
+         case ERRTYPEINTEGER: fprintf(stderr, "%s ilegal type for integer operation\n",s);
+            break;
+         case ERRTYPEMISMATCH: fprintf(stderr, "%s Logic comparation of different types\n",s);
+            break;
+        /* INSTANCE ERROR */
+        case ERRINSNOTFOUND: fprintf(stderr, "Instance %s not declared\n",s);
+            break;
+        /* ARGUMENTS ERROR */
+        case ERRARGUMENTPOSNONAME: fprintf(stderr, "positional argument %s in a name position argument\n",s);
+            break;
+        /* DEFAULT */
+        default: fprintf(stderr, "Undefined error in  %s\n",s);
             break;
         }
      }
