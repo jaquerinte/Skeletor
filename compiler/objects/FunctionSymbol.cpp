@@ -191,10 +191,14 @@ int FunctionSymbol :: searchInstance(string name, int nlin,int ncol){
 
 }
 
-void FunctionSymbol :: createFileModule()
+void FunctionSymbol :: createFileModule(bool verilogDef)
 {
     /* Start wriking the file */
     this -> createFileModuleDefines();
+     /* DEFINES */
+    if (verilogDef){
+        this -> output_file_data += "`include \"defines.vh\"\n";
+    }
     this -> createFileModuleBase();
 }
 

@@ -238,7 +238,7 @@ Func        : moduledefinition id
                 s1 = "null";
                 string pme = $2.lexeme;
                 int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
-                tfs.v_funcSymbols.at(pos).createFileModule();
+                tfs.v_funcSymbols.at(pos).createFileModule(ts.createDefinitions());
 
             }
     ;

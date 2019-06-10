@@ -32,7 +32,7 @@ public:
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
 	int searchInstance(string name, int nlin,int ncol);
 	
-	void createFileModule();
+	void createFileModule(bool verilogDef);
 	void createFileModule(string base, bool verilog_def);
 	void createRunTest(bool definitions);
 	void printToFile();
