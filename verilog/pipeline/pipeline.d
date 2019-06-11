@@ -151,14 +151,17 @@ module top pipeline(AddrSize = ADDR_SIZE){
     wire EXE.m2reg -> MEM.m2reg;
     wire EXE.wmem -> MEM.wmem;
     wire EXE.destination -> MEM.destination;
-    wire EXE.aluresult -> MEM.aluresult;
     wire EXE.op2 -> MEM.op2;
+    wire EXE.aluresult -> MEM.aluresult;
     wire MEM.wreg -> WB.wreg;
     wire MEM.m2reg -> WB.m2reg;
     wire MEM.destination -> WB.destination;
     wire MEM.dmemout -> WB.dmemout;
+    wire MEM.aluresult -> WB.aluresult;
     wire WB.wreg -> ID.wreg;
     wire WB.destination -> ID.destination;
+    //BUG: the result of this wires does not consider the width of the signal
+    // it will generate a wire of width 1 and therefore cause width mismatch
     wire WB.datareg -> ID.datareg;
 }
 
