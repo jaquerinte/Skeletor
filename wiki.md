@@ -24,18 +24,19 @@ regarding coding conventions, We will offer more flexibility in the future.
 
 For now generated code follows the following rules:
 
-   - Inputs are postfixed with _i, Outputs are postfixed with _o
+- Inputs are postfixed with _i, Outputs are postfixed with _o
       ex:input  clk\_i,
       
-  -   Wires that conect two modules are postfixed with the name of the modules that connect. 
+-   Wires that conect two modules are postfixed with the name of the modules that connect. 
       ex: wire rdy_a_d; // wiring between rdy_o of module a and clk_i of module d
-   -  Defines are written in capital letters.
-    - Module names are in lowercase letters and with underscores between words.
+-  Defines are written in capital letters.
+   
+- Module names are in lowercase letters and with underscores between words.
 	ex: module simple_example #(
-     - Parameters are written without underscores and only the first letter of each word is capital.
+- Parameters are written without underscores and only the first letter of each word is capital.
       ex:TransAddrSize 
-     - Project defines will be placed in to a file called "defines.vh"
-    -  All the files have five regions a File description, Headers, Modules,
+- Project defines will be placed in to a file called "defines.vh"
+-  All the files have five regions a File description, Headers, Modules,
       Generated logic and Handcrafted logic
 
         ``` 
