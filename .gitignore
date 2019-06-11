@@ -1,4 +1,7 @@
+*-cache.lib
 *.swp
+*.bak
+*.bck
 verilog/ABCD/tb/questa_sim/simpleExample/
 transcript
 *.wlf
