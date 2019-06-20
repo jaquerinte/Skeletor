@@ -35,8 +35,8 @@ def bracket_value(s):
 
 
 def main():
-    #f = open("test.net", "r")
-    f = open("test_big.net", "r")
+    f = open("test.net", "r")
+    # f = open("test_big.net", "r")
     netList = loads(f.read())
     for header in netList:
         if isinstance(header, list):
@@ -59,21 +59,26 @@ def main():
                             modules.add(symbol_value(str(header[i][2][1]))) # We add the name of the modules 
                             moduleSignals[symbol_value(str(header[i][2][1]))] = {}
 
-                            if(isinstance(header[i],list) and len(header[i])>=4):
-                                for pins in header[i][4]:
-                                    if isinstance(pins,list) and len(pins) == 4:
-                                        if len(pins[2]) > 2: # If the name of the pin has brackets, the imported library chops it in a non-desired manner.
-                                            name_1, bracket = bracket_value(pins[2][1])
-                                            # We take care of the name of the pins with brackets.
-                                            moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [str(bracket)+str(name_1)+"]"+symbol_value(str(pins[2][2])), symbol_value(str(pins[3][1]))] 
-                                        else:
-                                            # And those without them, we take care of them in a different manner.
-                                            moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [symbol_value(str(pins[2][1])), symbol_value(str(pins[3][1]))]
+                            # if(isinstance(header[i],list) and len(header[i])>=4):
+                            if isinstance(header[i],list):
+                                for sect in header[i]:
+                                    if isinstance(sect,list) and symbol_value(str(sect[0])):
+                                        for pins in sect: # We cannot fix the value to 4, we must look for the one that is "pins".
+                                            if isinstance(pins,list) and len(pins) == 4:
+                                                if len(pins[2]) > 2: # If the name of the pin has brackets, the imported library chops it in a non-desired manner.
+                                                    name_1, bracket = bracket_value(pins[2][1])
+                                                    # We take care of the name of the pins with brackets.
+                                                    moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [str(bracket)+str(name_1)+"]"+symbol_value(str(pins[2][2])), symbol_value(str(pins[3][1]))] 
+                                                else:
+                                                    # And those without them, we take care of them in a different manner.
+                                                    moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [symbol_value(str(pins[2][1])), symbol_value(str(pins[3][1]))]
 
 
                     i+=1
-    # for key,value in moduleSignals.items():
-    #     print(key, ":",value)
+    print(modules)
+    print(dicModName)
+    for key,value in moduleSignals.items():
+        print(key, ":",value)
         
 
                 
