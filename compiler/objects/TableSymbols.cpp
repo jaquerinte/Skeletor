@@ -8,12 +8,17 @@ bool TableSymbols :: addSymbol(string name, int type, string module, int nlin, i
 {
 	Symbol s(name,type, module);
 	for (int i = 0; i < v_symbols.size();++i) {
-		if (v_symbols.at(i).getName() == s.getName()) { 
+		if (v_symbols.at(i).getName() == s.getName()) {
+
 			if (v_symbols.at(i).getModule() == "null")
 			{
 			// fail: Symbol var ya decl
-			msgError(ERRORSIMALDEC, nlin, ncol - name.length(), name.c_str());
-			return false;
+				msgError(ERRORSIMALDEC, nlin, ncol - name.length(), name.c_str());
+				return false;
+			}
+			else if(v_symbols.at(i).getModule() == module){
+				msgError(ERRORSIMALDEC, nlin, ncol - name.length(), name.c_str());
+				return false;
 			}
 			else{
 				v_symbols.push_back(s);

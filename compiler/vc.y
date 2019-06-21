@@ -443,7 +443,7 @@ CallExpresion   :  twopoints id {
                 {
                     string pme = $2.lexeme;
                     string pme_name = $0.ph;
-                    ts.addSymbol(pme,INSTANCESYMBOL,s1, nlin, ncol);
+                    //ts.addSymbol(pme,INSTANCESYMBOL,s1, nlin, ncol);
                     s2 = "null";
 
                     //(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance)
