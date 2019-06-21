@@ -802,7 +802,8 @@ void print_usage(void)
     printf("-h, --help, help        Print this message\n");
     printf("-d                      Output directory name\n");
     printf("-n                      Set project name\n");
-    printf("-t                      Make the testbench\n");
+    printf("-t                      Make top test bench\n");
+    printf("-i                      Make test benches for all modules\n");
 }
 int arguments_handler(int argc, char ** argv){
     string str1 ;
