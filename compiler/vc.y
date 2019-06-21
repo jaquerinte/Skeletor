@@ -410,9 +410,11 @@ EInstr      : Ref {
                                 int in_inout;
                                 in_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).searchinoutSymbol(in[1], IN, nlin, ncol);
                                 // all verfiy
-                                // create wire.
                                 // add values instance and store wire
                                 string name_wire = out[1] + "_" + out[0] + "_" + in[0];
+                                // verify the wire if already exists and register if not
+                                ts.addSymbol(name_wire,WIRE,s1, nlin, ncol);
+                                // create wire.
                                 // add and instace out
                                 tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT, nlin,ncol);
                                 // add and instace in
