@@ -87,7 +87,7 @@ def main():
                         # First indexing to get the module name from the instance, second index to index the pin, third index to index the type of the pin.
                         if "Symbol" not in str(net[2][1]):
                             
-                            if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "output":
+                            if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "output" or moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional":
 
                                 name_ins_out = symbol_value(str(net[3][1][1])) # Module that outputs the signal.
                                 name_ins_in = symbol_value(str(net[4][1][1])) # Module that inputs the signal.
@@ -106,29 +106,20 @@ def main():
                                 name_ins_out = symbol_value(str(net[4][1][1])) # Module that outputs the signal.
 
                                 inpt = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0] # Input signal
-                                # print(inpt)
+
                                 inpt = inpt.replace("_","")
-                                # print(inpt)
                                     
                                 outpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Output signal
 
                                 
                                 width = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][0]
-                                # if width:
-                                #     outpt.replace("_","")
-                            
-                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional":
-                                pass
-
 
                             else:
                                 print("Error, pins must be of type input, output or bidireccional")
                                 exit()
 
                             wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt, width))
-                        
-                            # output = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0]
-                            # print(output)
+
     for cable in wires:
         # print(cable.id)
         # print(cable.name_ins_out)
