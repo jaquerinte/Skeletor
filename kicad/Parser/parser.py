@@ -21,7 +21,7 @@ class wire (object):
         self.output = o
         self.input = i
         self.width = width
-        self.wire_output = "wire %s%s.%s -> %s.%s" % (no,width,o,ni,i)
+        self.wire_output = "wire %s.%s%s -> %s.%s" % (no,width,o,ni,i)
 
 
 def symbol_value(s):
@@ -69,20 +69,15 @@ def main():
                                             if isinstance(pins,list) and len(pins) == 4:
                                                 if len(pins[2]) > 2: # If the name of the pin has brackets, the imported library chops it in a non-desired manner.
                                                     name_1, bracket = bracket_value(pins[2][1])
-                                                    print(name_1)
-                                                    print(bracket)
                                                     # We take care of the name of the pins with brackets.
-                                                    moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [str(bracket)+str(name_1)+"]"+symbol_value(str(pins[2][2])), symbol_value(str(pins[3][1]))] 
+                                                    moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [symbol_value(str(pins[2][2])), [str(bracket)+str(name_1)+"]",symbol_value(str(pins[3][1]))]] 
                                                 else:
                                                     # And those without them, we take care of them in a different manner.
-                                                    moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [symbol_value(str(pins[2][1])), symbol_value(str(pins[3][1]))]
+                                                    moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [symbol_value(str(pins[2][1])), ["",symbol_value(str(pins[3][1]))]]
 
 
                     i+=1
-            # print(modules)
-            # print(dicModName)
-            # for key,value in moduleSignals.items():
-            #     print(key, ":",value)
+            
             
             if symbol_value(str(header[0])) == "nets":
                 for net in header:
@@ -91,8 +86,8 @@ def main():
 
                         # First indexing to get the module name from the instance, second index to index the pin, third index to index the type of the pin.
                         if "Symbol" not in str(net[2][1]):
-                        
-                            if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1] == "output":
+                            
+                            if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "output":
 
                                 name_ins_out = symbol_value(str(net[3][1][1])) # Module that outputs the signal.
                                 name_ins_in = symbol_value(str(net[4][1][1])) # Module that inputs the signal.
@@ -100,27 +95,52 @@ def main():
 
                                 outpt = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0] # Output signal
                                 inpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Input signal
+                                inpt = inpt.replace("_","")
                                 
-                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1] == "input":
+                                width = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][0]
+
+                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "input":
 
                                 name_ins_in = symbol_value(str(net[3][1][1])) # Module that inputs the signal.
+                                
                                 name_ins_out = symbol_value(str(net[4][1][1])) # Module that outputs the signal.
 
                                 inpt = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0] # Input signal
+                                # print(inpt)
+                                inpt = inpt.replace("_","")
+                                # print(inpt)
+                                    
                                 outpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Output signal
 
-                            wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt))
+                                
+                                width = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][0]
+                                # if width:
+                                #     outpt.replace("_","")
+                            
+                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional":
+                                pass
+
+
+                            else:
+                                print("Error, pins must be of type input, output or bidireccional")
+                                exit()
+
+                            wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt, width))
                         
                             # output = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0]
                             # print(output)
-    #for cable in wires:
+    for cable in wires:
         # print(cable.id)
         # print(cable.name_ins_out)
         # print(cable.name_ins_in)
         # print(cable.output)
         # print(cable.input)
-        #print(cable.wire_output)
-                        
+        # print(cable.width)
+        print(cable.wire_output)
+    # print(modules)
+    # print(dicModName)
+    # for key,value in moduleSignals.items():
+    #     print(key, ":",value)
 
                 
 
