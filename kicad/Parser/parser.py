@@ -7,9 +7,22 @@ dicModName = dict() # Dictionary that saves {instance -> Module}
 
 moduleSignals = dict() # Dictionary of modules and its signals. The signals are a dictionary of their name and type. i.e., module1 -> [clk -> input, rst -> input], module2 -> ["[BITS_REGFILE:0]_destination" -> input]
 
+wires = []
+
 symbol = re.compile(r'Symbol\(\'(?P<value>.*)\'\)')
 
 bracket = re.compile(r'Bracket\(\[Symbol\(\'(?P<symbol>.*)\'\)\], \'(?P<value>.*)\'\)')
+
+class wire (object):
+    def __init__(self, id, no, ni, o, i, width=""):
+        self.id = id
+        self.name_ins_out = no
+        self.name_ins_in = ni
+        self.output = o
+        self.input = i
+        self.width = width
+        self.wire_output = "wire %s%s.%s -> %s.%s" % (no,width,o,ni,i)
+
 
 def symbol_value(s):
     result = symbol.search(s)
@@ -23,20 +36,10 @@ def bracket_value(s):
         return result.group('symbol'), result.group('value')
     return '',''
 
-# regex = re.compile(r'^Symbol\(\'(?P<value>.*)\'\)$')
-
-
-
-# def symbol_value(s):
-#     result = regex.search(s)
-#     if result:
-#         return result.group('value')
-#     return ''
-
 
 def main():
-    f = open("test.net", "r")
-    # f = open("test_big.net", "r")
+    # f = open("test.net", "r")
+    f = open("test_big.net", "r")
     netList = loads(f.read())
     for header in netList:
         if isinstance(header, list):
@@ -59,7 +62,6 @@ def main():
                             modules.add(symbol_value(str(header[i][2][1]))) # We add the name of the modules 
                             moduleSignals[symbol_value(str(header[i][2][1]))] = {}
 
-                            # if(isinstance(header[i],list) and len(header[i])>=4):
                             if isinstance(header[i],list):
                                 for sect in header[i]:
                                     if isinstance(sect,list) and symbol_value(str(sect[0])):
@@ -67,6 +69,8 @@ def main():
                                             if isinstance(pins,list) and len(pins) == 4:
                                                 if len(pins[2]) > 2: # If the name of the pin has brackets, the imported library chops it in a non-desired manner.
                                                     name_1, bracket = bracket_value(pins[2][1])
+                                                    print(name_1)
+                                                    print(bracket)
                                                     # We take care of the name of the pins with brackets.
                                                     moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [str(bracket)+str(name_1)+"]"+symbol_value(str(pins[2][2])), symbol_value(str(pins[3][1]))] 
                                                 else:
@@ -75,11 +79,48 @@ def main():
 
 
                     i+=1
-    print(modules)
-    print(dicModName)
-    for key,value in moduleSignals.items():
-        print(key, ":",value)
-        
+            # print(modules)
+            # print(dicModName)
+            # for key,value in moduleSignals.items():
+            #     print(key, ":",value)
+            
+            if symbol_value(str(header[0])) == "nets":
+                for net in header:
+                    if isinstance(net,list):
+                        id = net[1][1]
+
+                        # First indexing to get the module name from the instance, second index to index the pin, third index to index the type of the pin.
+                        if "Symbol" not in str(net[2][1]):
+                        
+                            if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1] == "output":
+
+                                name_ins_out = symbol_value(str(net[3][1][1])) # Module that outputs the signal.
+                                name_ins_in = symbol_value(str(net[4][1][1])) # Module that inputs the signal.
+                                
+
+                                outpt = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0] # Output signal
+                                inpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Input signal
+                                
+                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1] == "input":
+
+                                name_ins_in = symbol_value(str(net[3][1][1])) # Module that inputs the signal.
+                                name_ins_out = symbol_value(str(net[4][1][1])) # Module that outputs the signal.
+
+                                inpt = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0] # Input signal
+                                outpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Output signal
+
+                            wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt))
+                        
+                            # output = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0]
+                            # print(output)
+    #for cable in wires:
+        # print(cable.id)
+        # print(cable.name_ins_out)
+        # print(cable.name_ins_in)
+        # print(cable.output)
+        # print(cable.input)
+        #print(cable.wire_output)
+                        
 
                 
 
