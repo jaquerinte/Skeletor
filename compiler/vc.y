@@ -282,10 +282,11 @@ Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
 EInstr      : Ref {    
                        string pme = $1.trad; $$.ph = pme;} CallExpresion {$$.trad = $3.trad;}
             | TipoBase Arrayargs id  {
+                                string aux = "_";
                                 string pme = $3.lexeme;
                                 // add symbol
                                 int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
-                                ts.addSymbol(pme,INOUTSYMBOL,s1, nlin, ncol);
+                                ts.addSymbol(pme + aux + $1.trad,INOUTSYMBOL,s1, nlin, ncol);
                                 string with = $2.trad ;
                                 tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with, nlin, ncol);
                                 $$.trad = $1.trad + pme;
@@ -631,9 +632,9 @@ Factor  : Ref   {
 Ref     :   id {string pme = $1.lexeme; $$.trad = pme;}
     ;
 /* Tipos */
-TipoBase    : intype {$$.size = IN;}
-            | outtype {$$.size = OUT;} 
-            | inouttype {$$.size = INOUT;} 
+TipoBase    : intype {$$.trad = "i"; $$.size = IN;}
+            | outtype {$$.trad = "o";$$.size = OUT;} 
+            | inouttype {$$.trad = "io";$$.size = INOUT;} 
     ;
 
 S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
