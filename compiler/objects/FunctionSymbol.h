@@ -34,7 +34,7 @@ public:
 	
 	void createFileModule(bool verilogDef);
 	void createFileModule(string base, bool verilog_def);
-	void createRunTest(bool definitions);
+	void createRunTest(bool definitions, bool first);
 	void printToFile();
 
 	// getters
@@ -65,7 +65,7 @@ private:
 	void createTbVerilog(bool definitions);
 	void createTbFolder();
     void createQuestaSimFolder();
-    void createTbRun();
+    void createTbRun(bool first);
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;
