@@ -324,14 +324,26 @@ void FunctionSymbol ::createFileModuleBase(){
     this -> output_file_data += "endmodule\n";
 }
 
-void FunctionSymbol :: createRunTest(bool definitions, bool first){
-	if(first)
+void FunctionSymbol :: createRunTest(bool definitions, bool first, bool vtb, bool qtb){
+    if(first)
     {
-       this->createTbFolder();
-	   this->createQuestaSimFolder();
+        this->createTbFolder();
+       if(qtb){
+            this->createQuestaSimFolder();
+       }
+       if (vtb){
+            this->createVerilatorFolder();
+       }
     }
-	this->createTbRun(first);
-	this->createTbVerilog(definitions);
+    if(qtb){
+        this->createTbRunQuesta(first);
+        this->createTbQuesta(definitions);
+    }
+    if(vtb){
+        this->createTbRunVerilator(first);
+        this->createTbVerilator(definitions);
+    }
+	
 
 
 
@@ -349,7 +361,47 @@ void FunctionSymbol :: createQuestaSimFolder(){
 		cerr << "Error : " << strerror(errno) << endl;
 }
 
-void FunctionSymbol :: createTbRun(bool first){
+void FunctionSymbol :: createVerilatorFolder(){
+    string output_folder = this -> projectFolderName + "tb/verilator";
+    if (mkdir(output_folder.c_str(), 0777) == -1) 
+        cerr << "Error : " << strerror(errno) << endl;
+}
+
+void FunctionSymbol :: createTbRunVerilator(bool first){
+    string output_file = "";
+    if (first){
+        output_file = this -> projectFolderName + "tb/verilator/runtest.sh";
+    }
+    else{
+        output_file = this -> projectFolderName + "tb/verilator/runtest_" + this->name + ".sh";
+    }
+    // create file
+    string output = "RED='\\033[0;31m'\n";
+    output += "NC='\\033[0m' # No Color\n";
+    output += "\n";
+    output += "echo -e \"${RED} Modify the script if you need to set your verilator path ${NC}\"\n";
+    output += "#____________start set path verilator\n";
+    output += "#export TOP=/home/bscuser/BSC/lowrisc\n";
+    output += "#export VERILATOR_ROOT=$TOP/verilator\n";
+    output += "#____________end set path verilator\n";
+    output += "rm -rf obj_dir\n";
+    output += "verilator -Wall --cc --trace ../../hdl/" + this -> name + ".v -I../../hdl/ --exe tb_" + this -> name + ".cpp -CFLAGS \"-std=c++14\"\n";
+    output += "\n";
+    output += "cd obj_dir/\n";
+    output += "make -f V" + this -> name + ".mk \n";
+    output += "cd ../\n";
+    output += "./obj_dir/V" + this -> name + "\n";
+    output += "gtkwave obj_dir/V" + this -> name + ".vcd  test.gtkw\n";
+    output += "\n";
+    // create file
+    char buf[0x100];
+    snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+    FILE *f = fopen(buf, "w");
+    fprintf(f, output.c_str());
+    fclose(f);
+}
+
+void FunctionSymbol :: createTbRunQuesta(bool first){
     string output_file = "";
     if (first){
         output_file = this -> projectFolderName + "tb/questa_sim/runtest.sh";
@@ -371,7 +423,134 @@ void FunctionSymbol :: createTbRun(bool first){
     fclose(f);
 
 }
-void FunctionSymbol :: createTbVerilog(bool definitions){
+void FunctionSymbol :: createTbVerilator(bool definitions){
+    string output_file = this -> projectFolderName + "tb/verilator/tb_" + this->name + ".cpp";
+    string output = "";
+    output += "#include \"V" + this->name + "\"\n";
+    output += "#include \"verilated.h\"\n";
+    output += "#include \"verilated_vcd_c.h\"\n";
+    output += "#include <algorithm>\n";
+    output += "#define TRACE_DEF true\n";
+    output += "\n";
+    output += "//time for waveforms\n";
+    output += "vluint64_t main_time =0;//current simulation time\n";
+    output += "double sc_time_stamp(){ //called by $time in verilog\n";
+    output += "    return main_time;   //converts to double , to match\n";
+    output += "}\n";
+    output += "// debug function to generate waveforms and clock\n";
+    output += "void ticktoc_and_trace(V" + this->name +"* module,VerilatedVcdC* tfp){\n";
+    output += "  //waveforms and tick clock\n";
+    output += "  if (tfp != NULL){\n";
+    output += "  module->eval();\n";
+    output += "  module->clk_i = !module->clk_i;\n";
+    output += "  module->eval();\n";
+    output += "  tfp->dump (main_time);\n";
+    output += "  module->eval();\n";
+    output += "  main_time++;\n";
+    output += "  module->eval();\n";
+    output += "  module->clk_i = !module->clk_i;\n";
+    output += "  module->eval();\n";
+    output += "  tfp->dump (main_time);\n";
+    output += "  module->eval();\n";
+    output += "  main_time++;\n";
+    output += "  module->eval();\n";
+    output += "  }else{\n";
+    output += "  module->eval();\n";
+    output += "  module->clk_i = !module->clk_i;\n";
+    output += "  module->eval();\n";
+    output += "  module->clk_i = !module->clk_i;\n";
+    output += "  module->eval();\n";
+    output += " }\n";
+    output += "}\n";
+    output += "void tick_and_trace(V" + this->name +"* module,VerilatedVcdC* tfp){\n";
+    output += "  //waveforms and tick clock\n";
+    output += "  if (tfp != NULL){\n";
+    output += "  module->eval();\n";
+    output += "  module->clk_i = !module->clk_i;\n";
+    output += "  module->eval();\n";
+    output += "    tfp->dump (main_time);\n";
+    output += "  module->eval();\n";
+    output += "    main_time++;\n";
+    output += "  module->eval();\n";
+    output += "  }else{\n";
+    output += "  module->eval();\n";
+    output += "  module->clk_i = !module->clk_i;\n";
+    output += "  module->eval();\n";
+    output += "  }\n";
+    output += "}\n";
+    output += "\n";
+    output += "struct TestCase {\n";
+    output += "    const char* name;\n";
+    output += "    bool rst_i;\n";
+    output += "    uint32_t addr_i;\n";
+    output += "};\n";
+    output += "\n";
+    output += "TestCase test_cases[] {\n";
+    output += "//name            rst addr\n";
+    output += "    { \"step0\"       ,0  , 0xFFFF },\n";
+    output += "    { \"step1\"       ,0  , 0xFFFF },\n";
+    output += "    { \"step2\"       ,0  , 0x11FF },\n";
+    output += "    { \"step3\"       ,0  , 0xFF11 },\n";
+    output += "};\n";
+    output += "\n";
+    output += "int main(int argc, char **argv, char **env) {\n";
+    output += "  //enable waveforms\n";
+    output += "  bool vcdTrace= TRACE_DEF;\n";
+    output += "  VerilatedVcdC* tfp =NULL;\n";
+    output += "  //declare my module\n";
+    output += "  Verilated::commandArgs(argc, argv);\n";
+    output += "  VsimpleExample* DUT = new V" + this->name + ";\n";
+    output += "  //enable waveforms\n";
+    output += "  if(vcdTrace)\n";
+    output += "  {\n";
+    output += "    Verilated::traceEverOn(true);\n";
+    output += "    tfp= new VerilatedVcdC;\n";
+    output += "    DUT->trace(tfp,99);\n";
+    output += "    std::string vcdname = argv[0];\n";
+    output += "    vcdname += \".vcd\";\n";
+    output += "    std::cout << vcdname << std::endl;\n";
+    output += "    tfp->open(vcdname.c_str());\n";
+    output += "  }\n";
+    output += "\n";
+    output += "  //initial reset\n";
+    output += "  DUT->rst_i=1;\n";
+    output += "  ticktoc_and_trace(DUT,tfp);\n";
+    output += "  DUT->rst_i=0;\n";
+    output += "  ticktoc_and_trace(DUT,tfp);\n";
+    output += " //loop through test cases \n";
+    output += " int num_test_cases = sizeof(test_cases)/sizeof(TestCase);\n";
+    output += " for(int k = 0; k < num_test_cases; k++) {\n";
+    output += "      TestCase *test_case = &test_cases[k];\n";
+    output += "      //Feed addres\n";
+    output += "      DUT->rst_i=test_case->rst_i;\n";
+    output += "      DUT->addr_i=test_case->addr_i;\n";
+    output += "      //Advance one cycle\n";
+    output += "      ticktoc_and_trace(DUT,tfp);\n";
+    output += "  }\n";
+    output += "//waveforms\n";
+    output += "  if (tfp != NULL){\n";
+    output += "    tfp->dump (main_time);\n";
+    output += "    main_time++;\n";
+    output += "  }\n";
+    output += "  tfp->close();\n";
+    output += "  DUT->final();\n";
+    output += "  delete tfp;\n";
+    output += "  delete DUT;\n";
+    output += "exit(0);\n";
+    output += "}\n";
+    output += "\n";
+
+    // cretate file
+    char buf[0x100];
+    snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+    FILE *f = fopen(buf, "w");
+    fprintf(f, output.c_str());
+    fclose(f);
+
+
+}
+
+void FunctionSymbol :: createTbQuesta(bool definitions){
 	string output_file = this -> projectFolderName + "tb/questa_sim/tb_" + this->name + ".v";
 	string output = "";
 	output += "//-----------------------------------------------------\n";

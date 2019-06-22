@@ -34,7 +34,7 @@ public:
 	
 	void createFileModule(bool verilogDef);
 	void createFileModule(string base, bool verilog_def);
-	void createRunTest(bool definitions, bool first);
+	void createRunTest(bool definitions, bool first, bool qtb, bool vtb);
 	void printToFile();
 
 	// getters
@@ -62,10 +62,13 @@ public:
 	vector<InstanceSymbol> v_instances;
 
 private:
-	void createTbVerilog(bool definitions);
+	void createTbQuesta(bool definitions);
 	void createTbFolder();
     void createQuestaSimFolder();
-    void createTbRun(bool first);
+    void createVerilatorFolder();
+    void createTbRunVerilator(bool first);
+    void createTbRunQuesta(bool first);
+    void createTbVerilator(bool first);
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;

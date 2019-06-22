@@ -40,6 +40,8 @@ string projectFolder = "OUTPUT";
 bool db = false;
 bool tb = false;
 bool itb = false;
+bool qtb = true;
+bool vtb = false;
 string init_output(bool);
 
 struct Type {
@@ -642,14 +644,14 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
                                 ts.printToFile(projectFolder);
                                 if(tb && !itb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
-                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true);
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb);
                                 }
                                 else if(tb && itb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
-                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true);
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb);
                                     for (int i = 0; i <tfs.v_funcSymbols.size();++i) {
                                         if (i != pos ){
-                                            tfs.v_funcSymbols.at(i).createRunTest(ts.getVerilogDefig(),false);
+                                            tfs.v_funcSymbols.at(i).createRunTest(ts.getVerilogDefig(),false,qtb,vtb);
                                         }                   
                                     }
                                 }
@@ -836,6 +838,12 @@ int arguments_handler(int argc, char ** argv){
                 break;
             case 'i' :
                 itb = true;
+                break;
+            case 'v' :
+                qtb = true;
+                break;
+            case 'q' :
+                vtb = true;
                 break;
             //default
             default:
