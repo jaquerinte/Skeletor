@@ -3,7 +3,7 @@ EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 2 2
+Sheet 2 4
 Title ""
 Date ""
 Rev ""
@@ -13,17 +13,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L test:fetch U1
-U 1 1 5D0D2E0C
-P 2500 2050
-F 0 "U1" H 2600 2475 50  0000 C CNN
-F 1 "fetch" H 2600 2384 50  0000 C CNN
-F 2 "" H 2450 2500 50  0001 C CNN
-F 3 "" H 2450 2500 50  0001 C CNN
-	1    2500 2050
-	1    0    0    -1  
-$EndComp
 $Comp
 L test:decode U?
 U 1 1 5D0D2E12
@@ -59,14 +48,6 @@ F 3 "" H 8200 5250 50  0001 C CNN
 	1    8200 4650
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	3050 1850 3050 1550
-Wire Wire Line
-	3050 1550 1900 1550
-Wire Wire Line
-	1900 1550 1900 2050
-Wire Wire Line
-	1900 2050 2150 2050
 Wire Wire Line
 	6050 1950 6650 1950
 Wire Wire Line
@@ -233,10 +214,6 @@ Wire Wire Line
 Wire Wire Line
 	3450 2150 3150 2150
 Wire Wire Line
-	3050 2050 3150 2050
-Wire Wire Line
-	3150 2050 3150 2150
-Wire Wire Line
 	6350 2700 6900 2700
 Wire Wire Line
 	6050 2550 6350 2550
@@ -256,7 +233,7 @@ Wire Wire Line
 	6250 2750 6250 2900
 Text HLabel 3450 1950 0    50   Input ~ 0
 clk
-Text HLabel 2150 1850 0    50   Input ~ 0
+Text HLabel 2000 1750 0    50   Input ~ 0
 clk
 Text HLabel 6900 1900 0    50   Input ~ 0
 clk
@@ -264,7 +241,7 @@ Text HLabel 3550 4350 0    50   Input ~ 0
 clk
 Text HLabel 6950 4350 0    50   Input ~ 0
 clk
-Text HLabel 2150 1950 0    50   Input ~ 0
+Text HLabel 2000 1900 0    50   Input ~ 0
 rst
 Text HLabel 3450 2050 0    50   Input ~ 0
 rst
@@ -285,4 +262,62 @@ Wire Wire Line
 Connection ~ 10400 1900
 Wire Wire Line
 	10400 1900 10400 3850
+$Sheet
+S 2000 1600 850  550 
+U 5D105301
+F0 "fetch" 50
+F1 "fetch.sch" 50
+F2 "clk" I L 2000 1750 50 
+F3 "rst" I L 2000 1900 50 
+F4 "pc" I L 2000 2050 50 
+F5 "nextpc" O R 2850 1850 50 
+F6 "instruction" O R 2850 1950 50 
+$EndSheet
+Wire Wire Line
+	2850 1850 2900 1850
+Wire Wire Line
+	2900 1850 2900 1300
+Wire Wire Line
+	2900 1300 1750 1300
+Wire Wire Line
+	1750 2100 1900 2100
+Wire Wire Line
+	1900 2100 1900 2050
+Wire Wire Line
+	1900 2050 2000 2050
+Wire Wire Line
+	2850 1950 3150 1950
+Wire Wire Line
+	3150 1950 3150 2150
+$Sheet
+S 1050 2450 1100 650 
+U 5D11577B
+F0 "fetch2" 50
+F1 "fetch.sch" 50
+F2 "clk" I L 1050 2600 50 
+F3 "rst" I L 1050 2750 50 
+F4 "pc" I L 1050 2950 50 
+F5 "nextpc" O R 2150 2600 50 
+F6 "instruction" O R 2150 2750 50 
+$EndSheet
+Text HLabel 1050 2600 0    50   Input ~ 0
+clk
+Text HLabel 1050 2750 0    50   Input ~ 0
+rst
+Wire Wire Line
+	750  1950 750  2950
+Wire Wire Line
+	750  2950 1050 2950
+Wire Wire Line
+	1750 1300 1750 2100
+Wire Wire Line
+	750  1950 1500 1950
+Wire Wire Line
+	1500 1950 1500 2300
+Wire Wire Line
+	1500 2300 2250 2300
+Wire Wire Line
+	2250 2300 2250 2600
+Wire Wire Line
+	2250 2600 2150 2600
 $EndSCHEMATC
