@@ -97,7 +97,7 @@ def main():
                                 inpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Input signal
                                 inpt = inpt.replace("_","")
                                 
-                                width = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][0]
+                                width = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][0] # The width that will be concatenated to the output signal.
 
                             elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "input":
 
@@ -112,7 +112,7 @@ def main():
                                 outpt = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0] # Output signal
 
                                 
-                                width = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][0]
+                                width = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][0] # The width that will be concatenated to the output signal.
 
                             else:
                                 print("Error, pins must be of type input, output or bidireccional")
@@ -120,14 +120,14 @@ def main():
 
                             wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt, width))
 
-    for cable in wires:
+    # for cable in wires:
         # print(cable.id)
         # print(cable.name_ins_out)
         # print(cable.name_ins_in)
         # print(cable.output)
         # print(cable.input)
         # print(cable.width)
-        print(cable.wire_output)
+    #     print(cable.wire_output)
     # print(modules)
     # print(dicModName)
     # for key,value in moduleSignals.items():
