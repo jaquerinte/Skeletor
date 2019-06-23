@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:test-cache
 EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
@@ -286,7 +287,7 @@ Wire Wire Line
 Wire Wire Line
 	1900 2050 2000 2050
 Wire Wire Line
-	2850 1950 3150 1950
+	2850 1950 2950 1950
 Wire Wire Line
 	3150 1950 3150 2150
 $Sheet
@@ -320,4 +321,19 @@ Wire Wire Line
 	2250 2300 2250 2600
 Wire Wire Line
 	2250 2600 2150 2600
+Wire Wire Line
+	2950 1950 2950 2200
+Wire Wire Line
+	2950 2200 2600 2200
+Wire Wire Line
+	2600 2200 2600 2300
+Wire Wire Line
+	2600 2300 2350 2300
+Wire Wire Line
+	2350 2300 2350 2750
+Wire Wire Line
+	2350 2750 2150 2750
+Connection ~ 2950 1950
+Wire Wire Line
+	2950 1950 3150 1950
 $EndSCHEMATC
