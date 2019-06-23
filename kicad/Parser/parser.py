@@ -5,7 +5,9 @@ modules = set() # Set that contains all the modules
 
 dicModName = dict() # Dictionary that saves {instance -> Module}
 
-moduleSignals = dict() # Dictionary of modules and its signals. The signals are a dictionary of their name and type. i.e., module1 -> [clk -> input, rst -> input], module2 -> ["[BITS_REGFILE:0]_destination" -> input]
+moduleSignals = dict() # Dictionary of modules and its signals. The signals are a dictionary of their name and type. i.e., module1 -> [clk -> [width, input], rst -> [width,input]], module2 -> [destination -> [width,input]]
+
+topSignals = dict() # Dictionary with the top signals and the modules they connect to and their type. e.g., nameSignal -> {[instance1, instance2, instanc3], input}
 
 wires = []
 
@@ -85,7 +87,7 @@ def main():
                         id = net[1][1]
 
                         # First indexing to get the module name from the instance, second index to index the pin, third index to index the type of the pin.
-                        if "Symbol" not in str(net[2][1]):
+                        if "Symbol" not in str(net[2][1]): # Signals that come from the top modules use the Symbol name convention.
                             
                             if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "output" or moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional":
 
@@ -120,6 +122,22 @@ def main():
 
                             wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt, width))
 
+                        else:
+
+                            topSignals[symbol_value(str(net[2][1]))] = {}
+                            modulesToSignal = []
+                            if isinstance(net,list):
+                                for mod in net:
+                                    if isinstance(mod,list) and len(mod)>=3:
+                                        modulesToSignal.append(symbol_value(str(mod[1][1])))
+
+                                topSignals[symbol_value(str(net[2][1]))] = [modulesToSignal, moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1]]
+                            
+                        
+
+    for key,value in topSignals.items():
+        print(key, ":",value)
+
     # for cable in wires:
         # print(cable.id)
         # print(cable.name_ins_out)
@@ -127,7 +145,7 @@ def main():
         # print(cable.output)
         # print(cable.input)
         # print(cable.width)
-    #     print(cable.wire_output)
+        # print(cable.wire_output)
     # print(modules)
     # print(dicModName)
     # for key,value in moduleSignals.items():
