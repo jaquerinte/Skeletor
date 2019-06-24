@@ -112,25 +112,21 @@ F 3 "" H 7400 2650 50  0001 C CNN
 	1    7550 2050
 	1    0    0    -1  
 $EndComp
-Text GLabel 1500 1600 0    50   Input ~ 0
-rst
 Text GLabel 1500 1700 0    50   Input ~ 0
-clk
-Text GLabel 2800 1700 0    50   Input ~ 0
 rst
+Text GLabel 1500 1600 0    50   Input ~ 0
+clk
 Text GLabel 2800 1800 0    50   Input ~ 0
-clk
-Text GLabel 6250 1650 0    50   Input ~ 0
 rst
-Text GLabel 6250 1750 0    50   Input ~ 0
+Text GLabel 2800 1700 0    50   Input ~ 0
 clk
-Text GLabel 2900 4100 0    50   Input ~ 0
-rst
 Text GLabel 2900 4200 0    50   Input ~ 0
-clk
-Text GLabel 6300 4100 0    50   Input ~ 0
 rst
+Text GLabel 2900 4100 0    50   Input ~ 0
+clk
 Text GLabel 6300 4200 0    50   Input ~ 0
+rst
+Text GLabel 6300 4100 0    50   Input ~ 0
 clk
 Wire Wire Line
 	8850 1650 9000 1650
@@ -276,4 +272,8 @@ Wire Wire Line
 	5400 2500 5600 2500
 Wire Wire Line
 	5600 2500 5600 2650
+Text GLabel 6250 1750 0    50   Input ~ 0
+rst
+Text GLabel 6250 1650 0    50   Input ~ 0
+clk
 $EndSCHEMATC
