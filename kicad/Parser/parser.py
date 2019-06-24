@@ -164,33 +164,44 @@ def main():
                 f_skeletor.write("inout %s %s;\n" % (value[1][0], value[0]))
         f_skeletor.write("}\n\n")
     f_skeletor.write("module top main(){\n")
+    type_c='in'
+    for signal,signal_data in topSignals.items():
+        if signal_data[2]=='input':
+            type_c = 'in'
+        elif signal_data[2]=='output':
+            type_c = 'out'
+        else:
+            type_c = 'inout'
+        f_skeletor.write("    %s %s %s;\n"%(type_c,signal_data[1],signal))
+    f_skeletor.write("\n")
     for instance,module in dicModName.items() :
         f_skeletor.write("    %s:%s(){\n"%(module,instance))
+        connection_buffer = []
+        counter=0
         for signal,signal_data in topSignals.items():
             for instance_connected,pin in signal_data[0].items():
                 if instance_connected == instance:
-                    f_skeletor.write("        %s %s %s = %s %s\n"%(signal_data[2],signal_data[1],pin,signal_data[2],signal))
-        f_skeletor.write("    }\n")
+                    counter = counter+1
+                    if signal_data[2]=='input':
+                        type_c='in'
+                    elif signal_data[2]=='output':
+                        type_c='out'
+                    else:
+                        type_c='inout'
+
+                    connection_buffer.append("        " + type_c + " " + signal_data[1] + " " + pin + " = " + type_c + " " + signal)
+        for connection in connection_buffer:
+            f_skeletor.write(connection)
+            if counter > 1:
+                f_skeletor.write(",\n")
+            else:
+                f_skeletor.write("\n")
+            counter = counter-1
+        f_skeletor.write("    };\n\n")
     for cable in wires:
-        f_skeletor.write("    %s\n"%cable.wire_output)
+        f_skeletor.write("    %s;\n"%cable.wire_output)
+    f_skeletor.write("}\n")
     f_skeletor.close()
-    print(dicModName)
-    print(topSignals)
-    # for cable in wires:
-        # print(cable.id)
-        # print(cable.name_ins_out)
-        # print(cable.name_ins_in)
-        # print(cable.output)
-        # print(cable.input)
-        # print(cable.width)
-        # print(cable.wire_output)
-    # print(modules)
-    # print(dicModName)
-    # for key,value in moduleSignals.items():
-    #     print(key, ":",value)
-
-                
-
 
 
 if __name__== "__main__":
