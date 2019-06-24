@@ -7,7 +7,7 @@ dicModName = dict() # Dictionary that saves {instance -> Module}
 
 moduleSignals = dict() # Dictionary of modules and its signals. The signals are a dictionary of their name and type. i.e., module1 -> [clk -> [width, input], rst -> [width,input]], module2 -> [destination -> [width,input]]
 
-topSignals = dict() # Dictionary with the top signals and the modules they connect to and their type. e.g., nameSignal -> {[instance1, instance2, instance3], input}
+topSignals = dict() # Dictionary with the top signals and the modules they connect to and their type. e.g., nameSignal -> {[instance1, instance2, instanc3], input}
 
 wires = []
 
@@ -71,8 +71,6 @@ def main():
                                             if isinstance(pins,list) and len(pins) == 4:
                                                 if len(pins[2]) > 2: # If the name of the pin has brackets, the imported library chops it in a non-desired manner.
                                                     name_1, bracket = bracket_value(pins[2][1])
-                                                    # print(name_1)
-                                                    # print(bracket)
                                                     # We take care of the name of the pins with brackets.
                                                     moduleSignals[symbol_value(str(header[i][2][1]))][pins[1][1]] = [symbol_value(str(pins[2][2])), [str(bracket)+str(name_1)+"]",symbol_value(str(pins[3][1]))]] 
                                                 else:
@@ -125,29 +123,15 @@ def main():
                             wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt, width))
 
                         else:
-                            width = ""
-                            name = ""
-                            if len(net[2]) > 2: # If the width of the signal is specified.
 
-                                name = symbol_value(str(net[2][2])).replace("_","") # We get the name to use it as a key and remove the underscore used for the width.
-                                
-                                name_1, bracket = bracket_value(net[2][1])
-
-                                width = bracket + name_1 + "]"
-
-                                topSignals[name] = {}
-
-                            else:
-                                name = symbol_value(str(net[2][1]))
-                                topSignals[name] = {}
-                            modulesToSignal = {}
+                            topSignals[symbol_value(str(net[2][1]))] = {}
+                            modulesToSignal = []
                             if isinstance(net,list):
                                 for mod in net:
-                                    if isinstance(mod,list) and len(mod)>=3 and symbol_value(str(mod[0])) == "node":
+                                    if isinstance(mod,list) and len(mod)>=3:
+                                        modulesToSignal.append(symbol_value(str(mod[1][1])))
 
-                                        modulesToSignal[symbol_value(str(mod[1][1]))] = moduleSignals[dicModName[symbol_value(str(mod[1][1]))]][net[3][2][1]][0]
-
-                                topSignals[name] = [modulesToSignal, width, moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1]]
+                                topSignals[symbol_value(str(net[2][1]))] = [modulesToSignal, moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1]]
                             
                         
 
@@ -164,18 +148,16 @@ def main():
                 f_skeletor.write("inout %s %s;\n" % (value[1][0], value[0]))
         f_skeletor.write("}\n\n")
     f_skeletor.write("module top main(){\n")
-    for instance,module in dicModName.items() :
+    for instance,module in dicModName :
         f_skeletor.write("    %s:%s(){\n"%(module,instance))
-        for signal,signal_data in topSignals.items():
-            for instance_connected,pin in signal_data[0].items():
+        for signal,signal_data in topSignals:
+            for instance_connected in signal_data[0]:
                 if instance_connected == instance:
-                    f_skeletor.write("        %s %s %s = %s %s\n"%(signal_data[2],signal_data[1],pin,signal_data[2],signal))
-        f_skeletor.write("    }\n")
+                    f_skeletor.write("%s %s = %s %s"%(signal_data[1],signal,))
     for cable in wires:
         f_skeletor.write("    %s\n"%cable.wire_output)
     f_skeletor.close()
-    print(dicModName)
-    print(topSignals)
+
     # for cable in wires:
         # print(cable.id)
         # print(cable.name_ins_out)
