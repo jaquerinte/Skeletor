@@ -54,8 +54,9 @@ def main():
                 outputFile = sys.argv[4]
     elif sys.argv[1]=='--output':
         outputFile = sys.argv[2]
-        if sys.argv[3] == '--input':
-            inputFile = sys.argv[4]
+        if length==5:
+            if sys.argv[3] == '--input':
+                inputFile = sys.argv[4]
     if sys.argv[1] == '--help' or sys.argv[1]=='-h':
         print("================================")
         print("Usage: python3 parser.py --input filename.txt --output filename.txt")
