@@ -1,40 +1,3 @@
-module writeback(){
-    in  clk;
-    in  rst;
-    in  wreg;
-    in  m2reg;
-    in [AddrSize-1:0] _aluresult;
-    in [AddrSize-1:0] _dmemout;
-    in [BITS_REGFILE:0] _destination;
-    out  wreg;
-    out [BITS_REGFILE:0] _destination;
-    out [AddrSize-1:0] _datareg;
-}
-
-module memory(){
-    in  clk;
-    in  rst;
-    in  wreg;
-    in  m2reg;
-    in  wmem;
-    in [BITS_REGFILE:0] _destination;
-    in [AddrSize-1:0] _aluresult;
-    in [AddrSize-1:0] _op2;
-    out  wreg;
-    out  m2reg;
-    out [BITS_REGFILE:0] _destination;
-    out [AddrSize-1:0] _aluresult;
-    out [AddrSize-1:0] _dmemout;
-}
-
-module fetch(){
-    in  clk;
-    in  rst;
-    in  pc;
-    out  nextpc;
-    out  instruction;
-}
-
 module execute(){
     in  clk;
     in  rst;
@@ -66,6 +29,43 @@ module decode(){
     out [AddrSize-1:0] _op1;
     out [AddrSize-1:0] _op2;
     out [AddrSize-1:0] _extendedimm;
+}
+
+module fetch(){
+    in  clk;
+    in  rst;
+    in  pc;
+    out  nextpc;
+    out  instruction;
+}
+
+module writeback(){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in [AddrSize-1:0] _aluresult;
+    in [AddrSize-1:0] _dmemout;
+    in [BITS_REGFILE:0] _destination;
+    out  wreg;
+    out [BITS_REGFILE:0] _destination;
+    out [AddrSize-1:0] _datareg;
+}
+
+module memory(){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in [BITS_REGFILE:0] _destination;
+    in [AddrSize-1:0] _aluresult;
+    in [AddrSize-1:0] _op2;
+    out  wreg;
+    out  m2reg;
+    out [BITS_REGFILE:0] _destination;
+    out [AddrSize-1:0] _aluresult;
+    out [AddrSize-1:0] _dmemout;
 }
 
 module top main(){
