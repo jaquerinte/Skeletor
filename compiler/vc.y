@@ -805,8 +805,10 @@ void print_usage(void)
     printf("-h, --help, help        Print this message\n");
     printf("-d                      Output directory name\n");
     printf("-n                      Set project name\n");
-    printf("-t                      Make top test bench\n");
-    printf("-i                      Make test benches for all modules\n");
+    printf("-t -q                   Make top test bench for questasim \n");
+    printf("-t -v                   Make top test bench for verilator\n");
+    printf("-t -q -i                Make top and individual test benches for questasim \n");
+    printf("-t -v -i                Make top and individual test benches for verilator\n");
 }
 int arguments_handler(int argc, char ** argv){
     string str1 ;
