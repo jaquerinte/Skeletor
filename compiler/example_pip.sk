@@ -1,0 +1,164 @@
+`define ADDR_SIZE 32
+`define BITS_REGFILE 5
+
+#define N 2
+#define GENERALDESCIPTION "This is a detailed explanation use several lines to explain everything. You will forget how smart you where when coding this module"
+#define WORKER1 "G.Cabo"
+#define GENERALREFERENCE "https://github.com/jaquerinte/MA_2019.git"
+
+module fetch (AddrSize){
+    #function "Fetch instructions"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENERALREFERENCE
+    
+    in rst;
+    in clk;
+    in [AddrSize-1:0] pc;            
+    out [AddrSize-1:0] nextpc;            
+    out [AddrSize-1:0] instruction;            
+}
+
+module decode (AddrSize){
+    #function "Decode instructions and operand fetch"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENERALREFERENCE
+    in rst;
+    in clk;
+    in [AddrSize-1:0] instruction;            
+    in [BITS_REGFILE-1:0] destination;            
+    in [AddrSize-1:0] datareg;            
+    in wreg;            
+    out wreg;            
+    out m2reg;            
+    out wmem;            
+    out aluc;            
+    out aluimm;            
+    out [BITS_REGFILE:0] destination;            
+    out [AddrSize-1:0] op1;            
+    out [AddrSize-1:0] op2;            
+    out [AddrSize-1:0] extendedimm;            
+}
+
+module execute (AddrSize){
+    #function "Execution"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENERALREFERENCE
+    in rst;
+    in clk;
+    in wreg;            
+    in m2reg;            
+    in wmem;            
+    in aluc;            
+    in aluimm;            
+    in [BITS_REGFILE:0] destination;            
+    in [AddrSize-1:0] op1;            
+    in [AddrSize-1:0] op2;            
+    in [AddrSize-1:0] extendedimm;            
+    out wreg;            
+    out m2reg;            
+    out wmem;            
+    out [BITS_REGFILE:0] destination;            
+    out [AddrSize-1:0] aluresult;            
+    out [AddrSize-1:0] op2;            
+}
+
+module memory (AddrSize){
+    #function "Memory access"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENERALREFERENCE
+    in rst;
+    in clk;
+    in wreg;            
+    in m2reg;            
+    in wmem;            
+    in [BITS_REGFILE:0] destination;            
+    in [AddrSize-1:0] aluresult;            
+    in [AddrSize-1:0] op2;            
+    out wreg;            
+    out m2reg;            
+    out [BITS_REGFILE:0] destination;            
+    out [AddrSize-1:0] aluresult;            
+    out [AddrSize-1:0] dmemout;            
+}
+
+module writeback (AddrSize){
+    #function "Write back to register file"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENERALREFERENCE
+    
+    in rst;
+    in clk;
+    in wreg;            
+    in m2reg;            
+    in [AddrSize-1:0] aluresult;            
+    in [AddrSize-1:0] dmemout;            
+    in [BITS_REGFILE:0] destination;            
+    out wreg;            
+    out [BITS_REGFILE:0] destination;            
+    out [AddrSize-1:0] datareg;            
+}
+
+module top pipeline(AddrSize = ADDR_SIZE){
+    #function  "Pipelined processor example to test the tools"
+    #coder  WORKER1
+    #references GENERALREFERENCE
+
+    in clk;
+    in rst;
+
+    fetch:IF(AddrSize){
+        in clk = in clk,
+        in rst = in rst
+    };
+    
+    decode:ID(AddrSize){
+        in clk = in clk,
+        in rst = in rst
+    };
+    
+    execute:EXE(AddrSize){
+        in clk = in clk,
+        in rst = in rst
+    };
+    
+    memory:MEM(AddrSize){
+        in clk = in clk,
+        in rst = in rst
+    };
+    
+    writeback:WB(AddrSize){
+        in clk = in clk,
+        in rst = in rst
+    };
+
+    wire IF.nextpc -> IF.pc;
+    wire IF.instruction -> ID.instruction;
+    wire ID.wreg -> EXE.wreg;
+    wire ID.m2reg -> EXE.m2reg;
+    wire ID.wmem-> EXE.wmem;
+    wire ID.aluc -> EXE.aluc;
+    wire ID.aluimm -> EXE.aluimm;
+    wire ID.destination-> EXE.destination;
+    wire ID.op1 -> EXE.op1;
+    wire ID.op2 -> EXE.op2;
+    wire ID.extendedimm -> EXE.extendedimm;
+    wire EXE.wreg -> MEM.wreg;
+    wire EXE.m2reg -> MEM.m2reg;
+    wire EXE.wmem -> MEM.wmem;
+    wire EXE.destination -> MEM.destination;
+    wire EXE.aluresult -> MEM.aluresult;
+    wire EXE.op2 -> MEM.op2;
+    wire MEM.wreg -> WB.wreg;
+    wire MEM.m2reg -> WB.m2reg;
+    wire MEM.destination -> WB.destination;
+    wire MEM.dmemout -> WB.dmemout;
+    wire WB.wreg -> ID.wreg;
+    wire WB.destination -> ID.destination;
+    wire WB.datareg -> ID.datareg;
+}
+
