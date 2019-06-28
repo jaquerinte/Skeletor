@@ -160,5 +160,9 @@ module top pipeline(AddrSize = ADDR_SIZE){
     wire WB.wreg -> ID.wreg;
     wire WB.destination -> ID.destination;
     wire WB.datareg -> ID.datareg;
+    $
+    THIS is a test of the verilator dump 
+    with multiple lines
+    $
 }
 

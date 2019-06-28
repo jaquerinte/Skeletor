@@ -12,6 +12,7 @@ FunctionSymbol :: FunctionSymbol()
     this -> output_file_data = "";
     this -> projectFolder = "";
     this -> projectFolderName = "";
+    this -> verilog_dump = "";
 }
 
 
@@ -27,6 +28,7 @@ FunctionSymbol :: FunctionSymbol(string name, string projectName, string project
     this -> projectFolder = "./" + projectFolder + "/hdl/";
     //this -> filename_asociated = "./objects/" + name + ".v";
     this -> output_file_data = "";
+    this -> verilog_dump = "";
 }
 
 FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
@@ -45,6 +47,7 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
     this -> v_wire = In.v_wire;
     this -> v_instances = In.v_instances;
     this -> projectFolder = In.projectFolder;
+    this -> verilog_dump = In.verilog_dump;
 }
 FunctionSymbol :: ~FunctionSymbol(){}
 
@@ -57,7 +60,16 @@ FunctionSymbol& FunctionSymbol :: operator = (const FunctionSymbol &In)
     }
 }
 
+void FunctionSymbol :: addVerilogDump(const string dump)
+{
+    // delete first and last simbols
+    this -> verilog_dump += "\n";
+    string value_aux = dump;
+    value_aux.erase(0, 1);
+    value_aux.erase(value_aux.size() - 1);
+    this -> verilog_dump += value_aux;
 
+}
 bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string width, int nlin,int ncol)
 {
     InoutSymbol s(name, size, width);
@@ -317,6 +329,13 @@ void FunctionSymbol ::createFileModuleBase(){
     }
     this -> output_file_data +="\n";
     /* Putin some extra coments */
+
+    if (this->verilog_dump != ""){
+        this ->output_file_data += "//***Dumped Internal logic***";
+        this ->output_file_data += this->verilog_dump;
+        this -> output_file_data += "\n";
+
+    }
    
     this -> output_file_data += "//***Handcrafted Internal logic*** \n";
     this -> output_file_data += "//TODO\n";

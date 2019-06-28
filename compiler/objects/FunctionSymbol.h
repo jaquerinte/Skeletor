@@ -37,6 +37,8 @@ public:
 	void createRunTest(bool definitions, bool first, bool qtb, bool vtb);
 	void printToFile();
 
+    void addVerilogDump(const string dump);
+
 	// getters
 
 	string getName();
@@ -84,6 +86,7 @@ private:
 	string references;
 	string output_file_data;
 	string projectFolder;
+	string verilog_dump;
 	
 };
 

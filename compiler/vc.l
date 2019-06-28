@@ -3,6 +3,7 @@ L    [a-zA-Z]
 LD   [0-9a-zA-Z]
 name ({L}|\$)({L}|{D}|[_.$])*
 stringtext  \"[^\n"]+\"
+verilogtext  \$[^\t"]+\$
 
 %{
 #include <string.h> 
@@ -61,6 +62,7 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 
 {name}                      {return ret(id);}
 {stringtext}                {return ret(stringtext);}
+{verilogtext}				{return ret(verilogtext);}
 {D}+                        {return ret(ninteger);}
 "+"                         {return ret(opas);}
 "-"                         {return ret(opas);}

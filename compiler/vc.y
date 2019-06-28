@@ -1,7 +1,7 @@
 %token id ninteger amp moduledefinition intype inttype outtype inouttype definevalue wiretipe
 %token opas parl parr pyc coma oprel opmd opasig bral connectwire nyooperator stringtext
 %token brar cbl cbr ybool obool nobool opasinc twopoints mainmodule booltokentrue definevalueverilog
-%token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse
+%token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse verilogtext
 
 
 %{
@@ -19,6 +19,9 @@ using namespace std;
 //#include "common.h"
 #include "./objects/TableFunctionSymbols.h"
 #include "./objects/TableSymbols.h"
+
+/* Version */
+#define VERSION "1.0.0"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
@@ -224,6 +227,14 @@ SInstr      : SInstr Instr {$$.trad = $1.trad + $2.trad;}
 /* Instruction definition  */
 /* TODO THINK TO REDO WITH ONLY 2 RULES*/
 Instr       : EInstr pyc {$$.trad = $1.trad + ";";}
+            | verilogtext {
+                 int pos;
+                    if(s1 != "null"){
+                        pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                        string pme = $1.lexeme;
+                        tfs.v_funcSymbols.at(pos).addVerilogDump(pme);
+                    }
+            }
             | functionmodule ModuleTextDefinition 
                 {
                     int pos;
@@ -803,6 +814,7 @@ void print_usage(void)
 {
     printf("Use: verilog_connector <filename>\n");
     printf("-h, --help, help        Print this message\n");
+    printf("-V  --version           Print Version and exits\n");
     printf("-d                      Output directory name\n");
     printf("-n                      Set project name\n");
     printf("-t -q                   Make top test bench for questasim \n");
@@ -870,6 +882,13 @@ int main(int argc,char *argv[])
             return(CORRECT_EXECUTION);
         }
     }
+    //Check if Verion flag
+    for(int i=0; i<argc; ++i){
+        if(!strcmp(argv[i],"-V") || !strcmp(argv[i],"--version")){
+            printf("Skeletor version: %s", VERSION);
+            return(CORRECT_EXECUTION);
+        }
+    }
     //check if arguments are valid
     if (arguments_handler(argc,argv)) {
         printf("WRONG_ARGUMENTS\n");
@@ -887,6 +906,7 @@ int main(int argc,char *argv[])
         }
         else
             fprintf(stderr,"File can not open\n");
+            print_usage();
     }
     else{
         fprintf(stderr,"Use: example <filename>\n");

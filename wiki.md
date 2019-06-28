@@ -1,6 +1,12 @@
 
-Some notes about the compiler
+Skeletor
 ========================================================
+Version
+--------------------------------------------------------
+Verion 1.0.0: Base version of the Skeletor compiler.
+- Added suport por dumping verilog code into skeletor (Note: this verilator code is dump and in not checked by the skeletor compiler).
+- Added -V for version cheking. 
+
 Description
 --------------------------------------------------------
 This tool is intended to be used for generate *skeletons* of verilog projects.
@@ -56,6 +62,7 @@ Basic usage
 
 * "//": One line comment 
 * "/ \* My comment \*/": Multiline comment
+* $ * $: Multi line verilog dump
 * "module": starts definition  of a module
 * "in":input of a module 
 * "out":Output of a module
