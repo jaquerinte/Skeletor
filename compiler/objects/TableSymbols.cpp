@@ -92,13 +92,15 @@ return this -> verilogDefig;
 
 void TableSymbols :: printToFile(string projectFolder)
 {
-	string output_file = projectFolder +"/hdl/defines.vh";
-	/* create file */
-	char buf[0x100];
-	snprintf(buf, sizeof(buf), "%s", output_file.c_str());
-	FILE *f = fopen(buf, "w");
-	fprintf(f, this -> output_file_data.c_str());
-	fclose(f);
+	if (this -> verilogDefig){
+		string output_file = projectFolder +"/hdl/defines.vh";
+		/* create file */
+		char buf[0x100];
+		snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+		FILE *f = fopen(buf, "w");
+		fprintf(f, this -> output_file_data.c_str());
+		fclose(f);
+	}
 
 }
 
