@@ -21,7 +21,7 @@ using namespace std;
 #include "./objects/TableSymbols.h"
 
 /* Version */
-#define VERSION "1.0.0"
+#define VERSION "1.1.0"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
@@ -136,6 +136,7 @@ Func        : moduledefinition id
                 tfs.addFunctionSymbol(pme, projectName, projectFolder, nlin, ncol);
                 s1 = pme;
                 //printf("%s", s1);
+                
             } 
             parl SArgs parr  Block 
             {
@@ -178,6 +179,7 @@ SArgs       : DArgs {$$.trad = "";}
 
 DArgs       : id SArBlock {
                     string pme = $1.lexeme;
+                    
                     //printf("%s", s1);
                     if(s1 != "null"){
                         ts.addSymbol(pme,PARAMETERFUNCTION,$2.trad, INTEGER, s1, nlin, ncol);
@@ -193,6 +195,7 @@ DArgs       : id SArBlock {
 
             }
             | DArgs  coma id SArBlock {
+                
                  string pme = $3.lexeme;
                     if(s1 != "null"){
                         ts.addSymbol(pme,PARAMETERFUNCTION,$4.trad, INTEGER, s1, nlin, ncol);
@@ -208,14 +211,19 @@ DArgs       : id SArBlock {
             }
     ;
 SArBlock    : opasig Expr {
-                         
-                        int pos = ts.shearchSymbol($2.trad, s1,nlin,ncol);
-                        if($2.type != INTEGER){
-                            //msgError()
+                        
+                        if ($2.type == INTEGER){
+                            $$.trad = $2.trad;
+                            $$.size = $2.size;
+                        }
+                        else if ($2.type == REFERENCE){
+                            int pos = ts.shearchSymbol($2.trad, s1,nlin,ncol);
+                            $$.trad = $2.trad;
+                            $$.size = $2.size;
                         }
                         
-                        $$.trad = $2.trad;
-                        $$.size = $2.size;}
+                        
+                        }
             | /*epsilon*/ { $$.trad = "";} 
     ;
 /* Block definition and instructions base  */
@@ -904,9 +912,10 @@ int main(int argc,char *argv[])
             yyparse();
             fclose(fent);
         }
-        else
+        else{
             fprintf(stderr,"File can not open\n");
             print_usage();
+        }
     }
     else{
         fprintf(stderr,"Use: example <filename>\n");

@@ -3,7 +3,8 @@ L    [a-zA-Z]
 LD   [0-9a-zA-Z]
 name ({L}|\$)({L}|{D}|[_.$])*
 stringtext  \"[^\n"]+\"
-verilogtext  \$[^\t"]+\$
+
+verilogtext  [$][^"]*[$]
 
 %{
 #include <string.h> 
@@ -19,7 +20,7 @@ int ncol = 1,
     nlin = 1;
 
 int endfile = 0;
-
+//verilogtext  \$[^\t"]+\$
 int ret(int token);  
 // function to update 'nlin' y 'ncol' yand return token
 
