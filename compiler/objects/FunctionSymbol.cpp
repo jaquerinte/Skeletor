@@ -445,10 +445,11 @@ void FunctionSymbol :: createTbRunQuesta(bool first){
 void FunctionSymbol :: createTbVerilator(bool definitions){
     string output_file = this -> projectFolderName + "tb/verilator/tb_" + this->name + ".cpp";
     string output = "";
-    output += "#include \"V" + this->name + "\"\n";
+    output += "#include \"V" + this->name + ".h\"\n";
     output += "#include \"verilated.h\"\n";
     output += "#include \"verilated_vcd_c.h\"\n";
     output += "#include <algorithm>\n";
+    output += "#include <iostream>\n";
     output += "#define TRACE_DEF true\n";
     output += "\n";
     output += "//time for waveforms\n";
@@ -498,12 +499,14 @@ void FunctionSymbol :: createTbVerilator(bool definitions){
     output += "  }\n";
     output += "}\n";
     output += "\n";
+    output +="//*** TODO ***\n";
     output += "struct TestCase {\n";
     output += "    const char* name;\n";
     output += "    bool rst_i;\n";
     output += "    uint32_t addr_i;\n";
     output += "};\n";
     output += "\n";
+    output +="//*** TODO ***\n";
     output += "TestCase test_cases[] {\n";
     output += "//name            rst addr\n";
     output += "    { \"step0\"       ,0  , 0xFFFF },\n";
@@ -518,7 +521,7 @@ void FunctionSymbol :: createTbVerilator(bool definitions){
     output += "  VerilatedVcdC* tfp =NULL;\n";
     output += "  //declare my module\n";
     output += "  Verilated::commandArgs(argc, argv);\n";
-    output += "  VsimpleExample* DUT = new V" + this->name + ";\n";
+    output += "  V" + this->name +"* DUT = new V" + this->name + ";\n";
     output += "  //enable waveforms\n";
     output += "  if(vcdTrace)\n";
     output += "  {\n";
@@ -531,6 +534,7 @@ void FunctionSymbol :: createTbVerilator(bool definitions){
     output += "    tfp->open(vcdname.c_str());\n";
     output += "  }\n";
     output += "\n";
+    output +="//*** TODO ***\n";
     output += "  //initial reset\n";
     output += "  DUT->rst_i=1;\n";
     output += "  ticktoc_and_trace(DUT,tfp);\n";
