@@ -21,7 +21,7 @@ using namespace std;
 #include "./objects/TableSymbols.h"
 
 /* Version */
-#define VERSION "1.1.0"
+#define VERSION "1.1.1"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
