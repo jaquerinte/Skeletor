@@ -45,6 +45,7 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
     this -> v_inoutwires = In.v_inoutwires;
     this -> v_param = In.v_param;
     this -> v_wire = In.v_wire;
+    this -> v_vwire = In.v_vwire;
     this -> v_instances = In.v_instances;
     this -> projectFolder = In.projectFolder;
     this -> verilog_dump = In.verilog_dump;
@@ -186,6 +187,11 @@ bool FunctionSymbol :: addWireConnection(string function_out, string function_in
     this -> v_wire.push_back(wire);
 }
 
+bool FunctionSymbol :: addVWireConnection(string width_out, string name_wire){
+    VWireSymbol wire(width_out, name_wire);
+    this -> v_vwire.push_back(wire);
+}
+
 bool FunctionSymbol :: addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance){
     InstanceSymbol instance(v_inoutwires,v_param, this -> v_wire, name_module, name_instance);
     this -> v_instances.push_back(instance);
@@ -321,6 +327,16 @@ void FunctionSymbol ::createFileModuleBase(){
         this -> output_file_data += tabulate + "wire " + width + v_wire.at(i).getNameWire() + ";";
         this -> output_file_data += " // wiring between " + v_wire.at(i).getNameOut() + " of module " + v_wire.at(i).getFuncionOut() + " and " + v_wire.at(i).getNameIn() + " of module " + v_wire.at(i).getFuncionIn();
         this -> output_file_data += "\n";
+    }
+    if (this -> v_vwire.size() > 0){
+        this -> output_file_data += "//***Auxiliar Wires***  \n";
+    }
+    for (int i = 0; i < this -> v_vwire.size(); ++i){
+        string width = "";
+        if (v_vwire.at(i).getWidthOut() != ""){
+            width = v_vwire.at(i).getWidthOut() + " ";
+        }
+        this -> output_file_data += tabulate + "wire " + width + v_vwire.at(i).getNameWire() + "; // Auxiliar Wire\n";
     }
     this -> output_file_data +="\n";
     /* Add instances */

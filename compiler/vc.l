@@ -58,6 +58,7 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "true"                      {return ret(booltokentrue);}
 "false"                     {return ret(booltokenfalse);}
 "wire"                      {return ret(wiretipe);}
+"vwire"                     {return ret(wireverilogtipe);}
 "->"                        {return ret(connectwire);}
 "top"                       {return ret (mainmodule);}
 

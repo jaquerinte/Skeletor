@@ -1,7 +1,7 @@
 %token id ninteger amp moduledefinition intype inttype outtype inouttype definevalue wiretipe
 %token opas parl parr pyc coma oprel opmd opasig bral connectwire nyooperator stringtext
 %token brar cbl cbr ybool obool nobool opasinc twopoints mainmodule booltokentrue definevalueverilog
-%token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse verilogtext
+%token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse verilogtext wireverilogtipe
 
 
 %{
@@ -21,7 +21,7 @@ using namespace std;
 #include "./objects/TableSymbols.h"
 
 /* Version */
-#define VERSION "1.1.1"
+#define VERSION "1.2.0"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
@@ -312,6 +312,14 @@ EInstr      : Ref {
                                 tfs.v_funcSymbols.at(pos).addConnectionFunctionSymbol(pme,$1.size,with, nlin, ncol);
                                 $$.trad = $1.trad + pme;
                                 }
+            | wireverilogtipe Arrayargs id {
+                                string aux = "_w";
+                                string pme = $3.lexeme;
+                                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                                string with = $2.trad ;
+                                ts.addSymbol(pme + aux ,INOUTSYMBOL,s1, nlin, ncol);
+                                tfs.v_funcSymbols.at(pos).addVWireConnection(with,pme+aux);
+                                }
             | wiretipe Arrayargs Ref connectwire Ref {
                                 string var_out = $3.trad;
                                 string var_in = $5.trad;
@@ -438,28 +446,62 @@ DCallArgsExtension  : opasig Expr {$$.trad = $2.trad;}
 CallConnectors  : DCallArgsConn {$$.trad = $1.trad;}
                 | /*epsilon*/ { }
     ;
-DCallArgsConn   : TipoBase id opasig TipoBase id 
+DCallArgsConn   : TipoBase id opasig DcallArgsAux 
                 {
                 // TODO ERROR CHECKING THAT ID EXISTS AND TYPES ARE VALID
                 int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                 int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
                 string pme_name = $2.lexeme;
-                string pme_value = $5.lexeme;
-                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
-                
-                string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
-                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $1.size, nlin,ncol);
+                string pme_value = $4.trad;
+
+                if ($4.ph == "io"){ 
+                    int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
+                    
+                    string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $1.size, nlin,ncol);
                 }
-                | DCallArgsConn coma TipoBase id opasig TipoBase id 
+                else if ($4.ph == "w"){
+                    string aux = "_w";
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, pme_value+aux, $1.size, nlin,ncol);
+                }
+
+                }
+                | DCallArgsConn coma TipoBase id opasig DcallArgsAux 
                 {
                 int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                 int pos_instance = tfs.v_funcSymbols.at(pos).searchInstance(s2, nlin, ncol);
                 string pme_name = $4.lexeme;
-                string pme_value = $7.lexeme;
-                int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
-                string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
-                tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $3.size, nlin,ncol);
+                string pme_value = $6.trad;
+
+                if ($4.ph == "io"){ 
+                    int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
+                    
+                    string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $3.size, nlin,ncol);
                 }
+                else if ($4.ph == "w"){
+                    string aux = "_w";
+                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, pme_value+aux, $3.size, nlin,ncol);
+                }
+                }
+    ;
+DcallArgsAux  : TipoBase id
+              {
+                string pme = $2.lexeme;
+                $$.trad = pme;
+                $$.ph = "io";
+              }
+              | id
+              {
+                string pme = $1.lexeme;
+                string aux = "_w";
+                $$.ph = "w";
+                $$.trad = pme;
+                // check that the wire exists
+                ts.shearchSymbol(pme+aux,s1,nlin,ncol);
+
+              }
+
     ;
 
 /* Expresion */
@@ -655,7 +697,7 @@ Ref     :   id {string pme = $1.lexeme; $$.trad = pme;}
 /* Tipos */
 TipoBase    : intype {$$.trad = "i"; $$.size = IN;}
             | outtype {$$.trad = "o";$$.size = OUT;} 
-            | inouttype {$$.trad = "io";$$.size = INOUT;} 
+            | inouttype {$$.trad = "io";$$.size = INOUT;}
     ;
 
 S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;

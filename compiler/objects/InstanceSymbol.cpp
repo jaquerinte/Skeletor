@@ -8,7 +8,7 @@ InstanceSymbol :: InstanceSymbol(){
 	this -> nameInstance = "null";
 	this -> nameInstanceVerilog = "null";
 }
-InstanceSymbol :: InstanceSymbol(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param,vector<WireSymbol> v_wire, string nameModule,string nameInstance){
+InstanceSymbol :: InstanceSymbol(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, vector<WireSymbol> v_wire ,string nameModule,string nameInstance){
 	this -> nameModule = nameModule;
 	this -> nameInstance = nameInstance;
 	this -> nameInstanceVerilog = "inst_" + nameInstance;
