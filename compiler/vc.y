@@ -21,7 +21,7 @@ using namespace std;
 #include "./objects/TableSymbols.h"
 
 /* Version */
-#define VERSION "1.2.0"
+#define VERSION "1.2.1"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
@@ -473,13 +473,13 @@ DCallArgsConn   : TipoBase id opasig DcallArgsAux
                 string pme_name = $4.lexeme;
                 string pme_value = $6.trad;
 
-                if ($4.ph == "io"){ 
+                if ($6.ph == "io"){ 
                     int pos_inout = tfs.v_funcSymbols.at(pos).searchinoutSymbol(pme_value, nlin, ncol);
                     
                     string name_verilog = tfs.v_funcSymbols.at(pos).getInoutSymbol().at(pos_inout).getNameVerilog();
                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, name_verilog, $3.size, nlin,ncol);
                 }
-                else if ($4.ph == "w"){
+                else if ($6.ph == "w"){
                     string aux = "_w";
                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_instance).addValueInoutSymbolParam(pme_name, pme_value+aux, $3.size, nlin,ncol);
                 }
