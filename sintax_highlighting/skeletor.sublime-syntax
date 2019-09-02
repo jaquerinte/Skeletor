@@ -26,6 +26,8 @@ contexts:
       scope: entity.name.type markup.italic
     - match: 'wire'
       scope: entity.name.type markup.italic
+    - match: 'vwire'
+      scope: entity.name.type markup.italic
     - match: '(#function|#description|#coder|#references)'
       scope: keyword.control
     - match: 'module'

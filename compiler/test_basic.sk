@@ -54,6 +54,21 @@ module d(){
     out out1; // no puede ser out porque es una palabra reservada
 }
 
+module e(){
+    #function  "Three way AND gate"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in a;
+    out b;
+    $$$
+	adadad
+	asdasda
+	asdadsasdasd
+    $$$
+}
+
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     #function  "Module to provide a reference output"
     #coder  WORKER1
@@ -64,6 +79,7 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     in [AddrSize -1 : 0] addr;
     out [TransAddrSize-1: 0] taddr;
     out rdy;
+    vwire base;
     
 
     a:x(AddrSize = AddrSize, TransAddrSize = TransAddrSize){
@@ -86,6 +102,10 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 
     d:w(){
         out out1 = out rdy
+    };
+
+    e:test(){
+        in a = base
     };
     
     wire [TransAddrSize-1:0] x.taddr -> y.taddr;

@@ -14,6 +14,7 @@ const int PARAMETERFUNCTION=5;
 const int INOUTSYMBOL=6;
 const int INSTANCESYMBOL=7;//IDs of instances
 const int WIRE=8;//Definition of a wire
+const int VWIRE=9;//Definition of a wire
 
 class Symbol
 {
