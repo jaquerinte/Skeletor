@@ -66,8 +66,8 @@ void FunctionSymbol :: addVerilogDump(const string dump)
     // delete first and last simbols
     this -> verilog_dump += "\n";
     string value_aux = dump;
-    value_aux.erase(0, 1);
-    value_aux.erase(value_aux.size() - 1);
+    value_aux.erase(0, 3);
+    value_aux.erase(value_aux.size() - 3,3);
     this -> verilog_dump += value_aux;
 
 }

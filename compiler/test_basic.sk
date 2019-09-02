@@ -62,6 +62,11 @@ module e(){
 
     in a;
     out b;
+    $$$
+	adadad
+	asdasda
+	asdadsasdasd
+    $$$
 }
 
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){

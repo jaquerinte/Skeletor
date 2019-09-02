@@ -4,7 +4,7 @@ LD   [0-9a-zA-Z]
 name ({L}|\$)({L}|{D}|[_.$])*
 stringtext  \"[^\n"]+\"
 
-verilogtext  [$][^"]*[$]
+verilogtext  "$$$"[^"]*"$$$"
 
 %{
 #include <string.h> 
