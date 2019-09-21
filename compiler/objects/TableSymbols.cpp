@@ -77,6 +77,19 @@ bool TableSymbols :: createDefinitions(){
 			if (!this -> verilogDefig){
 				this -> verilogDefig = true;
 			}
+		}
+	}
+
+return this -> verilogDefig;
+}
+
+bool TableSymbols :: createDefinitionsTop(){
+	string verilogVar = "";
+	for (int i = 0; i < v_symbols.size();++i) {
+		if (v_symbols.at(i).getType() == DEFINITIONVERILOG) { 
+			if (!this -> verilogDefig){
+				this -> verilogDefig = true;
+			}
 			verilogVar += "`define " +  v_symbols.at(i).getName() + " " + v_symbols.at(i).getValue_S() + "\n";
 		}
 	}
@@ -98,7 +111,7 @@ void TableSymbols :: printToFile(string projectFolder)
 		char buf[0x100];
 		snprintf(buf, sizeof(buf), "%s", output_file.c_str());
 		FILE *f = fopen(buf, "w");
-		fprintf(f, this -> output_file_data.c_str());
+		fprintf(f, "%s",this -> output_file_data.c_str());
 		fclose(f);
 	}
 

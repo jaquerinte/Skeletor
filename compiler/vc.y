@@ -43,7 +43,7 @@ string projectFolder = "OUTPUT";
 bool db = false;
 bool tb = false;
 bool itb = false;
-bool qtb = true;
+bool qtb = false;
 bool vtb = false;
 string init_output(bool);
 
@@ -92,7 +92,7 @@ int yyerror(char *s);
 SA      : S     
         { 
             int tk = yylex();
-            if (tk != 0) yyerror("");
+            if (tk != 0) yyerror((char*)"");
         }
     ;
 /* Base syntax */
@@ -165,10 +165,7 @@ MainFunc    : moduledefinition mainmodule id
                 string pme = $3.lexeme;
                 int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
                 string base = init_output(db);
-                tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitions());
-
-                
-                
+                tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitionsTop()); 
 
             }
     ;
@@ -904,10 +901,10 @@ int arguments_handler(int argc, char ** argv){
                 itb = true;
                 break;
             case 'v' :
-                qtb = true;
+                vtb  = true;
                 break;
             case 'q' :
-                vtb = true;
+                qtb = true;
                 break;
             //default
             default:

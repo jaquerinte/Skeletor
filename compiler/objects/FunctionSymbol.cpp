@@ -165,7 +165,7 @@ void FunctionSymbol :: addValueFunctionSymbolParamPos(int pos, string value, int
     msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 }
 
-FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, int nlin,int ncol)
+/*FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, int nlin,int ncol)
 {
     FunctionSymbolParam s;
     for (int i = 0; i < this -> v_param.size();++i) {
@@ -176,7 +176,7 @@ FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, in
     // fail: Symbol param  not declared
     msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
     return s;
-}
+}*/
 
 bool FunctionSymbol :: addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name){
     WireSymbol wire(function_out,function_in, pos_out, pos_in,width_out, name_wire, out_name, in_name);
@@ -355,7 +355,8 @@ void FunctionSymbol ::createFileModuleBase(){
     this -> output_file_data += "endmodule\n";
 }
 
-void FunctionSymbol :: createRunTest(bool definitions, bool first, bool vtb, bool qtb){
+void FunctionSymbol :: createRunTest(bool definitions, bool first, bool qtb, bool vtb){
+
     if(first)
     {
         this->createTbFolder();
@@ -428,7 +429,7 @@ void FunctionSymbol :: createTbRunVerilator(bool first){
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 }
 
@@ -450,7 +451,7 @@ void FunctionSymbol :: createTbRunQuesta(bool first){
 	char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 
 }
@@ -579,7 +580,7 @@ void FunctionSymbol :: createTbVerilator(bool definitions){
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 
 
@@ -735,7 +736,7 @@ void FunctionSymbol :: createTbQuesta(bool definitions){
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 
 }
@@ -747,7 +748,7 @@ void FunctionSymbol :: printToFile()
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", this -> filename_asociated.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, this -> output_file_data.c_str());
+    fprintf(f, "%s",this -> output_file_data.c_str());
     fclose(f);
 
 }

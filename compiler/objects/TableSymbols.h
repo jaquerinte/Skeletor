@@ -19,6 +19,7 @@ public:
 	int shearchSymbol(string name, string module, int nlin, int ncol);
 	string getTableSymbols();
 	bool createDefinitions();
+	bool createDefinitionsTop();
 	bool getVerilogDefig();
 	void printToFile(string projectFolder);
 	vector<Symbol> v_symbols;
