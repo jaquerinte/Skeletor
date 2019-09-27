@@ -23,6 +23,7 @@ int endfile = 0;
 //verilogtext  "$$$"[^"]*"$$$"
 //verilogtext  \$[^\t"]+\$
 int ret(int token);  
+int ret_dump(int token);  
 // function to update 'nlin' y 'ncol' yand return token
 
 void msgError(int nerror, int nlin,int ncol,const char *s);
@@ -48,12 +49,12 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 <COMMENT>"*/"               {ncol+=strlen(yytext); BEGIN(INITIAL);}
 <COMMENT>[*/]               {ncol += strlen(yytext);}
 "module"                    {return ret(moduledefinition);}
-"/$$"  						{ncol += strlen(yytext);BEGIN(VERILOGTEXTINPUT);}
-<VERILOGTEXTINPUT>[^/*\n]+  {ncol += strlen(yytext);}
-<VERILOGTEXTINPUT>\n        {nlin++;ncol=1;}
+"$$"  						    {ncol += strlen(yytext);BEGIN(VERILOGTEXTINPUT); return ret_dump(verilogtext);}
+<VERILOGTEXTINPUT>[^$$\n]*  {ncol += strlen(yytext);return ret_dump(verilogtext);}
+<VERILOGTEXTINPUT>\n        {nlin++;ncol=1;return ret_dump(verilogtext);}
 <VERILOGTEXTINPUT><<EOF>>   {msgError(ERREOF,-1,-1,"");}
-<VERILOGTEXTINPUT>"$$/"     {ncol+=strlen(yytext); BEGIN(INITIAL);}
-<VERILOGTEXTINPUT>[$$/]     {ncol+= strlen(yytext);}
+<VERILOGTEXTINPUT>"$$"      {ncol+=strlen(yytext); BEGIN(INITIAL);}
+<VERILOGTEXTINPUT>[$$]      {ncol+= strlen(yytext);return ret_dump(verilogtext);}
 "in"                        {return ret(intype);}
 "int"                       {return ret(inttype);}
 "out"                       {return ret(outtype);}
@@ -107,6 +108,15 @@ int yywrap(void) {endfile=1; return 1;} /* for not to link with the lex lib*/
 
 
 int ret(int token)
+{
+   yylval.lexeme=strdup(yytext);
+   yylval.nlin=nlin;
+   yylval.ncol=ncol;
+   ncol+=(strlen(yytext));
+   return(token);
+}
+
+int ret_dump(int token)
 {
    yylval.lexeme=strdup(yytext);
    yylval.nlin=nlin;

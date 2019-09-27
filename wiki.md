@@ -2,6 +2,7 @@
 Skeletor
 ========================================================
 Version
+
 --------------------------------------------------------
 Version 1.2.3: Change to $$ for dump Verilog.
 - Change the verilator dump form $$$ to $$ for simplicity
@@ -12,14 +13,7 @@ Version 1.2.2: Change to $$$ for dump Verilog.
 - Change the verilator dump form $ to $$$ for some functions in verilog entering in conflic
 
 --------------------------------------------------------
-Version 1.2.1: Bugfix round 1.
-- Bug of not reconized no = parameters
-
---------------------------------------------------------
-Version 1.2.0: Instruction added.
-- Added vwire to create a wire that will be created directly in the verilog code (Note: always is going to be call {name}_w)
-
-Verion 1.0.0: Base version of the Skeletor compiler.
+Version 1.0.0: Base version of the Skeletor compiler.
 - Added suport por dumping verilog code into skeletor (Note: this verilator code is dump and in not checked by the skeletor compiler).
 - Added -V for version cheking. 
 
@@ -28,6 +22,7 @@ Description
 This tool is intended to be used for generate *skeletons* of verilog projects.
 We define skeletons as verilog files witout any logic except interconexions
 amoung them. This allow us to enforce *name conventions*, *code style* and
+
 reduce tedious *code replication* and *human error*.
 
 Our lenguaje allows to write a *single file* that *generates all* the basic

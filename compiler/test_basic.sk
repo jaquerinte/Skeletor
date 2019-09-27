@@ -16,7 +16,8 @@ module a (TransAddrSize, AddrSize){
     in [AddrSize -1 : 0] addr;
     out [TransAddrSize-1: 0] taddr;
     out rdy;
-/$$
+$$
+
 	reg [WORD_SIZE-1:0] main_mem [0:MEMORY_LINES-1];
 	reg [LINE_SIZE-1:0] data_o_0;
 	reg [LINE_SIZE-1:0] data_o_1;
@@ -69,7 +70,7 @@ module a (TransAddrSize, AddrSize){
 		valid_1 <= valid_0;
 
 	end   
-$$/
+$$
 
 
 }
@@ -118,11 +119,19 @@ module e(){
 
     in a;
     out b;
+<<<<<<< HEAD
     /$$
 	adadad
 	asdasda
 	asdadsasdasd
     $$/
+=======
+    $$
+	adadad
+	asdasda
+	asdadsasdasd
+    $$
+>>>>>>> f0030450d84556c4594422e756a81dd3433f3481
 }
 
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){

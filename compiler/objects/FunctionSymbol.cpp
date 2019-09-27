@@ -64,11 +64,7 @@ FunctionSymbol& FunctionSymbol :: operator = (const FunctionSymbol &In)
 void FunctionSymbol :: addVerilogDump(const string dump)
 {
     // delete first and last simbols
-    this -> verilog_dump += "\n";
-    string value_aux = dump;
-    value_aux.erase(0, 3);
-    value_aux.erase(value_aux.size() - 3,3);
-    this -> verilog_dump += value_aux;
+    this -> verilog_dump += dump;
 
 }
 bool FunctionSymbol :: addConnectionFunctionSymbol(string name, int size, string width, int nlin,int ncol)
