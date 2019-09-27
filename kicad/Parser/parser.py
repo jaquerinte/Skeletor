@@ -30,7 +30,7 @@ class wire (object):
         self.output = o
         self.input = i
         self.width = width
-        self.wire_output = "wire %s.%s%s -> %s.%s" % (no,width,o,ni,i)
+        self.wire_output = "wire %s %s.%s -> %s.%s" % (width,no,o,ni,i)
 
 
 def symbol_value(s):
@@ -232,7 +232,42 @@ def main():
             else :
                 f_skeletor.write("inout %s %s;\n" % (value[1][0], value[0]))
         f_skeletor.write("}\n\n")
-    f_skeletor.write("module top main(){\n")
+    f_skeletor.write("module top main(")
+
+    parameterSet = set()
+    for w in wires:
+        if w.width!="":
+            strng = w.width
+            length = len(strng)
+            middle = strng.find(':')
+            operatorA = -1
+            operatorB = -1
+            for op in operators:
+                if operatorA==-1:
+                    operatorA = strng[0:middle].find(op)
+                if operatorB==-1:
+                    operatorB = strng[middle+1:length-1].find(op)
+            if operatorA==-1:
+                left = strng[1:middle]
+            else:
+                left = strng[1:operatorA]
+            if operatorB==-1:
+                right = strng[middle+1:length-1]
+            else:
+                right = strng[middle+1:operatorB]
+            if not left.isdigit():
+                parameterSet.add(left)
+            if not right.isdigit():
+                parameterSet.add(right)
+    it=1
+    for param in parameterSet:
+        if it < len(parameterSet) :
+            f_skeletor.write("%s,"%param)
+        else:
+            f_skeletor.write("%s"%param)
+        it+=1
+    f_skeletor.write("){\n")
+
     type_c='in'
     for signal,signal_data in topSignals.items():
         if signal_data[2]=='input':
