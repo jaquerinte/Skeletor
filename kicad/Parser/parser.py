@@ -12,6 +12,12 @@ topSignals = dict() # Dictionary with the top signals and the modules they conne
 
 wires = []
 
+operators = set()
+operators.add("+")
+operators.add("-")
+operators.add("*")
+operators.add("/")
+
 symbol = re.compile(r'Symbol\(\'(?P<value>.*)\'\)')
 
 bracket = re.compile(r'Bracket\(\[Symbol\(\'(?P<symbol>.*)\'\)\], \'(?P<value>.*)\'\)')
@@ -182,7 +188,41 @@ def main():
 
     f_skeletor = open(outputFile,"w+")
     for mod in modules:
-        f_skeletor.write("module %s(){\n"%mod)
+        parameterSet = set()
+        f_skeletor.write("module %s("%mod)
+        it = 1
+        for key,value in moduleSignals[mod].items():
+            #f_skeletor.write("%s"%value[1][0])
+            if value[1][0]!="":
+                strng = value[1][0]
+                length = len(strng)
+                middle = strng.find(':')
+                operatorA = -1
+                operatorB = -1
+                for op in operators:
+                    if operatorA==-1:
+                        operatorA = strng[0:middle].find(op)
+                    if operatorB==-1:
+                        operatorB = strng[middle+1:length-1].find(op)
+                if operatorA==-1:
+                    left = strng[1:middle]
+                else:
+                    left = strng[1:operatorA]
+                if operatorB==-1:
+                    right = strng[middle+1:length-1]
+                else: 
+                    right = strng[middle+1:operatorB]
+                if not left.isdigit():
+                    parameterSet.add(left)
+                if not right.isdigit():
+                    parameterSet.add(right)
+        for param in parameterSet:
+            if it < len(parameterSet) :
+                f_skeletor.write("%s,"%param)
+            else:
+                f_skeletor.write("%s"%param)
+            it+=1
+        f_skeletor.write("){\n")
         for key,value in moduleSignals[mod].items():
             f_skeletor.write("    ")
             if value[1][1] == "input":
