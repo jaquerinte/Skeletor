@@ -138,7 +138,7 @@ def main():
                                 
                                 width = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][0] # The width that will be concatenated to the output signal.
 
-                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "input":
+                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "input" :
 
                                 name_ins_in = symbol_value(str(net[3][1][1])) # Module that inputs the signal.
                                 
@@ -165,7 +165,7 @@ def main():
                             if len(net[2]) > 2: # If the width of the signal is specified.
 
                                 name = symbol_value(str(net[2][2])).replace("_","") # We get the name to use it as a key and remove the underscore used for the width.
-                                
+                                print(name)
                                 name_1, bracket = bracket_value(net[2][1])
 
                                 width = bracket + name_1 + "]"
