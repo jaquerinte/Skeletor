@@ -126,7 +126,7 @@ def main():
                         # First indexing to get the module name from the instance, second index to index the pin, third index to index the type of the pin.
                         if "Symbol" not in str(net[2][1]): # Signals that come from the top modules use the Symbol name convention.
                             
-                            if moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "output" or moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional":
+                            if (moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "output" or moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional") and moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][1] == "input":
 
                                 name_ins_out = symbol_value(str(net[3][1][1])) # Module that outputs the signal.
                                 name_ins_in = symbol_value(str(net[4][1][1])) # Module that inputs the signal.
@@ -138,7 +138,7 @@ def main():
                                 
                                 width = moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][0] # The width that will be concatenated to the output signal.
 
-                            elif moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "input" :
+                            elif (moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "input" or moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1] == "bidireccional") and moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][1] == "output":
 
                                 name_ins_in = symbol_value(str(net[3][1][1])) # Module that inputs the signal.
                                 
@@ -154,7 +154,7 @@ def main():
                                 width = moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][0] # The width that will be concatenated to the output signal.
 
                             else:
-                                print("Error, pins must be of type input, output or bidireccional")
+                                print("Error, pins wrong connection between %s %s.%s and %s %s.%s"%(moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][1][1], symbol_value(str(net[3][1][1])), moduleSignals[dicModName[symbol_value(str(net[3][1][1]))]][net[3][2][1]][0], moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][1][1], symbol_value(str(net[4][1][1])), moduleSignals[dicModName[symbol_value(str(net[4][1][1]))]][net[4][2][1]][0]))
                                 exit()
 
                             wires.append(wire(id, name_ins_out, name_ins_in, outpt, inpt, width))
