@@ -1,5 +1,5 @@
-#ifndef VWIRESYMBOL_H
-#define VWIRESYMBOL_H
+#ifndef VREGSYMBOL_H
+#define VREGSYMBOL_H
 
 #include <string.h>
 #include <string>
@@ -9,11 +9,11 @@ using namespace std;
 class VWireSymbol
 {
 public:
-	VWireSymbol();
-	VWireSymbol(string width_out,string name_wire);
-	~VWireSymbol();
-	VWireSymbol(const VWireSymbol &In);
-	VWireSymbol& operator = (const VWireSymbol &In);
+	VRegSymbol();
+	VRegSymbol(string width_out,string name_wire);
+	~VRegSymbol();
+	VRegSymbol(const VRegSymbol &In);
+	VRegSymbol& operator = (const VRegSymbol &In);
 
 	string getWidthOut();
 	string getNameWire();

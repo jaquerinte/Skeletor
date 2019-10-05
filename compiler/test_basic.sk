@@ -18,6 +18,7 @@ module a (TransAddrSize, AddrSize){
     out rdy;
 
 
+
 }
 module b (TransAddrSize, AddrSize){
     #function "OR current addr_i with previous addr_i"
@@ -64,11 +65,19 @@ module e(){
 
     in a;
     out b;
+<<<<<<< HEAD
+    /$$
+	adadad
+	asdasda
+	asdadsasdasd
+    $$/
+=======
     $$
 	adadad
 	asdasda
 	asdadsasdasd
     $$
+>>>>>>> f0030450d84556c4594422e756a81dd3433f3481
 }
 
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){

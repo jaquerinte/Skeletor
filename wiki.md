@@ -16,14 +16,6 @@ Version 1.2.2: Change to $$$ for dump Verilog.
 - Change the verilator dump form $ to $$$ for some functions in verilog entering in conflic
 
 --------------------------------------------------------
-Version 1.2.1: Bugfix round 1.
-- Bug of not reconized no = parameters
-
---------------------------------------------------------
-Version 1.2.0: Instruction added.
-- Added vwire to create a wire that will be created directly in the verilog code (Note: always is going to be call {name}_w)
-
---------------------------------------------------------
 Version 1.0.0: Base version of the Skeletor compiler.
 - Added suport por dumping verilog code into skeletor (Note: this verilator code is dump and in not checked by the skeletor compiler).
 - Added -V for version cheking. 
