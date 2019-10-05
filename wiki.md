@@ -2,7 +2,10 @@
 Skeletor
 ========================================================
 Version
-
+--------------------------------------------------------
+Version 1.3.0: Added -a for verilator for custom asserts dessing by @vorixo.
+- added \`default_nettype none
+- Fix error with multiple defines one per file
 --------------------------------------------------------
 Version 1.2.3: Change to $$ for dump Verilog.
 - Change the verilator dump form $$$ to $$ for simplicity
@@ -94,6 +97,7 @@ Basic usage
 * "true":Bool state
 * "false":Bool state
 * "wire": Connexion between modules
+* "vwire": Create a verilog wire that can be acces from verilog and skeletor
 * "->": Assign connections between ports and wires
 * "top": Top module of your project 
 * "+"                           {return ret(opas);}
