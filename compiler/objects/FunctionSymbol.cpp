@@ -165,7 +165,7 @@ void FunctionSymbol :: addValueFunctionSymbolParamPos(int pos, string value, int
     msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 }
 
-FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, int nlin,int ncol)
+/*FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, int nlin,int ncol)
 {
     FunctionSymbolParam s;
     for (int i = 0; i < this -> v_param.size();++i) {
@@ -176,7 +176,7 @@ FunctionSymbolParam& FunctionSymbol :: searchFunctionSymbolParam(string name, in
     // fail: Symbol param  not declared
     msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
     return s;
-}
+}*/
 
 bool FunctionSymbol :: addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name){
     WireSymbol wire(function_out,function_in, pos_out, pos_in,width_out, name_wire, out_name, in_name);
@@ -232,6 +232,8 @@ void FunctionSymbol :: createFileModule(string base, bool verilogDef)
 
 void FunctionSymbol :: createFileModuleDefines(){
     
+    /* Add define not define type to none */
+    this -> output_file_data +="`default_nettype none\n";
     /* Definition top file */
     this -> output_file_data += "//-----------------------------------------------------\n";
     this -> output_file_data += "// Project Name : " + this -> projectName + "\n";
@@ -355,7 +357,8 @@ void FunctionSymbol ::createFileModuleBase(){
     this -> output_file_data += "endmodule\n";
 }
 
-void FunctionSymbol :: createRunTest(bool definitions, bool first, bool vtb, bool qtb){
+void FunctionSymbol :: createRunTest(bool definitions, bool first, bool qtb, bool vtb, bool avb){
+
     if(first)
     {
         this->createTbFolder();
@@ -372,7 +375,7 @@ void FunctionSymbol :: createRunTest(bool definitions, bool first, bool vtb, boo
     }
     if(vtb){
         this->createTbRunVerilator(first);
-        this->createTbVerilator(definitions);
+        this->createTbVerilator(definitions,avb);
     }
 	
 
@@ -428,7 +431,7 @@ void FunctionSymbol :: createTbRunVerilator(bool first){
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 }
 
@@ -450,11 +453,12 @@ void FunctionSymbol :: createTbRunQuesta(bool first){
 	char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 
 }
-void FunctionSymbol :: createTbVerilator(bool definitions){
+void FunctionSymbol :: createTbVerilator(bool definitions, bool avb){
+
     string output_file = this -> projectFolderName + "tb/verilator/tb_" + this->name + ".cpp";
     string output = "";
     output += "#include \"V" + this->name + ".h\"\n";
@@ -464,6 +468,46 @@ void FunctionSymbol :: createTbVerilator(bool definitions){
     output += "#include <iostream>\n";
     output += "#define TRACE_DEF true\n";
     output += "\n";
+    // add the assertions
+    if(avb){
+        output += "//#define NDEBUG\n";
+        output += "//#define NABORT\n";
+        output += "\n";
+        output += "/**\n";
+        output += "* Custom assertion logic\n";
+        output += "* Usage:\n";
+        output += "* - define NABORT to continue the execution after a failed assert.\n";
+        output += "* - define NDEBUG to disable the assertion logic\n";
+        output += "**/";
+        output += "\n";
+        output += "#if !defined(NDEBUG) && !defined(NABORT)\n";
+        output += "  extern char *__progname;\n";
+        output += "  #define ASSERT(step,left,operator,right) {\\\n";
+        output += "    if(!((left) operator (right))){ \\\n";
+        output += "      std::cerr << \"\\033[31m\" << __progname << \": \" << __FILE__ << \":\" << __LINE__ <<\": \" << __PRETTY_FUNCTION__ \\\n";
+        output += "      <<\". Assertion \\\'\" << #left << \" \" << #operator << \" \" << #right << \"\\\' failed in Step \" << step << \".\\033[0m\\nLeft Value :\\033[31m[\" \\\n";
+        output += "      << (left) << \"]\\033[0m\\nRight Value   :\\033[31m[\" << (right) << \"]\\033[0m\" << std::endl; \\\n";
+        output += "      exit(0); \\\n";
+        output += "    }\\\n";
+        output += "  }\n";
+        output += "#elif !defined(NDEBUG) && defined(NABORT)\n";
+        output += "  extern char *__progname;\n";
+        output += "  #define ASSERT(step,left,operator,right) {\\\n";
+        output += "    if(!((left) operator (right))){ \\\n";
+        output += "      std::cerr << \"\\033[31m\" << __progname << \": \" << __FILE__ << \":\" << __LINE__ <<\": \" << __PRETTY_FUNCTION__ \\\n";
+        output += "      <<\". Assertion \\\'\" << #left << \" \" << #operator << \" \" << #right << \"\\\' failed in Step \" << step << \".\\033[0m\\nLeft Value :\\033[31m[\" \\\n";
+        output += "      << (left) << \"]\\033[0m\\nRight Value   :\\033[31m[\" << (right) << \"]\\033[0m\" << std::endl; \\\n";
+        output += "    }\\\n";
+        output += "  }\n";
+        output += "#else\n";
+        output += "  #define ASSERT(step,left,operator,right)\n";
+        output += "#endif\n";
+        output += "/**\n";
+        output += "* Custom assertion logic\n";
+        output += "**/\n";
+        output += "\n";
+
+    }
     output += "//time for waveforms\n";
     output += "vluint64_t main_time =0;//current simulation time\n";
     output += "double sc_time_stamp(){ //called by $time in verilog\n";
@@ -579,7 +623,7 @@ void FunctionSymbol :: createTbVerilator(bool definitions){
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 
 
@@ -735,7 +779,7 @@ void FunctionSymbol :: createTbQuesta(bool definitions){
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, output.c_str());
+    fprintf(f, "%s",output.c_str());
     fclose(f);
 
 }
@@ -747,7 +791,7 @@ void FunctionSymbol :: printToFile()
     char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", this -> filename_asociated.c_str());
     FILE *f = fopen(buf, "w");
-    fprintf(f, this -> output_file_data.c_str());
+    fprintf(f, "%s",this -> output_file_data.c_str());
     fclose(f);
 
 }

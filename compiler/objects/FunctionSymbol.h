@@ -35,7 +35,7 @@ public:
 	
 	void createFileModule(bool verilogDef);
 	void createFileModule(string base, bool verilog_def);
-	void createRunTest(bool definitions, bool first, bool qtb, bool vtb);
+	void createRunTest(bool definitions, bool first, bool qtb, bool vtb, bool avb);
 	void printToFile();
 
     void addVerilogDump(const string dump);
@@ -71,7 +71,7 @@ private:
     void createVerilatorFolder();
     void createTbRunVerilator(bool first);
     void createTbRunQuesta(bool first);
-    void createTbVerilator(bool first);
+    void createTbVerilator(bool first, bool avb);
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;

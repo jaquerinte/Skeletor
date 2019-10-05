@@ -2,7 +2,7 @@
 # Compilers 
 CC = g++
 # the build target executable:
-TARGET = verilog_connector
+TARGET = skeletor
 # YACC FILE
 YFILE = vc.y
 # LEX FILE

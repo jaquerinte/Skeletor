@@ -21,7 +21,7 @@ using namespace std;
 #include "./objects/TableSymbols.h"
 
 /* Version */
-#define VERSION "1.2.3"
+#define VERSION "1.3.0"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
@@ -43,8 +43,9 @@ string projectFolder = "OUTPUT";
 bool db = false;
 bool tb = false;
 bool itb = false;
-bool qtb = true;
+bool qtb = false;
 bool vtb = false;
+bool avb = false;
 string init_output(bool);
 
 struct Type {
@@ -92,7 +93,7 @@ int yyerror(char *s);
 SA      : S     
         { 
             int tk = yylex();
-            if (tk != 0) yyerror("");
+            if (tk != 0) yyerror((char*)"");
         }
     ;
 /* Base syntax */
@@ -165,10 +166,7 @@ MainFunc    : moduledefinition mainmodule id
                 string pme = $3.lexeme;
                 int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
                 string base = init_output(db);
-                tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitions());
-
-                
-                
+                tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitionsTop()); 
 
             }
     ;
@@ -705,14 +703,14 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
                                 ts.printToFile(projectFolder);
                                 if(tb && !itb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
-                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb);
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb,avb);
                                 }
                                 else if(tb && itb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
-                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb);
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb,avb);
                                     for (int i = 0; i <tfs.v_funcSymbols.size();++i) {
                                         if (i != pos ){
-                                            tfs.v_funcSymbols.at(i).createRunTest(ts.getVerilogDefig(),false,qtb,vtb);
+                                            tfs.v_funcSymbols.at(i).createRunTest(ts.getVerilogDefig(),false,qtb,vtb,avb);
                                         }                   
                                     }
                                 }
@@ -869,8 +867,10 @@ void print_usage(void)
     printf("-n                      Set project name\n");
     printf("-t -q                   Make top test bench for questasim \n");
     printf("-t -v                   Make top test bench for verilator\n");
+    printf("-t -v -a                Make top test bench for verilator with asserts\n");
     printf("-t -q -i                Make top and individual test benches for questasim \n");
     printf("-t -v -i                Make top and individual test benches for verilator\n");
+    printf("-t -v -i -a             Make top and individual test benches for verilator with asserts\n");
 }
 int arguments_handler(int argc, char ** argv){
     string str1 ;
@@ -904,10 +904,13 @@ int arguments_handler(int argc, char ** argv){
                 itb = true;
                 break;
             case 'v' :
-                qtb = true;
+                vtb  = true;
                 break;
             case 'q' :
-                vtb = true;
+                qtb = true;
+                break;
+            case 'a' :
+                avb = true;
                 break;
             //default
             default:

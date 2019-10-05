@@ -49,7 +49,7 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 <COMMENT>"*/"               {ncol+=strlen(yytext); BEGIN(INITIAL);}
 <COMMENT>[*/]               {ncol += strlen(yytext);}
 "module"                    {return ret(moduledefinition);}
-"$$"  						    {ncol += strlen(yytext);BEGIN(VERILOGTEXTINPUT); return ret_dump(verilogtext);}
+"$$"  						    {ncol += strlen(yytext);BEGIN(VERILOGTEXTINPUT);}
 <VERILOGTEXTINPUT>[^$$\n]*  {ncol += strlen(yytext);return ret_dump(verilogtext);}
 <VERILOGTEXTINPUT>\n        {nlin++;ncol=1;return ret_dump(verilogtext);}
 <VERILOGTEXTINPUT><<EOF>>   {msgError(ERREOF,-1,-1,"");}
