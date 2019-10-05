@@ -45,6 +45,7 @@ bool tb = false;
 bool itb = false;
 bool qtb = false;
 bool vtb = false;
+bool avb = false;
 string init_output(bool);
 
 struct Type {
@@ -702,14 +703,14 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
                                 ts.printToFile(projectFolder);
                                 if(tb && !itb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
-                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb);
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb,avb);
                                 }
                                 else if(tb && itb){
                                     int pos = tfs.searchFunctionSymbol(name_function_main, nlin, ncol);
-                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb);
+                                    tfs.v_funcSymbols.at(pos).createRunTest(ts.getVerilogDefig(),true,qtb,vtb,avb);
                                     for (int i = 0; i <tfs.v_funcSymbols.size();++i) {
                                         if (i != pos ){
-                                            tfs.v_funcSymbols.at(i).createRunTest(ts.getVerilogDefig(),false,qtb,vtb);
+                                            tfs.v_funcSymbols.at(i).createRunTest(ts.getVerilogDefig(),false,qtb,vtb,avb);
                                         }                   
                                     }
                                 }
@@ -866,8 +867,10 @@ void print_usage(void)
     printf("-n                      Set project name\n");
     printf("-t -q                   Make top test bench for questasim \n");
     printf("-t -v                   Make top test bench for verilator\n");
+    printf("-t -v -a                Make top test bench for verilator with asserts\n");
     printf("-t -q -i                Make top and individual test benches for questasim \n");
     printf("-t -v -i                Make top and individual test benches for verilator\n");
+    printf("-t -v -i -a             Make top and individual test benches for verilator with asserts\n");
 }
 int arguments_handler(int argc, char ** argv){
     string str1 ;
@@ -905,6 +908,9 @@ int arguments_handler(int argc, char ** argv){
                 break;
             case 'q' :
                 qtb = true;
+                break;
+            case 'a' :
+                avb = true;
                 break;
             //default
             default:

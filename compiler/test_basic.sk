@@ -16,60 +16,6 @@ module a (TransAddrSize, AddrSize){
     in [AddrSize -1 : 0] addr;
     out [TransAddrSize-1: 0] taddr;
     out rdy;
-$$
-	reg [WORD_SIZE-1:0] main_mem [0:MEMORY_LINES-1];
-	reg [LINE_SIZE-1:0] data_o_0;
-	reg [LINE_SIZE-1:0] data_o_1;
-	reg [LINE_SIZE-1:0] data_o_2;
-	reg [LINE_SIZE-1:0] data_o_3; 
-	reg [LINE_SIZE-1:0] data_o_4;    
-    reg valid_0; 
-    reg valid_1;
-    reg valid_2;
-    reg valid_3;
-    reg valid_4;
-    `ifdef SIM
-    	initial begin
-    		$readmemh("..\..\..\memory.hex", main_mem)
-     `endif
-
-	always @(posedge clk_i) begin
-		// data_o_0 <= {WORD_SIZE{1'b0}};
-		valid_0 <=0;                           
-		if (!rstn_i) begin                                       
-			// reset                                            
-			integer i;         
-			/* verilator lint_off BLKLOOPINIT*/                                 
-			for(i=0;i<MEMORY_LINES; i=i+1) begin                 
-				main_mem[i] <= {WORD_SIZE{1'b0}};                
-			end   
-			/* verilator lint_on BLKLOOPINIT*/                                             
-			                                                    
-		end                                                  
-		else if (we_i) begin                                 
-			main_mem[addr_i] <= data_i ;                         
-			                                                    
-		end else if (strobe_i) begin                        
-			data_o_0[31:0] <= main_mem[addr_i>>2];                 
-			data_o_0[63:32] <= main_mem[(addr_i>>2) + 1];
-			data_o_0[95:64] <= main_mem[(addr_i>>2) + 2];                 
-			data_o_0[127:96] <= main_mem[(addr_i>>2) + 3];
-			valid_0 <= 1;                    
-			                                                    
-		end
-		data_o <= data_o_4;
-		valid_data_o <= valid_4;
-		data_o_4 <=  data_o_3;
-		valid_4 <= valid_3;
-		data_o_3 <= data_o_2;
-		valid_3 <= valid_2;
-		data_o_2 <= data_o_1;
-		valid_2 <= valid_1;
-		data_o_1 <= data_o_0;
-		valid_1 <= valid_0;
-
-	end   
-$$
 
 
 }
