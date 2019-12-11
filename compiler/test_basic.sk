@@ -65,6 +65,7 @@ module e(){
     #references GENRALREFERENCE
 
     in a;
+    in test;
     out b;
 }
 
@@ -110,6 +111,7 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     wire [TransAddrSize-1:0] x.taddr -> y.taddr;
     wire x.rdy -> w.in1;
     wire x.rdy -> w.in4;
+    wire x.rdy -> test.test;
     wire y.rdy -> w.in2;
     wire z.rdy -> w.in3;
     

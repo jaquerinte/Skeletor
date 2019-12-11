@@ -48,18 +48,26 @@ bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value, in
 	msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 	return false;
 }
-bool InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int type, int nlin, int ncol)
+string InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int type, int nlin, int ncol)
 {
 	
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
-		if (this -> v_inoutwires.at(i).getName() == name && this -> v_inoutwires.at(i).getType() == type) { 
-			this -> v_inoutwires.at(i).setValue(value);
-			return true;
+		if (this -> v_inoutwires.at(i).getName() == name && this -> v_inoutwires.at(i).getType() == type) {
+			if (this -> v_inoutwires.at(i).getValue() == ""){
+				this -> v_inoutwires.at(i).setValue(value);
+				return "";
+			}
+			else{
+				// value already in place so do not change the wire only returned. 
+				return this -> v_inoutwires.at(i).getValue();
+			}
+			
+			
 		}
 	}
 	// fail: Symbol param  not declared
 	msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
-	return false;
+	return "";
 }
 
 void InstanceSymbol :: addValueFunctionSymbolParamPos(int pos, string value)

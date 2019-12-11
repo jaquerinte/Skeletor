@@ -341,8 +341,9 @@ EInstr      : Ref {
                                 // all verfiy
                                 // add values instance and store wire
                                 string name_wire = out[1] + "_" + out[0] + "_" + in[0];
-                                // verify the wire if already exists and register if not
+                                // verify the wire if already exists and register if
                                 if (!ts.contains(name_wire,s1)){
+                                    // resgiter only of already exits
                                     ts.addSymbol(name_wire,WIRE,s1, nlin, ncol);
                                 }
                                 else{
@@ -350,12 +351,21 @@ EInstr      : Ref {
                                 }
                                 // create wire.
                                 // add and instace out
-                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT, nlin,ncol);
-                                // add and instace in
-                                tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, IN, nlin,ncol);
-                                // add wire
-                                tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i",print);
+                                string value = tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT, nlin,ncol);
+                                if (value == ""){
+                                    // not filled yet
+                                    // add and instace in
+                                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, IN, nlin,ncol);
+                                    // add wire
+                                    tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i",print);
 
+                                }
+                                else{
+                                    // already filled only add the symbol
+                                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], value, IN, nlin,ncol);
+                                    
+                                }
+                                
                                }
     ;
 CallExpresion   :  twopoints id {
