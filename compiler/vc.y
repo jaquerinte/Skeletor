@@ -21,7 +21,7 @@ using namespace std;
 #include "./objects/TableSymbols.h"
 
 /* Version */
-#define VERSION "1.3.0"
+#define VERSION "1.4.0"
 
 /* Return messages */
 #define CORRECT_EXECUTION 0
@@ -321,6 +321,7 @@ EInstr      : Ref {
             | wiretipe Arrayargs Ref connectwire Ref {
                                 string var_out = $3.trad;
                                 string var_in = $5.trad;
+                                bool print = true;
                                 // get functionsymbol that stores instantce
                                 int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
                                 // decompse the variables.
@@ -341,14 +342,19 @@ EInstr      : Ref {
                                 // add values instance and store wire
                                 string name_wire = out[1] + "_" + out[0] + "_" + in[0];
                                 // verify the wire if already exists and register if not
-                                ts.addSymbol(name_wire,WIRE,s1, nlin, ncol);
+                                if (!ts.contains(name_wire,s1)){
+                                    ts.addSymbol(name_wire,WIRE,s1, nlin, ncol);
+                                }
+                                else{
+                                    print = false;
+                                }
                                 // create wire.
                                 // add and instace out
                                 tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT, nlin,ncol);
                                 // add and instace in
                                 tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, IN, nlin,ncol);
                                 // add wire
-                                tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i");
+                                tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i",print);
 
                                }
     ;
@@ -860,7 +866,7 @@ return output;
 
 void print_usage(void)
 {
-    printf("Use: verilog_connector <filename>\n");
+    printf("Use: skeletor <filename>\n");
     printf("-h, --help, help        Print this message\n");
     printf("-V  --version           Print Version and exits\n");
     printf("-d                      Output directory name\n");

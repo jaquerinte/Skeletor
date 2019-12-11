@@ -29,6 +29,7 @@ public:
 	FunctionSymbolParam& searchFunctionSymbolParam(string name, int nlin,int ncol);
 
 	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name);
+	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name, bool print);
 	bool addVWireConnection(string width_out, string name_wire);
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
 	int searchInstance(string name, int nlin,int ncol);

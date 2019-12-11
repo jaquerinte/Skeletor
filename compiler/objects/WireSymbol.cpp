@@ -9,9 +9,10 @@ WireSymbol :: WireSymbol(){
 	this -> name_wire = "";
 	this -> out_name = "";
 	this -> in_name = "";
+	this -> print = true;
 
 }
-WireSymbol :: WireSymbol(string function_out, string function_in ,int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name){
+WireSymbol :: WireSymbol(string function_out, string function_in ,int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name, bool print){
 	this -> function_out = function_out;
 	this -> function_in = function_in;
 	this -> pos_out = pos_out;
@@ -20,6 +21,7 @@ WireSymbol :: WireSymbol(string function_out, string function_in ,int pos_out, i
 	this -> name_wire = name_wire;
 	this -> out_name = out_name;
 	this -> in_name = in_name;
+	this -> print = print;
 }
 WireSymbol :: ~WireSymbol(){}
 WireSymbol :: WireSymbol(const WireSymbol &In){
@@ -31,6 +33,7 @@ WireSymbol :: WireSymbol(const WireSymbol &In){
 	this -> name_wire = In.name_wire;
 	this -> out_name = In.out_name;
 	this -> in_name = In.in_name;
+	this -> print = In.print;
 
 }
 WireSymbol& WireSymbol :: operator = (const WireSymbol &In){
@@ -49,4 +52,5 @@ string WireSymbol :: getWidthOut(){return this -> width_out;}
 string WireSymbol :: getNameWire(){return this -> name_wire;}
 string WireSymbol :: getNameOut(){return this -> out_name;}
 string WireSymbol :: getNameIn(){return this -> in_name;}
+bool WireSymbol :: getPrint(){return this -> print;}
 

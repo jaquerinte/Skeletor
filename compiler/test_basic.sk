@@ -54,6 +54,7 @@ module d(){
     in in1;
     in in2;
     in in3;
+    in in4;
     out out1; // no puede ser out porque es una palabra reservada
 }
 
@@ -65,19 +66,6 @@ module e(){
 
     in a;
     out b;
-<<<<<<< HEAD
-    /$$
-	adadad
-	asdasda
-	asdadsasdasd
-    $$/
-=======
-    $$
-	adadad
-	asdasda
-	asdadsasdasd
-    $$
->>>>>>> f0030450d84556c4594422e756a81dd3433f3481
 }
 
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
@@ -121,6 +109,7 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     
     wire [TransAddrSize-1:0] x.taddr -> y.taddr;
     wire x.rdy -> w.in1;
+    wire x.rdy -> w.in4;
     wire y.rdy -> w.in2;
     wire z.rdy -> w.in3;
     

@@ -70,6 +70,20 @@ int TableSymbols :: shearchSymbol(string name, string module, int nlin, int ncol
 	return -1;
 }
 
+bool TableSymbols :: contains(string name, string module)
+{
+	for (int i = 0; i < v_symbols.size();++i) {
+		if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == module) {
+			return true;
+		}
+		else if (v_symbols.at(i).getName() == name && v_symbols.at(i).getModule() == "null"){
+			
+			return true;
+		}
+	}
+	return false;
+}
+
 bool TableSymbols :: createDefinitions(){
 	string verilogVar = "";
 	for (int i = 0; i < v_symbols.size();++i) {
