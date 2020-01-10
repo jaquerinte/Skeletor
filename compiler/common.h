@@ -1,6 +1,5 @@
 #ifndef COMMON_H
 #define COMMON_H
-
 typedef struct {
    char *lexeme;
    int nlin,ncol;
@@ -52,6 +51,25 @@ typedef struct {
 #define ERRINSNOTFOUND   100 // ERROR Instance not found
 /* ARGUMENTS ERROR */
 #define ERRARGUMENTPOSNONAME 120 // ERROR positional ARGUMENT un a name argument
+
+/* KICAT CONSTANTS */
+#define DEFAULTMODULEWIDTH 2500 // 800 2500
+#define DEFAULTMODULEHEIGHT 500
+#define CRERANCEINTOP 100
+#define DISTANCEBETWEENPINS 100
+
+#define PINLENGH 100
+
+#define XPOSITIONBASE 1500  
+#define YPOSITIONBASE 5000 // 3000 5000
+#define CLEARANCEBETWEENMODULES 3500 // 1500 3500
+#define TOPCLEARANCETEXT1 -115
+#define TOPCLEARANCETEXT2 -175
+
+#define XLABELBASEINPUT 1200
+#define XLABELBASEOUTPUT 10250
+#define YLABELBASE 800
+#define CLEARANCEBETWEENLABELS 200
 
 void msgError(int nerror,int nlin,int ncol,const char *s);
 #endif

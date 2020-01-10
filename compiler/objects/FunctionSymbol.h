@@ -4,7 +4,8 @@
 
 #include "InstanceSymbol.h"
 #include "../common.h"
-#include <sys/stat.h> 
+#include <sys/stat.h>
+#include <map>
 
 using namespace std;
 
@@ -15,6 +16,7 @@ public:
 
 	FunctionSymbol();
     FunctionSymbol(string name, string projectName, string projectFolder);
+    FunctionSymbol(string name, string projectName, string projectFolder, bool isTop);
 	FunctionSymbol(const FunctionSymbol &In);
 	~FunctionSymbol();
 	FunctionSymbol& operator = (const FunctionSymbol &In);
@@ -39,6 +41,11 @@ public:
 	void createRunTest(bool definitions, bool first, bool qtb, bool vtb, bool avb);
 	void printToFile();
 
+	// kicad functions
+	string getLibData();
+	void createProjectFile(string projectFolder, string name);
+	void CreateSchFile(string projectName, std::map<string, FunctionSymbol> mapOfLeafsModules);
+
     void addVerilogDump(const string dump);
 
 	// getters
@@ -51,8 +58,12 @@ public:
 	string getProjectName();
 	string getReferences();
 	string getOutputFileData();
+	bool getIsTop();
+	int getNumberOfInstances();
+	bool isLeaf();
 	vector<FunctionSymbolParam> getFunctionSymbolParam();
 	vector<InoutSymbol> getInoutSymbol();
+	
 
 	//setters
 
@@ -64,6 +75,7 @@ public:
 	void setReferences(string references);
 
 	vector<InstanceSymbol> v_instances;
+	vector<InoutSymbol> v_inoutwires;
 
 private:
 	void createTbQuesta(bool definitions);
@@ -76,7 +88,7 @@ private:
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;
-	vector<InoutSymbol> v_inoutwires;
+	
 	vector<FunctionSymbolParam> v_param;
 	vector<WireSymbol> v_wire;
 	vector<VWireSymbol> v_vwire;
@@ -90,6 +102,7 @@ private:
 	string output_file_data;
 	string projectFolder;
 	string verilog_dump;
+	bool isTop;
 	
 };
 

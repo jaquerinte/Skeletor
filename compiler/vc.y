@@ -41,11 +41,12 @@ const int LOGIC=5;
 string projectName = "a.out";
 string projectFolder = "OUTPUT";
 bool db = false;
-bool tb = false;
-bool itb = false;
-bool qtb = false;
-bool vtb = false;
-bool avb = false;
+bool tb = false; // testbech creation
+bool itb = false; // individual testbech creation
+bool qtb = false; // questa sim testbench creation
+bool vtb = false; // verilator testbech creation
+bool avb = false; // create assertions
+bool kcreation = false; // create kicat folder and desing 
 string init_output(bool);
 
 struct Type {
@@ -156,7 +157,7 @@ MainFunc    : moduledefinition mainmodule id
                 // fist add symbol
                 ts.addSymbol(pme,FUNCTION,"null", nlin, ncol);
                 // then add symbol
-                tfs.addFunctionSymbol(pme, projectName, projectFolder, nlin, ncol);
+                tfs.addTopFunctionSymbol(pme, projectName, projectFolder, nlin, ncol);
                 s1 = pme;
                 name_function_main = pme;
             }  parl SArgs parr Block
@@ -730,6 +731,11 @@ S       : SSuperblock SAFunc {$$.trad = $1.trad + $2.trad;
                                         }                   
                                     }
                                 }
+                                if(kcreation){
+                                    // create files for kicat
+                                    tfs.createFilesKicat(projectFolder);
+
+                                }
                             }
     ;
 
@@ -881,6 +887,7 @@ void print_usage(void)
     printf("-V  --version           Print Version and exits\n");
     printf("-d                      Output directory name\n");
     printf("-n                      Set project name\n");
+    printf("-k                      Create kicat schematic (EXPERIMENTAL)\n");
     printf("-t -q                   Make top test bench for questasim \n");
     printf("-t -v                   Make top test bench for verilator\n");
     printf("-t -v -a                Make top test bench for verilator with asserts\n");
@@ -927,6 +934,9 @@ int arguments_handler(int argc, char ** argv){
                 break;
             case 'a' :
                 avb = true;
+                break;
+            case 'k' :
+                kcreation = true;
                 break;
             //default
             default:

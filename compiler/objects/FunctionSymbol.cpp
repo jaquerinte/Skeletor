@@ -13,6 +13,7 @@ FunctionSymbol :: FunctionSymbol()
     this -> projectFolder = "";
     this -> projectFolderName = "";
     this -> verilog_dump = "";
+    this -> isTop = false;
 }
 
 
@@ -29,6 +30,22 @@ FunctionSymbol :: FunctionSymbol(string name, string projectName, string project
     //this -> filename_asociated = "./objects/" + name + ".v";
     this -> output_file_data = "";
     this -> verilog_dump = "";
+    this -> isTop = false;
+}
+FunctionSymbol :: FunctionSymbol(string name, string projectName, string projectFolder, bool isTop)
+{
+    this -> name = name;
+    this -> function = "";
+    this -> description = "";
+    this -> code = "";
+    this -> projectName = projectName;
+    this -> projectFolderName = "./" + projectFolder + "/";
+    this -> filename_asociated = "./" + projectFolder + "/hdl/" + name + ".v";
+    this -> projectFolder = "./" + projectFolder + "/hdl/";
+    //this -> filename_asociated = "./objects/" + name + ".v";
+    this -> output_file_data = "";
+    this -> verilog_dump = "";
+    this -> isTop = isTop;
 }
 
 FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
@@ -49,6 +66,7 @@ FunctionSymbol :: FunctionSymbol(const FunctionSymbol &In)
     this -> v_instances = In.v_instances;
     this -> projectFolder = In.projectFolder;
     this -> verilog_dump = In.verilog_dump;
+    this -> isTop = In.isTop;
 }
 FunctionSymbol :: ~FunctionSymbol(){}
 
@@ -432,7 +450,7 @@ void FunctionSymbol :: createTbRunVerilator(bool first){
     output += "make -f V" + this -> name + ".mk \n";
     output += "cd ../\n";
     output += "./obj_dir/V" + this -> name + "\n";
-    output += "gtkwave obj_dir/V" + this -> name + ".vcd  test.gtkw\n";
+    output += "gtkwave obj_dir/V" + this -> name + ".vcd  test_" + this->name + ".gtkw\n";
     output += "\n";
     // create file
     char buf[0x100];
@@ -803,6 +821,227 @@ void FunctionSymbol :: printToFile()
 
 }
 
+string FunctionSymbol :: getLibData(){
+    string output = "";
+    // start definition
+    output += "#\n";
+    output += "#"+ this->name +"\n";
+    output += "#\n";
+    // create names
+    output += "DEF "+ this->name + " U 0 40 Y Y 1 F N\n";
+    output += "F0 \"U\" 0 0 50 H V C CNN\n";
+    output += "F1 \"" + this->name + "\" 0 100 50 H V C CNN\n";
+    output += "F2 \"\" 0 0 50 H I C CNN\n";
+    output += "F3 \"\" 0 0 50 H I C CNN\n";
+    // DRAW Face
+    output += "DRAW\n";
+    // get parameters
+    int number_of_inputs = 0;
+    int number_of_outpus = 0;
+    for (int i = 0; i < this -> v_inoutwires.size();++i) {
+        if (this -> v_inoutwires.at(i).getType() == IN){
+                number_of_inputs += 1;
+        }
+        else if (this -> v_inoutwires.at(i).getType() == OUT){
+            number_of_outpus += 1;
+        }
+        else if (this -> v_inoutwires.at(i).getType() == INOUT){
+            number_of_outpus += 1;
+        }
+    }
+
+    int height_module = std::max(DEFAULTMODULEHEIGHT,(CRERANCEINTOP) + std::max(number_of_inputs,number_of_outpus) * DISTANCEBETWEENPINS);
+    int width_module = DEFAULTMODULEWIDTH;
+    // size of the module
+    output += "S 0 " + std::to_string(height_module) + " " + std::to_string(width_module) + " 0 0 1 0 N\n";
+    // add the connections
+    // inputs first
+    int aux_position = height_module - CRERANCEINTOP;
+    int number_of_pin = 1;
+    for (int i = 0; i < this -> v_inoutwires.size();++i) {
+        if (this -> v_inoutwires.at(i).getType() == IN){
+                output += "X "+ this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" -"+ std::to_string(PINLENGH) + " " + std::to_string(aux_position) + " 100 R 50 50 1 1 I\n";
+                aux_position = aux_position - DISTANCEBETWEENPINS;
+                number_of_pin += 1;
+        }
+        
+    }
+    // outputs
+    aux_position = height_module - CRERANCEINTOP;
+    for (int i = 0; i < this -> v_inoutwires.size();++i) {
+        if (this -> v_inoutwires.at(i).getType() != IN){
+                output += "X "+ this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" "+ std::to_string(width_module + PINLENGH) +" " + std::to_string(aux_position) + " 100 L 50 50 1 1 O\n";
+                aux_position = aux_position - DISTANCEBETWEENPINS;
+                number_of_pin += 1;
+        }
+    }
+    // finish file
+    output += "ENDDRAW\nENDDEF\n";
+   
+
+
+
+    return output;
+}
+void FunctionSymbol :: createProjectFile(string projectFolder, string name){
+    string output_file = projectFolder + "/kicat/" + name + ".pro";
+    string output = "";
+    // init creation of default folder
+    output += "update=22/05/2015 07:44:53\n";
+    output += "version=1\n";
+    output += "last_client=kicad\n";
+    output += "[general]\n";
+    output += "version=1\n";
+    output += "RootSch=\n";
+    output += "BoardNm=\n";
+    output += "[pcbnew]\n";
+    output += "version=1\n";
+    output += "LastNetListRead=\n";
+    output += "UseCmpFile=1\n";
+    output += "PadDrill=0.600000000000\n";
+    output += "PadDrillOvalY=0.600000000000\n";
+    output += "PadSizeH=1.500000000000\n";
+    output += "PadSizeV=1.500000000000\n";
+    output += "PcbTextSizeV=1.500000000000\n";
+    output += "PcbTextSizeH=1.500000000000\n";
+    output += "PcbTextThickness=0.300000000000\n";
+    output += "ModuleTextSizeV=1.000000000000\n";
+    output += "ModuleTextSizeH=1.000000000000\n";
+    output += "ModuleTextSizeThickness=0.150000000000\n";
+    output += "SolderMaskClearance=0.000000000000\n";
+    output += "SolderMaskMinWidth=0.000000000000\n";
+    output += "DrawSegmentWidth=0.200000000000\n";
+    output += "BoardOutlineThickness=0.100000000000\n";
+    output += "ModuleOutlineThickness=0.150000000000\n";
+    output += "[cvpcb]\n";
+    output += "version=1\n";
+    output += "NetIExt=net\n";
+    output += "[eeschema]\n";
+    output += "version=1\n";
+    output += "LibDir=\n";
+    output += "[eeschema/libraries]";
+
+    // create file
+    char buf[0x100];
+    snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+    FILE *f = fopen(buf, "w");
+    fprintf(f, "%s",output.c_str());
+    fclose(f);
+
+}
+
+
+void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, FunctionSymbol> mapOfLeafsModules){
+    string output = "";
+    string output_file = projectName + "/kicat/" + this -> name + ".sch";
+    // start definition
+    // create the basic stuff
+    output += "EESchema Schematic File Version 4\n";
+    output += "EELAYER 30 0\n";
+    output += "EELAYER END\n";
+    output += "$Descr A2 11693 8268\n";
+    output += "encoding utf-8\n";
+    output += "Sheet 1 1\n";
+    output += "Title \"\"\n";
+    output += "Date \"\"\n";
+    output += "Rev \"\"\n";
+    output += "Comp \"\"\n";
+    output += "Comment1 \"\"\n";
+    output += "Comment2 \"\"\n";
+    output += "Comment3 \"\"\n";
+    output += "Comment4 \"\"\n";
+    output += "$EndDescr\n";
+    
+    // first iterate over the instaces TODO check if is a component or a sheet
+    for (int i = 0; i < this -> v_instances.size(); ++i){
+        // check if the module of the instance is a leaf or have more components
+        
+        if(mapOfLeafsModules.at(this -> v_instances.at(i).getName()).isLeaf()){
+            // is leaf create component
+            output += "$Comp\n";
+            output += "L " + projectName + ":" + this -> v_instances.at(i).getName() +" U" + std::to_string(i + 1) + "\n";
+            output += "U 1 1 5DC34FD9\n"; // TODO check what does that number
+            output += "P " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) + "\n";
+            output += "F 0 \"" + this -> v_instances.at(i).getName() + " U" + std::to_string(i + 1) + "\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH/2)+ " " + std::to_string(YPOSITIONBASE + TOPCLEARANCETEXT1) + " 50  0000 C CNN\n";
+            output += "F 1 \""+ this -> v_instances.at(i).getNameInstance() + "\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH/2) +" "+ std::to_string(YPOSITIONBASE + TOPCLEARANCETEXT2) +" 50  0000 C CNN\n";
+            output += "F 2 \"\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) +" 50  0001 C CNN\n";
+            output += "F 3 \"\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) +" 50  0001 C CNN\n";
+            output += "    1    " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) + "\n";
+            output += "    1    0    0    -1 \n";
+            output += "$EndComp\n";
+        }
+        else {
+            // frist we need to know the max number of imputs for the size
+            int number_of_inputs = 0;
+            int number_of_outpus = 0;
+            for(int w = 0; w < mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.size(); ++w){
+                if (mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(i).getType() == IN){
+                    number_of_inputs += 1;
+                }
+                else{
+                    number_of_outpus += 1;
+                }
+
+            }
+            int height_module = std::max(DEFAULTMODULEHEIGHT, (CRERANCEINTOP) + std::max(number_of_inputs,number_of_outpus) * DISTANCEBETWEENPINS);
+            int width_module = DEFAULTMODULEWIDTH;
+            // create a sheet
+            output += "$Sheet\n";
+            output += "S " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE-height_module) + " " + std::to_string(width_module) +  " " +std::to_string(height_module)  + "\n"; // todo check with more pins
+            output += "U 5E175FE2\n";// TODO check what does that number
+            output += "F0 \"" + v_instances.at(i).getName() + "\" 50\n";
+            output += "F1 \"" + v_instances.at(i).getName() + ".sch\" 50\n";
+            // create connections
+            int aux_position_input = YPOSITIONBASE - height_module + CRERANCEINTOP;
+            int aux_position_output = YPOSITIONBASE - height_module + CRERANCEINTOP;
+            for(int w = 0; w < mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.size(); ++w){
+                if (mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(w).getType() == IN){
+                    output += "F" + std::to_string(w+2) + " \"" + mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(w).getName() + "\" I L " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(aux_position_input)+ " 50\n";
+                    aux_position_input = aux_position_input + DISTANCEBETWEENPINS;
+                }
+                else{
+                    output += "F" + std::to_string(w+2) + " \"" + mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(w).getName() + "\" O R " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH) + " " + std::to_string(aux_position_output) + " 50\n";
+                    aux_position_output = aux_position_output + DISTANCEBETWEENPINS;
+                }
+            }
+
+            //output += "F2 \"aa\" I L 1650 2300 50\n";
+            output += "$EndSheet\n";
+        }
+    }
+    // start creating the lablels
+    string aux_label_type = "";
+    int labels_input = 0;
+    int labels_output = 0;
+    for (int i = 0; i < this -> v_inoutwires.size();++i) {
+         if (this -> isTop) {
+            aux_label_type = "GLabel";
+        }else{
+            aux_label_type = "HLabel";
+        }
+        if (this -> v_inoutwires.at(i).getType() == IN){
+            output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEINPUT) + " " + std::to_string(YLABELBASE + labels_input*CLEARANCEBETWEENLABELS) + " 0    50   Input ~ 0\n";
+            output +=  this -> v_inoutwires.at(i).getName() + "\n";
+            labels_input +=1;
+        }
+        else{
+            output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEOUTPUT) + " " + std::to_string(YLABELBASE + labels_output*CLEARANCEBETWEENLABELS) + " 2    50   Output ~ 0\n";
+            output +=  this -> v_inoutwires.at(i).getName() + "\n";
+            labels_output +=1;
+        }  
+    }
+    // TODO missing recursive sheets
+    // TODO missing wires
+
+    output += "$EndSCHEMATC";
+    // create file sch
+    char buf[0x100];
+    snprintf(buf, sizeof(buf), "%s", output_file.c_str());
+    FILE *f = fopen(buf, "w");
+    fprintf(f, "%s",output.c_str());
+    fclose(f);
+}
+
 string FunctionSymbol :: getName(){return this -> name;}
 string FunctionSymbol :: getFilenameAsociated(){return this -> filename_asociated;}
 string FunctionSymbol :: getFunction() {return this -> function;}
@@ -811,8 +1050,12 @@ string FunctionSymbol :: getCode() {return this -> code;}
 string FunctionSymbol :: getProjectName() {return this -> projectName;}
 string FunctionSymbol :: getReferences() {return this -> references;}
 string FunctionSymbol :: getOutputFileData() {return this -> output_file_data;}
+bool   FunctionSymbol :: getIsTop(){return this -> isTop;}
+int    FunctionSymbol :: getNumberOfInstances(){return this->v_instances.size();};
+bool   FunctionSymbol :: isLeaf(){return this->v_instances.size() == 0 ? true : false;}
 vector<FunctionSymbolParam> FunctionSymbol :: getFunctionSymbolParam(){return this -> v_param;}
 vector<InoutSymbol> FunctionSymbol :: getInoutSymbol(){return this -> v_inoutwires;}
+
 
 //setters
 
