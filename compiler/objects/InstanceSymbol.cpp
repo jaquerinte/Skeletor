@@ -23,6 +23,7 @@ InstanceSymbol :: InstanceSymbol(const InstanceSymbol &In){
 	this -> v_inoutwires = In.v_inoutwires;
 	this -> v_param = In.v_param;
 	this -> v_wire = In.v_wire;
+	this -> instancenDesig = In.instancenDesig;
 }
 InstanceSymbol :: ~InstanceSymbol(){}
 

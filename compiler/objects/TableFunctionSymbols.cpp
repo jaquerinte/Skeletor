@@ -75,9 +75,9 @@ void TableFunctionSymbols :: createFiles(string projectFolder)
 // create the folder for the kicatProject
 void TableFunctionSymbols :: createFilesKicat(string projectFolder)
 {	
-	string output_file_lib = projectFolder + "/kicat/" + projectFolder + ".lib";
+	string output_file_lib = projectFolder + "/kicad/" + projectFolder + ".lib";
 	string output_lib = "";
-	string temp = projectFolder +"/kicat";
+	string temp = projectFolder +"/kicad";
 	if (mkdir(temp.c_str(), 0777) == -1){
 		cerr << "Error : " << strerror(errno) << endl;
 	}
@@ -101,10 +101,10 @@ void TableFunctionSymbols :: createFilesKicat(string projectFolder)
     fclose(f);
 	
 	//create a list of functions symbols that have
-	std::map<string, FunctionSymbol> mapOfLeafsModules;
+	std::map<string, FunctionSymbol*> mapOfLeafsModules;
 
 	for(int i = 0; i < v_funcSymbols.size();++i){
-		mapOfLeafsModules.insert({v_funcSymbols.at(i).getName(), v_funcSymbols.at(i) });
+		mapOfLeafsModules.insert({v_funcSymbols.at(i).getName(), &v_funcSymbols.at(i) });
 	}
 	//create sch files TODO only top now
 	for (int i = 0; i < v_funcSymbols.size();++i) {
@@ -132,7 +132,7 @@ void TableFunctionSymbols :: createFilesKicat(string projectFolder)
 // create the sym-lib-table
 
 void createSymLibTable(string projectFolder){
-	string output_file = projectFolder + "/kicat/sym-lib-table";
+	string output_file = projectFolder + "/kicad/sym-lib-table";
 	string output = "";
 	output += "(sym_lib_table\n";
 	output += "  (lib (name "+ projectFolder + ")(type Legacy)(uri ${KIPRJMOD}/" + projectFolder + ".lib)(options \"\")(descr \"\"))\n";

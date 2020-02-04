@@ -7,9 +7,9 @@
 #include <vector>
 using namespace std;
 
-const int IN=1;
-const int OUT=2;
-const int INOUT=3;
+#include "../common.h"
+
+
 
 class InoutSymbol
 {

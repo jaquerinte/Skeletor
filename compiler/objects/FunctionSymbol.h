@@ -3,6 +3,8 @@
 
 
 #include "InstanceSymbol.h"
+#include "../kicatobjects/ComponentFunctionSymbol.h"
+#include "../kicatobjects/InstanceComponentFunctionSymbol.h"
 #include "../common.h"
 #include <sys/stat.h>
 #include <map>
@@ -44,7 +46,7 @@ public:
 	// kicad functions
 	string getLibData();
 	void createProjectFile(string projectFolder, string name);
-	void CreateSchFile(string projectName, std::map<string, FunctionSymbol> mapOfLeafsModules);
+	void CreateSchFile(string projectName, std::map<string, FunctionSymbol*> mapOfLeafsModules);
 
     void addVerilogDump(const string dump);
 
@@ -102,6 +104,10 @@ private:
 	string output_file_data;
 	string projectFolder;
 	string verilog_dump;
+
+	ComponentFunctionSymbol* functionDesig;
+
+
 	bool isTop;
 	
 };

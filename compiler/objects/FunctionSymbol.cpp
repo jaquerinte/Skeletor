@@ -14,6 +14,7 @@ FunctionSymbol :: FunctionSymbol()
     this -> projectFolderName = "";
     this -> verilog_dump = "";
     this -> isTop = false;
+    this -> functionDesig = new ComponentFunctionSymbol();
 }
 
 
@@ -31,6 +32,7 @@ FunctionSymbol :: FunctionSymbol(string name, string projectName, string project
     this -> output_file_data = "";
     this -> verilog_dump = "";
     this -> isTop = false;
+    this -> functionDesig = new ComponentFunctionSymbol();
 }
 FunctionSymbol :: FunctionSymbol(string name, string projectName, string projectFolder, bool isTop)
 {
@@ -402,22 +404,22 @@ void FunctionSymbol :: createRunTest(bool definitions, bool first, bool qtb, boo
         this->createTbRunVerilator(first);
         this->createTbVerilator(definitions,avb);
     }
-	
+    
 
 
 
 }
 
 void FunctionSymbol :: createTbFolder(){
-	string output_folder = this -> projectFolderName + "tb";
-	if (mkdir(output_folder.c_str(), 0777) == -1) 
-		cerr << "Error : " << strerror(errno) << endl; 
+    string output_folder = this -> projectFolderName + "tb";
+    if (mkdir(output_folder.c_str(), 0777) == -1) 
+        cerr << "Error : " << strerror(errno) << endl; 
 }
 
 void FunctionSymbol :: createQuestaSimFolder(){
-	string output_folder = this -> projectFolderName + "tb/questa_sim";
-	if (mkdir(output_folder.c_str(), 0777) == -1) 
-		cerr << "Error : " << strerror(errno) << endl;
+    string output_folder = this -> projectFolderName + "tb/questa_sim";
+    if (mkdir(output_folder.c_str(), 0777) == -1) 
+        cerr << "Error : " << strerror(errno) << endl;
 }
 
 void FunctionSymbol :: createVerilatorFolder(){
@@ -465,17 +467,17 @@ void FunctionSymbol :: createTbRunQuesta(bool first){
     if (first){
         output_file = this -> projectFolderName + "tb/questa_sim/runtest.sh";
     }
-	else{
+    else{
         output_file = this -> projectFolderName + "tb/questa_sim/runtest_" + this->name + ".sh";
     }
-	// create file
-	string output = "vlib " + this -> name + "\n";
-	output += "vmap work $PWD/" + this -> name + "\n";
-	output += "vlog +incdir+../../hdl/ ../../hdl/*.v ../../hdl/*.vh tb_" + this -> name + ".v" + "\n";
-	output += "vmake "+ this -> name +"/ > Makefile" + "\n";
-	output += "vsim";
     // create file
-	char buf[0x100];
+    string output = "vlib " + this -> name + "\n";
+    output += "vmap work $PWD/" + this -> name + "\n";
+    output += "vlog +incdir+../../hdl/ ../../hdl/*.v ../../hdl/*.vh tb_" + this -> name + ".v" + "\n";
+    output += "vmake "+ this -> name +"/ > Makefile" + "\n";
+    output += "vsim";
+    // create file
+    char buf[0x100];
     snprintf(buf, sizeof(buf), "%s", output_file.c_str());
     FILE *f = fopen(buf, "w");
     fprintf(f, "%s",output.c_str());
@@ -655,9 +657,9 @@ void FunctionSymbol :: createTbVerilator(bool definitions, bool avb){
 }
 
 void FunctionSymbol :: createTbQuesta(bool definitions){
-	string output_file = this -> projectFolderName + "tb/questa_sim/tb_" + this->name + ".v";
-	string output = "";
-	output += "//-----------------------------------------------------\n";
+    string output_file = this -> projectFolderName + "tb/questa_sim/tb_" + this->name + ".v";
+    string output = "";
+    output += "//-----------------------------------------------------\n";
     output += "// Project Name : " + this -> projectName + "\n";
     output += "// File Name    : tb_" + this->name + ".v\n";
     if (this -> function != ""){
@@ -677,7 +679,7 @@ void FunctionSymbol :: createTbQuesta(bool definitions){
     // header finish
     // definition
     if (definitions){
-    	output += "`include \"defines.vh\"\n";
+        output += "`include \"defines.vh\"\n";
     }
     output += "//***Test bench***\n";
     // test bench definition
@@ -854,6 +856,8 @@ string FunctionSymbol :: getLibData(){
     int width_module = DEFAULTMODULEWIDTH;
     // size of the module
     output += "S 0 " + std::to_string(height_module) + " " + std::to_string(width_module) + " 0 0 1 0 N\n";
+    // create object for the 
+    this -> functionDesig = new ComponentFunctionSymbol(height_module,width_module);
     // add the connections
     // inputs first
     int aux_position = height_module - CRERANCEINTOP;
@@ -861,8 +865,10 @@ string FunctionSymbol :: getLibData(){
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         if (this -> v_inoutwires.at(i).getType() == IN){
                 output += "X "+ this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" -"+ std::to_string(PINLENGH) + " " + std::to_string(aux_position) + " 100 R 50 50 1 1 I\n";
+                this -> functionDesig->addNewPin(aux_position,IN,LEFT,this -> v_inoutwires.at(i).getName());
                 aux_position = aux_position - DISTANCEBETWEENPINS;
                 number_of_pin += 1;
+
         }
         
     }
@@ -871,6 +877,7 @@ string FunctionSymbol :: getLibData(){
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         if (this -> v_inoutwires.at(i).getType() != IN){
                 output += "X "+ this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" "+ std::to_string(width_module + PINLENGH) +" " + std::to_string(aux_position) + " 100 L 50 50 1 1 O\n";
+                this -> functionDesig->addNewPin(aux_position,this -> v_inoutwires.at(i).getType(),RIGHT,this -> v_inoutwires.at(i).getName());
                 aux_position = aux_position - DISTANCEBETWEENPINS;
                 number_of_pin += 1;
         }
@@ -884,7 +891,7 @@ string FunctionSymbol :: getLibData(){
     return output;
 }
 void FunctionSymbol :: createProjectFile(string projectFolder, string name){
-    string output_file = projectFolder + "/kicat/" + name + ".pro";
+    string output_file = projectFolder + "/kicad/" + name + ".pro";
     string output = "";
     // init creation of default folder
     output += "update=22/05/2015 07:44:53\n";
@@ -931,9 +938,9 @@ void FunctionSymbol :: createProjectFile(string projectFolder, string name){
 }
 
 
-void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, FunctionSymbol> mapOfLeafsModules){
+void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, FunctionSymbol*> mapOfLeafsModules){
     string output = "";
-    string output_file = projectName + "/kicat/" + this -> name + ".sch";
+    string output_file = projectName + "/kicad/" + this -> name + ".sch";
     // start definition
     // create the basic stuff
     output += "EESchema Schematic File Version 4\n";
@@ -952,62 +959,21 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
     output += "Comment4 \"\"\n";
     output += "$EndDescr\n";
     
-    // first iterate over the instaces TODO check if is a component or a sheet
     for (int i = 0; i < this -> v_instances.size(); ++i){
         // check if the module of the instance is a leaf or have more components
-        
-        if(mapOfLeafsModules.at(this -> v_instances.at(i).getName()).isLeaf()){
+        if(mapOfLeafsModules.at(this -> v_instances.at(i).getName())->isLeaf()){
             // is leaf create component
-            output += "$Comp\n";
-            output += "L " + projectName + ":" + this -> v_instances.at(i).getName() +" U" + std::to_string(i + 1) + "\n";
-            output += "U 1 1 5DC34FD9\n"; // TODO check what does that number
-            output += "P " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) + "\n";
-            output += "F 0 \"" + this -> v_instances.at(i).getName() + " U" + std::to_string(i + 1) + "\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH/2)+ " " + std::to_string(YPOSITIONBASE + TOPCLEARANCETEXT1) + " 50  0000 C CNN\n";
-            output += "F 1 \""+ this -> v_instances.at(i).getNameInstance() + "\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH/2) +" "+ std::to_string(YPOSITIONBASE + TOPCLEARANCETEXT2) +" 50  0000 C CNN\n";
-            output += "F 2 \"\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) +" 50  0001 C CNN\n";
-            output += "F 3 \"\" H " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) +" 50  0001 C CNN\n";
-            output += "    1    " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE) + "\n";
-            output += "    1    0    0    -1 \n";
-            output += "$EndComp\n";
+            this -> v_instances.at(i).instancenDesig = new InstanceComponentFunctionSymbol(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES, YPOSITIONBASE,COMPONENT, i);
+            ComponentFunctionSymbol *a = mapOfLeafsModules.at(this -> v_instances.at(i).getName())->functionDesig;
+            output += this -> v_instances.at(i).instancenDesig -> generateSchematicDesing(projectName,this -> v_instances.at(i).getName(),this -> v_instances.at(i).getNameInstance(), a);
+            
         }
         else {
-            // frist we need to know the max number of imputs for the size
-            int number_of_inputs = 0;
-            int number_of_outpus = 0;
-            for(int w = 0; w < mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.size(); ++w){
-                if (mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(i).getType() == IN){
-                    number_of_inputs += 1;
-                }
-                else{
-                    number_of_outpus += 1;
-                }
-
-            }
-            int height_module = std::max(DEFAULTMODULEHEIGHT, (CRERANCEINTOP) + std::max(number_of_inputs,number_of_outpus) * DISTANCEBETWEENPINS);
-            int width_module = DEFAULTMODULEWIDTH;
-            // create a sheet
-            output += "$Sheet\n";
-            output += "S " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(YPOSITIONBASE-height_module) + " " + std::to_string(width_module) +  " " +std::to_string(height_module)  + "\n"; // todo check with more pins
-            output += "U 5E175FE2\n";// TODO check what does that number
-            output += "F0 \"" + v_instances.at(i).getName() + "\" 50\n";
-            output += "F1 \"" + v_instances.at(i).getName() + ".sch\" 50\n";
-            // create connections
-            int aux_position_input = YPOSITIONBASE - height_module + CRERANCEINTOP;
-            int aux_position_output = YPOSITIONBASE - height_module + CRERANCEINTOP;
-            for(int w = 0; w < mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.size(); ++w){
-                if (mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(w).getType() == IN){
-                    output += "F" + std::to_string(w+2) + " \"" + mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(w).getName() + "\" I L " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES) + " " + std::to_string(aux_position_input)+ " 50\n";
-                    aux_position_input = aux_position_input + DISTANCEBETWEENPINS;
-                }
-                else{
-                    output += "F" + std::to_string(w+2) + " \"" + mapOfLeafsModules.at(this -> v_instances.at(i).getName()).v_inoutwires.at(w).getName() + "\" O R " + std::to_string(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH) + " " + std::to_string(aux_position_output) + " 50\n";
-                    aux_position_output = aux_position_output + DISTANCEBETWEENPINS;
-                }
-            }
-
-            //output += "F2 \"aa\" I L 1650 2300 50\n";
-            output += "$EndSheet\n";
+            // no leaf compononet create sheet
+            this -> v_instances.at(i).instancenDesig = new InstanceComponentFunctionSymbol(XPOSITIONBASE + i * CLEARANCEBETWEENMODULES, YPOSITIONBASE,SHEET, i);
+            output += this -> v_instances.at(i).instancenDesig -> generateSchematicDesing(projectName,this -> v_instances.at(i).getName(),this -> v_instances.at(i).getNameInstance(),mapOfLeafsModules);
         }
+            output += "$EndSheet\n";
     }
     // start creating the lablels
     string aux_label_type = "";
@@ -1030,9 +996,108 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
             labels_output +=1;
         }  
     }
-    // TODO missing recursive sheets
-    // TODO missing wires
+    // Wires desing
+    // loop over all wires
+    for (int i = 0; i < this -> v_wire.size(); ++i){
+        // get the diferent connections
+        // loop over all instances to search for the connection
+        int xInitialPos = 0;
+        int yInitialPos = 0;
+        int xFinalPos = 0;
+        int yFinalPos = 0;
 
+        for (int j = 0; j < this -> v_instances.size(); ++j){
+            // are leaves
+            if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionIn() && mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf()) {
+                // the instance is funtion in
+                // now search the position of the pin to the the base x and y
+                int xpostionpin = 0;
+                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                    string type = "";
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+                    
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
+                        // we get the pin extract position
+                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                        break;
+                    }
+                }
+                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                xFinalPos = this -> v_instances.at(j).instancenDesig -> getXBasePosition() - PINLENGH;
+                yFinalPos = this -> v_instances.at(j).instancenDesig -> getyBasePosition() - xpostionpin;
+            }
+            else if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionOut() && mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf()) {
+                // the instance is funtion out
+                // now search the position of the pin to the the base x and y
+                int xpostionpin = 0;
+                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                    string type = "";
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
+                        // we get the pin extract position
+                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                        break;
+                    }
+                }
+                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                xInitialPos  = this -> v_instances.at(j).instancenDesig -> getXBasePosition() + this -> v_instances.at(j).instancenDesig-> componentDesig ->getWidth() + PINLENGH;
+                yInitialPos  = this -> v_instances.at(j).instancenDesig -> getyBasePosition() - xpostionpin;
+            }
+            // are no leaves
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // hierarchy sheets
+            else if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionIn() && !mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf())
+            {
+                int xpostionpin = 0;
+                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                    string type = "";
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+                    
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
+                        // we get the pin extract position
+                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                        break;
+                    }
+                }
+                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                xFinalPos = this -> v_instances.at(j).instancenDesig -> getXBasePosition();
+                yFinalPos = xpostionpin;
+               
+            }
+            else if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionOut() && !mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf())
+            {
+                int xpostionpin = 0;
+                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                    string type = "";
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+
+                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
+                        // we get the pin extract position
+                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                        break;
+                    }
+                }
+                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                xInitialPos  = this -> v_instances.at(j).instancenDesig -> getXBasePosition() + this -> v_instances.at(j).instancenDesig-> componentDesig ->getWidth();
+                yInitialPos  = xpostionpin;
+            }
+            
+            
+
+        }
+        //write the wire in the file
+        output += "Wire Wire Line\n" + std::to_string(xInitialPos) + " "+ std::to_string(yInitialPos)+ " " + std::to_string(xFinalPos) +" " + std::to_string(yFinalPos) + "\n";
+
+    }
     output += "$EndSCHEMATC";
     // create file sch
     char buf[0x100];

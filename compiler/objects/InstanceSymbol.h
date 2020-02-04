@@ -7,6 +7,7 @@
 
 
 #include "FunctionSymbolParam.h"
+#include "../kicatobjects/InstanceComponentFunctionSymbol.h"
 #include "WireSymbol.h"
 #include "VWireSymbol.h"
 #include "../common.h"
@@ -32,6 +33,9 @@ public:
 	string getNameInstance();
 	string generateInstance();
 	string getNameInstanceVerilog();
+	InstanceComponentFunctionSymbol* instancenDesig;
+
+	vector<WireSymbol> v_wire; // of the actual module that is calling
 
 private:
 	string nameModule;
@@ -39,7 +43,6 @@ private:
 	string nameInstanceVerilog;
 	vector<InoutSymbol> v_inoutwires; // of the module to connect
 	vector<FunctionSymbolParam> v_param; // of the module to connect
-	vector<WireSymbol> v_wire; // of the actual module that is calling
     string currentspace(string a, int max);
     int getmaxNameVerilog();
 };
