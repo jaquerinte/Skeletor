@@ -8,14 +8,15 @@
 
 #include "FunctionSymbolParam.h"
 #include "../kicatobjects/InstanceComponentFunctionSymbol.h"
+#include "../kicatobjects/ComponentLabel.h"
 #include "WireSymbol.h"
 #include "VWireSymbol.h"
 #include "../common.h"
 
+
 //TODO:Put this in a better place. Set tab format with flags
 //style parameters
 extern string tabulate;
-
 class InstanceSymbol
 {
 public:
@@ -32,6 +33,7 @@ public:
 	string getName();
 	string getNameInstance();
 	string generateInstance();
+	string generateLabels(std::map<string, ComponentLabel> base, vector<string> values_fullfill, bool isLeaf, bool isTop);
 	string getNameInstanceVerilog();
 	InstanceComponentFunctionSymbol* instancenDesig;
 

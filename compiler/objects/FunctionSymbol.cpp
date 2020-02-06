@@ -1,4 +1,5 @@
 #include "FunctionSymbol.h"
+#include "../kicatobjects/ComponentLabel.h"
 #include <iostream>
 
 FunctionSymbol :: FunctionSymbol()
@@ -979,25 +980,32 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
     string aux_label_type = "";
     int labels_input = 0;
     int labels_output = 0;
+    int type = 0;
+    std::map<string, ComponentLabel> labels_generation;
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
          if (this -> isTop) {
             aux_label_type = "GLabel";
+            type = GLABEL;
         }else{
             aux_label_type = "HLabel";
+            type = HLABEL;
         }
         if (this -> v_inoutwires.at(i).getType() == IN){
-            output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEINPUT) + " " + std::to_string(YLABELBASE + labels_input*CLEARANCEBETWEENLABELS) + " 0    50   Input ~ 0\n";
-            output +=  this -> v_inoutwires.at(i).getName() + "\n";
+            //output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEINPUT) + " " + std::to_string(YLABELBASE + labels_input*CLEARANCEBETWEENLABELS) + " 0    50   Input ~ 0\n";
+            //output +=  this -> v_inoutwires.at(i).getName() + "\n";
+            labels_generation.insert({this -> v_inoutwires.at(i).getName(), ComponentLabel(type,IN, this -> v_inoutwires.at(i).getName(),XLABELBASEINPUT,YLABELBASE + labels_input*CLEARANCEBETWEENLABELS)});
             labels_input +=1;
         }
         else{
-            output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEOUTPUT) + " " + std::to_string(YLABELBASE + labels_output*CLEARANCEBETWEENLABELS) + " 2    50   Output ~ 0\n";
-            output +=  this -> v_inoutwires.at(i).getName() + "\n";
+            //output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEOUTPUT) + " " + std::to_string(YLABELBASE + labels_output*CLEARANCEBETWEENLABELS) + " 2    50   Output ~ 0\n";
+            //output +=  this -> v_inoutwires.at(i).getName() + "\n";
+            labels_generation.insert({this -> v_inoutwires.at(i).getName(), ComponentLabel(type,OUT, this -> v_inoutwires.at(i).getName(),XLABELBASEINPUT,YLABELBASE + labels_input*CLEARANCEBETWEENLABELS)});
             labels_output +=1;
         }  
     }
     // Wires desing
     // loop over all wires
+    vector<string> values_fullfill;
     for (int i = 0; i < this -> v_wire.size(); ++i){
         // get the diferent connections
         // loop over all instances to search for the connection
@@ -1021,6 +1029,8 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
                     if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
                         // we get the pin extract position
                         xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                        
+                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
                         break;
                     }
                 }
@@ -1041,6 +1051,8 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
                     if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
                         // we get the pin extract position
                         xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+
+                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
                         break;
                     }
                 }
@@ -1063,6 +1075,8 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
                     if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
                         // we get the pin extract position
                         xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+
+                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
                         break;
                     }
                 }
@@ -1083,6 +1097,8 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
                     if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
                         // we get the pin extract position
                         xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+
+                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
                         break;
                     }
                 }
@@ -1098,6 +1114,11 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
         output += "Wire Wire Line\n" + std::to_string(xInitialPos) + " "+ std::to_string(yInitialPos)+ " " + std::to_string(xFinalPos) +" " + std::to_string(yFinalPos) + "\n";
 
     }
+    // create labels
+    for (int i = 0; i < this -> v_instances.size(); ++i){
+        output += this -> v_instances.at(i).generateLabels(labels_generation, values_fullfill, mapOfLeafsModules.at(v_instances.at(i).getName())->isLeaf(), this -> isTop);
+    }
+
     output += "$EndSCHEMATC";
     // create file sch
     char buf[0x100];

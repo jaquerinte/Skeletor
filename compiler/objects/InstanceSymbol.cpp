@@ -1,4 +1,7 @@
 #include "InstanceSymbol.h"
+#include <iostream>
+#include <vector>
+#include <algorithm>
 //TODO:Put this in a better place. Set tab format with flags
 //style parameters
 string tabulate = "    ";
@@ -126,7 +129,7 @@ string InstanceSymbol :: generateInstance(){
 		for (int i = 0; i < this -> v_inoutwires.size();++i) {
 	        thisspace = currentspace(v_inoutwires.at(i).getNameVerilog(),maxspace);	
             if (i == this -> v_inoutwires.size() -1){
-				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() +thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + ")\n" ;
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + ")\n" ;
 			}
 			else{
 				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + "),\n" ;
@@ -136,6 +139,68 @@ string InstanceSymbol :: generateInstance(){
 	return output;
 	// add connections
 }
+
+string InstanceSymbol :: generateLabels(std::map<string, ComponentLabel> base, vector<string> values_fullfill,bool isLeaf, bool isTop){
+	string output = "";
+	string value = "";
+	if (isTop){
+		value = "GLabel";
+	}
+	else
+	{
+		value = "HLabel";
+	}
+	
+
+	int xpostionpin = 0;
+	for(int w = 0; w < this -> instancenDesig -> componentDesig -> v_pins.size(); ++w){
+		xpostionpin = this -> instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+		string valueSearch = this -> instancenDesig -> componentDesig -> v_pins.at(w).getName()+ "_" + this->nameInstance;
+		if (this -> instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN && std::find(values_fullfill.begin(), values_fullfill.end(), valueSearch)  == values_fullfill.end() && this -> v_inoutwires.at(w).getValue() != ""){
+			std::size_t pos = this -> v_inoutwires.at(w).getValue().find_last_of ('_');
+
+			int xPosition = this-> instancenDesig -> getXBasePosition();
+			int yPosition = 0;
+			if (isLeaf){
+				yPosition = this-> instancenDesig -> getyBasePosition() - xpostionpin;
+				xPosition -= PINLENGH;
+			}
+			else
+			{
+				yPosition = xpostionpin;
+			}
+			
+			output += "Text " + value + " " + std::to_string(xPosition) + " " + std::to_string(yPosition) + " 0    50   Input ~ 0\n";
+			output +=  this -> v_inoutwires.at(w).getValue().substr (0,pos) + "\n";
+		}
+		else if (std::find(values_fullfill.begin(), values_fullfill.end(), valueSearch) == values_fullfill.end() && this -> v_inoutwires.at(w).getValue() != ""){
+			std::size_t pos = this -> v_inoutwires.at(w).getValue().find_last_of ('_');
+			
+			int xPosition = this -> instancenDesig -> getXBasePosition() + this-> instancenDesig -> componentDesig ->getWidth();
+			int yPosition = 0;
+
+			if (isLeaf){
+				yPosition = this -> instancenDesig -> getyBasePosition() - xpostionpin;
+				xPosition += PINLENGH;
+			}
+			else
+			{
+				yPosition = xpostionpin;
+				xPosition -= PINLENGH;
+			}
+
+			output += "Text " + value + " " + std::to_string(xPosition) + " " + std::to_string(yPosition) + " 2    50   Output ~ 0\n";
+			output +=  this -> v_inoutwires.at(w).getValue().substr (0,pos) + "\n";  
+		}
+	}
+
+
+	//output += "Text " + aux_label_type + " " + std::to_string(XLABELBASEINPUT) + " " + std::to_string(YLABELBASE + labels_input*CLEARANCEBETWEENLABELS) + " 0    50   Input ~ 0\n";
+    //output +=  this -> v_inoutwires.at(i).getName() + "\n";
+	return output;
+
+}
+
 
 string InstanceSymbol :: currentspace(string a, int max){
     int nspaces= max - a.length();

@@ -24,6 +24,9 @@ all:main
 	
 # End Main
 # Kicat object compilation
+ComponentLabel.o: $(KICATOBJECTSFOLDER)ComponentLabel.cpp
+	$(CC) -c $(KICATOBJECTSFOLDER)ComponentLabel.cpp -o $(KICATOBJECTSFOLDER)ComponentLabel.o $(CFLAGS)
+
 ComponentFunctionSymbol.o: $(KICATOBJECTSFOLDER)ComponentFunctionSymbol.cpp
 	$(CC) -c $(KICATOBJECTSFOLDER)ComponentFunctionSymbol.cpp -o $(KICATOBJECTSFOLDER)ComponentFunctionSymbol.o $(CFLAGS)
 
@@ -67,7 +70,7 @@ FunctionSymbol.o: $(OBJECTSFOLDER)FunctionSymbol.cpp
 TableFunctionSymbols.o: $(OBJECTSFOLDER)TableFunctionSymbols.cpp
 	$(CC) -c $(OBJECTSFOLDER)TableFunctionSymbols.cpp -o $(OBJECTSFOLDER)TableFunctionSymbols.o $(CFLAGS)
 
-main: InoutSymbol.o FunctionSymbolParam.o FunctionSymbol.o TableFunctionSymbols.o Symbol.o TableSymbols.o WireSymbol.o VWireSymbol.o InstanceSymbol.o ComponentFunctionSymbol.o ComponentPin.o ComponentWire.o ComponentWireSection.o InstanceComponentFunctionSymbol.o 
+main: InoutSymbol.o FunctionSymbolParam.o FunctionSymbol.o TableFunctionSymbols.o Symbol.o TableSymbols.o WireSymbol.o VWireSymbol.o InstanceSymbol.o ComponentFunctionSymbol.o ComponentPin.o ComponentWire.o ComponentWireSection.o InstanceComponentFunctionSymbol.o ComponentLabel.o 
 	mkdir -p $(OUTPUTFOLDER)
 	rm -f *.tab.*
 	rm -f lex.yy.c
@@ -77,7 +80,7 @@ main: InoutSymbol.o FunctionSymbolParam.o FunctionSymbol.o TableFunctionSymbols.
 	$(CC) -o $(OUTPUTFOLDER)$(TARGET) vc.tab.c lex.yy.c $(OBJECTSFOLDER)InoutSymbol.o $(OBJECTSFOLDER)FunctionSymbolParam.o $(OBJECTSFOLDER)FunctionSymbol.o \
 	$(OBJECTSFOLDER)TableFunctionSymbols.o $(OBJECTSFOLDER)Symbol.o $(OBJECTSFOLDER)TableSymbols.o $(OBJECTSFOLDER)WireSymbol.o $(OBJECTSFOLDER)VWireSymbol.o \
 	$(OBJECTSFOLDER)InstanceSymbol.o $(KICATOBJECTSFOLDER)ComponentFunctionSymbol.o $(KICATOBJECTSFOLDER)ComponentPin.o $(KICATOBJECTSFOLDER)ComponentWire.o \
-	$(KICATOBJECTSFOLDER)ComponentWireSection.o $(KICATOBJECTSFOLDER)InstanceComponentFunctionSymbol.o  
+	$(KICATOBJECTSFOLDER)ComponentWireSection.o $(KICATOBJECTSFOLDER)InstanceComponentFunctionSymbol.o  $(KICATOBJECTSFOLDER)ComponentLabel.o
 
 # Clean
 .PHONY: clean
