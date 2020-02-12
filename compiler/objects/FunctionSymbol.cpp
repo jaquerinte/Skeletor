@@ -1,6 +1,7 @@
 #include "FunctionSymbol.h"
 #include "../kicatobjects/ComponentLabel.h"
 #include <iostream>
+#include <algorithm>
 
 FunctionSymbol :: FunctionSymbol()
 {
@@ -212,6 +213,16 @@ bool FunctionSymbol :: addWireConnection(string function_out, string function_in
 bool FunctionSymbol :: addVWireConnection(string width_out, string name_wire){
     VWireSymbol wire(width_out, name_wire);
     this -> v_vwire.push_back(wire);
+}
+
+bool FunctionSymbol :: addNewFunctionInWireConnection(string name_wire, string newFunctionIn, string in_name){
+     for (int i = 0; i <  this -> v_wire.size();++i) {
+        if ( this -> v_wire.at(i).getNameWire() == name_wire) {
+            this -> v_wire.at(i).addFunctionIn(newFunctionIn,in_name);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool FunctionSymbol :: addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance){
@@ -865,7 +876,14 @@ string FunctionSymbol :: getLibData(){
     int number_of_pin = 1;
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         if (this -> v_inoutwires.at(i).getType() == IN){
-                output += "X "+ this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" -"+ std::to_string(PINLENGH) + " " + std::to_string(aux_position) + " 100 R 50 50 1 1 I\n";
+                string size = "";
+                if(this -> v_inoutwires.at(i).getWidth() != ""){
+                    string with_value = v_inoutwires.at(i).getWidth();
+                    std::string::iterator end_pos = std::remove(with_value.begin(), with_value.end(), ' ');
+                    with_value.erase(end_pos, with_value.end());
+                    size = with_value + "_";
+                }
+                output += "X "+ size + this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" -"+ std::to_string(PINLENGH) + " " + std::to_string(aux_position) + " 100 R 50 50 1 1 I\n";
                 this -> functionDesig->addNewPin(aux_position,IN,LEFT,this -> v_inoutwires.at(i).getName());
                 aux_position = aux_position - DISTANCEBETWEENPINS;
                 number_of_pin += 1;
@@ -877,7 +895,14 @@ string FunctionSymbol :: getLibData(){
     aux_position = height_module - CRERANCEINTOP;
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         if (this -> v_inoutwires.at(i).getType() != IN){
-                output += "X "+ this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" "+ std::to_string(width_module + PINLENGH) +" " + std::to_string(aux_position) + " 100 L 50 50 1 1 O\n";
+                string size = "";
+                if(this -> v_inoutwires.at(i).getWidth() != ""){
+                    string with_value = v_inoutwires.at(i).getWidth();
+                    std::string::iterator end_pos = std::remove(with_value.begin(), with_value.end(), ' ');
+                    with_value.erase(end_pos, with_value.end());
+                    size = with_value + "_";
+                }
+                output += "X "+ size + this -> v_inoutwires.at(i).getName() + " " + std::to_string(number_of_pin) +" "+ std::to_string(width_module + PINLENGH) +" " + std::to_string(aux_position) + " 100 L 50 50 1 1 O\n";
                 this -> functionDesig->addNewPin(aux_position,this -> v_inoutwires.at(i).getType(),RIGHT,this -> v_inoutwires.at(i).getName());
                 aux_position = aux_position - DISTANCEBETWEENPINS;
                 number_of_pin += 1;
@@ -1006,114 +1031,143 @@ void FunctionSymbol :: CreateSchFile(string projectName, std::map<string, Functi
     // Wires desing
     // loop over all wires
     vector<string> values_fullfill;
+    ComponentWireManager wires;
     for (int i = 0; i < this -> v_wire.size(); ++i){
         // get the diferent connections
         // loop over all instances to search for the connection
-        int xInitialPos = 0;
-        int yInitialPos = 0;
-        int xFinalPos = 0;
-        int yFinalPos = 0;
+        for (int k = 0; k < this -> v_wire.at(i).functions_in.size(); ++k){
+            
+            int xInitialPos = 0;
+            int yInitialPos = 0;
+            int xFinalPos = 0;
+            int yFinalPos = 0;
+            string initialInstance = "";
+            string finalInstance = "";
 
-        for (int j = 0; j < this -> v_instances.size(); ++j){
-            // are leaves
-            if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionIn() && mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf()) {
-                // the instance is funtion in
-                // now search the position of the pin to the the base x and y
-                int xpostionpin = 0;
-                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
-                    string type = "";
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
-                    
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
-                        // we get the pin extract position
-                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+            bool finish_find_init = false;
+            bool finish_find_end = false;
+
+            for (int j = 0; j < this -> v_instances.size(); ++j){
+                if (finish_find_init && finish_find_end){
+                    break;
+                }
+                // are leaves
+                if (this -> v_wire.at(i).isFunctionIn(this -> v_instances.at(j).getNameInstance()) && mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf() && !finish_find_end) {
+                    // the instance is funtion in
+                    // now search the position of the pin to the the base x and y
+                    int xpostionpin = 0;
+                    for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                        string type = "";
+                        if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
                         
-                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
-                        break;
+                        if (this -> v_wire.at(i).isFunctionInPortIn(this -> v_instances.at(j).getNameInstance(), this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type) && std::find(values_fullfill.begin(), values_fullfill.end(), this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance()+ "_" + type)  == values_fullfill.end()){
+                        //if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
+                            // we get the pin extract position
+                            xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                            
+                            values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance() + "_" + type);
+                            // get the positions
+                            // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                            xFinalPos = this -> v_instances.at(j).instancenDesig -> getXBasePosition() - PINLENGH;
+                            yFinalPos = this -> v_instances.at(j).instancenDesig -> getyBasePosition() - xpostionpin;
+                            finalInstance = this -> v_instances.at(j).getName();
+                            finish_find_end = true;
+                            break;
+                        }
+                    }
+                   
+                }
+                if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionOut() && mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf() && !finish_find_init) {
+                    // the instance is funtion out
+                    // now search the position of the pin to the the base x and y
+                    int xpostionpin = 0;
+                    for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                        string type = "";
+                        if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+
+                        //if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut() && std::find(values_fullfill.begin(), values_fullfill.end(), this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance())  == values_fullfill.end()){
+                        if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
+                            // we get the pin extract position
+                            xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+
+                            values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance() + "_" + type);
+                            // get the positions
+                            // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                            xInitialPos  = this -> v_instances.at(j).instancenDesig -> getXBasePosition() + this -> v_instances.at(j).instancenDesig-> componentDesig ->getWidth() + PINLENGH;
+                            yInitialPos  = this -> v_instances.at(j).instancenDesig -> getyBasePosition() - xpostionpin;
+                            initialInstance = this -> v_instances.at(j).getName();
+                            finalInstance = this -> v_instances.at(j).getName();
+                            finish_find_init = true;
+                            break;
+                        }
                     }
                 }
-                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
-                xFinalPos = this -> v_instances.at(j).instancenDesig -> getXBasePosition() - PINLENGH;
-                yFinalPos = this -> v_instances.at(j).instancenDesig -> getyBasePosition() - xpostionpin;
-            }
-            else if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionOut() && mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf()) {
-                // the instance is funtion out
-                // now search the position of the pin to the the base x and y
-                int xpostionpin = 0;
-                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
-                    string type = "";
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+                // are no leaves
+                /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // hierarchy sheets
+                if (this -> v_wire.at(i).isFunctionIn(this -> v_instances.at(j).getNameInstance()) && !mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf() && !finish_find_end)
+                {
+                    int xpostionpin = 0;
+                    for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                        string type = "";
+                        if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+                        
+                        if (this -> v_wire.at(i).isFunctionInPortIn(this -> v_instances.at(j).getNameInstance(), this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type) && std::find(values_fullfill.begin(), values_fullfill.end(), this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance() + "_" + type)  == values_fullfill.end()){
+                            // we get the pin extract position
+                            xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
 
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
-                        // we get the pin extract position
-                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
-
-                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
-                        break;
+                            values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance() + "_" + type);
+                            // get the positions
+                            // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                            xFinalPos = this -> v_instances.at(j).instancenDesig -> getXBasePosition();
+                            yFinalPos = xpostionpin;
+                            finalInstance = this -> v_instances.at(j).getName();
+                            finish_find_end = true;
+                            break;
+                        }
                     }
-                }
-                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
-                xInitialPos  = this -> v_instances.at(j).instancenDesig -> getXBasePosition() + this -> v_instances.at(j).instancenDesig-> componentDesig ->getWidth() + PINLENGH;
-                yInitialPos  = this -> v_instances.at(j).instancenDesig -> getyBasePosition() - xpostionpin;
-            }
-            // are no leaves
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // hierarchy sheets
-            else if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionIn() && !mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf())
-            {
-                int xpostionpin = 0;
-                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
-                    string type = "";
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
                     
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameIn()){
-                        // we get the pin extract position
-                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
-
-                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
-                        break;
-                    }
+                
                 }
-                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
-                xFinalPos = this -> v_instances.at(j).instancenDesig -> getXBasePosition();
-                yFinalPos = xpostionpin;
-               
-            }
-            else if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionOut() && !mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf())
-            {
-                int xpostionpin = 0;
-                for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
-                    string type = "";
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
-                    else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+                if (this -> v_instances.at(j).getNameInstance() == this -> v_wire.at(i).getFuncionOut() && !mapOfLeafsModules.at(v_instances.at(j).getName())->isLeaf() && !finish_find_init)
+                {
+                    int xpostionpin = 0;
+                    for(int w = 0; w < this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.size(); ++w){
+                        string type = "";
+                        if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+                        else if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
 
-                    if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
-                        // we get the pin extract position
-                        xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
+                        //if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut() && std::find(values_fullfill.begin(), values_fullfill.end(), this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance())  == values_fullfill.end()){
+                        if (this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + type == v_wire.at(i).getNameOut()){
+                            // we get the pin extract position
+                            xpostionpin = this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
 
-                        values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance());
-                        break;
+                            values_fullfill.push_back(this -> v_instances.at(j).instancenDesig -> componentDesig -> v_pins.at(w).getName() + "_" + this -> v_instances.at(j).getNameInstance() + "_" + type);
+                            // get the positions
+                            // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
+                            xInitialPos  = this -> v_instances.at(j).instancenDesig -> getXBasePosition() + this -> v_instances.at(j).instancenDesig-> componentDesig ->getWidth();
+                            yInitialPos  = xpostionpin;
+                            initialInstance = this -> v_instances.at(j).getName();
+                            finish_find_init = true;
+                            break;
+                        }
                     }
-                }
-                // now we have the x position base on the component so whe need to get base of the componet in orther to get the global position of the pin
-                xInitialPos  = this -> v_instances.at(j).instancenDesig -> getXBasePosition() + this -> v_instances.at(j).instancenDesig-> componentDesig ->getWidth();
-                yInitialPos  = xpostionpin;
+                }          
             }
-            
-            
-
+            //write the wire in the file
+            wires.addComponetWire(xInitialPos,yInitialPos, xFinalPos,  yFinalPos,initialInstance, finalInstance);
+            // output += "Wire Wire Line\n" + std::to_string(xInitialPos) + " "+ std::to_string(yInitialPos)+ " " + std::to_string(xFinalPos) +" " + std::to_string(yFinalPos) + "\n";
         }
-        //write the wire in the file
-        output += "Wire Wire Line\n" + std::to_string(xInitialPos) + " "+ std::to_string(yInitialPos)+ " " + std::to_string(xFinalPos) +" " + std::to_string(yFinalPos) + "\n";
-
     }
+    // create the output
+    output += wires.generateWires();
     // create labels
     for (int i = 0; i < this -> v_instances.size(); ++i){
         output += this -> v_instances.at(i).generateLabels(labels_generation, values_fullfill, mapOfLeafsModules.at(v_instances.at(i).getName())->isLeaf(), this -> isTop);

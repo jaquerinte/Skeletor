@@ -83,7 +83,7 @@ string InstanceComponentFunctionSymbol :: generateSchematicDesing(string project
         output += "F0 \"" + functionName + "\" 50\n";
         output += "F1 \"" + functionName + ".sch\" 50\n";
         // create the instance and the componet desing of a sheet
-        this -> componentDesig = new ComponentFunctionSymbol(width_module,height_module);
+        this -> componentDesig = new ComponentFunctionSymbol(height_module, width_module);
 
         // create connections
         int aux_position_input = YPOSITIONBASE - height_module + CRERANCEINTOP;

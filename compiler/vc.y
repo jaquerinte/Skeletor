@@ -364,6 +364,9 @@ EInstr      : Ref {
                                 else{
                                     // already filled only add the symbol
                                     tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], value, IN, nlin,ncol);
+                                    if(!tfs.v_funcSymbols.at(pos).addNewFunctionInWireConnection(value, in[0],in[1]+ "_i")){
+                                        cout<< "ERROR"<<endl;
+                                    }
                                     
                                 }
                                 

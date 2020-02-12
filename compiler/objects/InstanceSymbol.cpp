@@ -155,7 +155,11 @@ string InstanceSymbol :: generateLabels(std::map<string, ComponentLabel> base, v
 	int xpostionpin = 0;
 	for(int w = 0; w < this -> instancenDesig -> componentDesig -> v_pins.size(); ++w){
 		xpostionpin = this -> instancenDesig -> componentDesig -> v_pins.at(w).getPosition();
-		string valueSearch = this -> instancenDesig -> componentDesig -> v_pins.at(w).getName()+ "_" + this->nameInstance;
+		string type = "";
+        if (this -> instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN){type = "_i";}
+        else if (this -> instancenDesig -> componentDesig -> v_pins.at(w).getType() == OUT){type = "_o";}
+        else if (this -> instancenDesig -> componentDesig -> v_pins.at(w).getType() == INOUT){type = "_io";}
+		string valueSearch = this -> instancenDesig -> componentDesig -> v_pins.at(w).getName()+ "_" + this->nameInstance + "_" + type;
 		if (this -> instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN && std::find(values_fullfill.begin(), values_fullfill.end(), valueSearch)  == values_fullfill.end() && this -> v_inoutwires.at(w).getValue() != ""){
 			std::size_t pos = this -> v_inoutwires.at(w).getValue().find_last_of ('_');
 
@@ -186,12 +190,48 @@ string InstanceSymbol :: generateLabels(std::map<string, ComponentLabel> base, v
 			else
 			{
 				yPosition = xpostionpin;
-				xPosition -= PINLENGH;
 			}
 
 			output += "Text " + value + " " + std::to_string(xPosition) + " " + std::to_string(yPosition) + " 2    50   Output ~ 0\n";
 			output +=  this -> v_inoutwires.at(w).getValue().substr (0,pos) + "\n";  
 		}
+		else if (this -> instancenDesig -> componentDesig -> v_pins.at(w).getType() == IN && std::find(values_fullfill.begin(), values_fullfill.end(), valueSearch)  == values_fullfill.end()&& this -> v_inoutwires.at(w).getValue() == ""){
+			std::size_t pos = this -> v_inoutwires.at(w).getValue().find_last_of ('_');
+
+			int xPosition = this-> instancenDesig -> getXBasePosition();
+			int yPosition = 0;
+			if (isLeaf){
+				yPosition = this-> instancenDesig -> getyBasePosition() - xpostionpin;
+				xPosition -= PINLENGH;
+			}
+			else
+			{
+				yPosition = xpostionpin;
+			}
+			if (ENABLENOCONNECTION){output += "NoConn ~ " + std::to_string(xPosition) + " " + std::to_string(yPosition) + "\n";}
+				
+		}
+
+		else if (std::find(values_fullfill.begin(), values_fullfill.end(), valueSearch) == values_fullfill.end() && this -> v_inoutwires.at(w).getValue() == ""){
+			std::size_t pos = this -> v_inoutwires.at(w).getValue().find_last_of ('_');
+			
+			int xPosition = this -> instancenDesig -> getXBasePosition() + this-> instancenDesig -> componentDesig ->getWidth();
+			int yPosition = 0;
+
+			if (isLeaf){
+				yPosition = this -> instancenDesig -> getyBasePosition() - xpostionpin;
+				xPosition += PINLENGH;
+			}
+			else
+			{
+				yPosition = xpostionpin;
+				xPosition -= PINLENGH;
+			}
+
+			if (ENABLENOCONNECTION){output += "NoConn ~ " + std::to_string(xPosition) + " " + std::to_string(yPosition) + "\n";}
+		
+		}
+		// NoConn ~ 3900 2400
 	}
 
 

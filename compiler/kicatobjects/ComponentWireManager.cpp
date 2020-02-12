@@ -110,7 +110,7 @@ string ComponentWireManager :: generateWires(){
             output += "Wire Wire Line\n" + std::to_string(this->v_kicad_wires.at(i).getStartX()) + " "+ std::to_string(this->v_kicad_wires.at(i).getStartY())+ " " + std::to_string(xPositionEndGrabWire) +" " + std::to_string(this->v_kicad_wires.at(i).getStartY()) + "\n";
             
             // create the input wire in the channel
-            int yPositionEndInputChannel = (FIRSTBOTTOMCHANELYCORDINATE + availableChannelBottom * (SPACEBEWEENWIRES/numberOfSubDivisionsOfBottomChannel) );
+            int yPositionEndInputChannel = (FIRSTBOTTOMCHANELYCORDINATE + (MINIMUNCLEARANCE +((numberOfSubDivisionsOfBottomChannel-1) * OFFSETCLEARANCE)) + availableChannelBottom * (SPACEBEWEENWIRES/numberOfSubDivisionsOfBottomChannel) );
             if (availableChannelBottom >= NUMBEROFBOTTOMCHANELS){
                 // create a subdivion and reset
                 numberOfSubDivisionsOfBottomChannel +=1;
