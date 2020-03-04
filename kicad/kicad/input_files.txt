@@ -1,0 +1,3 @@
+netlist=../kicad/simple_example.net
+library=../kicad/OUTPUT.lib
+schematic=../kicad/simple_example.sch
