@@ -54,9 +54,17 @@ bool InstanceSymbol :: addValueFunctionSymbolParam(string name, string value, in
 }
 string InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int type, int nlin, int ncol)
 {
-	
+	bool flop_enable = false;
+	int old_type = type;
+	if (type > 3){
+		flop_enable = true;
+		type = type - 3;
+	}
 	for (int i = 0; i < this -> v_inoutwires.size();++i) {
 		if (this -> v_inoutwires.at(i).getName() == name && this -> v_inoutwires.at(i).getType() == type) {
+			if (flop_enable){
+				this -> v_inoutwires.at(i).setFlop(true);
+			}
 			if (this -> v_inoutwires.at(i).getValue() == ""){
 				this -> v_inoutwires.at(i).setValue(value);
 				return "";
@@ -73,7 +81,6 @@ string InstanceSymbol :: addValueInoutSymbolParam(string name, string value, int
 	msgError(ERRPARAMNODEC, nlin, ncol - name.length(), name.c_str());
 	return "";
 }
-
 void InstanceSymbol :: addValueFunctionSymbolParamPos(int pos, string value)
 {
 	if (pos < v_param.size()){
@@ -128,11 +135,15 @@ string InstanceSymbol :: generateInstance(){
         string thisspace;
 		for (int i = 0; i < this -> v_inoutwires.size();++i) {
 	        thisspace = currentspace(v_inoutwires.at(i).getNameVerilog(),maxspace);	
+			string name_value_wire = v_inoutwires.at(i).getValue();
+			if (this -> v_inoutwires.at(i).getFlop()){
+				name_value_wire += "_wf";
+			}
             if (i == this -> v_inoutwires.size() -1){
-				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + ")\n" ;
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + name_value_wire + ")\n" ;
 			}
 			else{
-				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + v_inoutwires.at(i).getValue() + "),\n" ;
+				output += tabulate + tabulate + "." + v_inoutwires.at(i).getNameVerilog() + thisspace + tabulate + "(" + name_value_wire + "),\n" ;
 			}
 		}
 	output += tabulate + ");\n\n";

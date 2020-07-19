@@ -2,6 +2,7 @@
 %token opas parl parr pyc coma oprel opmd opasig bral connectwire nyooperator stringtext
 %token brar cbl cbr ybool obool nobool opasinc twopoints mainmodule booltokentrue definevalueverilog
 %token functionmodule descriptionmodule codermodule referencesmodule booltoken booltokenfalse verilogtext wireverilogtipe
+%token flopconnection
 
 
 %{
@@ -146,7 +147,7 @@ Func        : moduledefinition id
                 s1 = "null";
                 string pme = $2.lexeme;
                 int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
-                tfs.v_funcSymbols.at(pos).createFileModule(ts.createDefinitions());
+                //tfs.v_funcSymbols.at(pos).createFileModule(ts.createDefinitions());
 
             }
     ;
@@ -167,7 +168,13 @@ MainFunc    : moduledefinition mainmodule id
                 string pme = $3.lexeme;
                 int pos = tfs.searchFunctionSymbol(pme, nlin, ncol);
                 string base = init_output(db);
-                tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitionsTop()); 
+                tfs.v_funcSymbols.at(pos).createFileModule(init_output(db), ts.createDefinitionsTop());
+                // generate the rest of the modules
+                for (unsigned int x = 0; x < tfs.v_funcSymbols.size(); ++x){
+                   if (x != pos){
+                        tfs.v_funcSymbols.at(x).createFileModule(ts.createDefinitions());
+                    }
+                }
 
             }
     ;
@@ -318,6 +325,58 @@ EInstr      : Ref {
                                 string with = $2.trad ;
                                 ts.addSymbol(pme + aux ,INOUTSYMBOL,s1, nlin, ncol);
                                 tfs.v_funcSymbols.at(pos).addVWireConnection(with,pme+aux);
+                                }
+            | flopconnection Arrayargs Ref connectwire Ref {
+                                string var_out = $3.trad;
+                                string var_in = $5.trad;
+                                bool print = true;
+                                // get functionsymbol that stores instantce
+                                int pos = tfs.searchFunctionSymbol(s1, nlin, ncol);
+                                // decompse the variables.
+                                // decompse out var
+                                vector<string> out = split_ref(var_out);
+                                // decompse in var
+                                vector<string> in = split_ref(var_in);
+                                // check out function 
+                                int pos_base = tfs.v_funcSymbols.at(pos).searchInstance(out[0], nlin, ncol);
+                                // check InoutSymbol
+                                int out_inout;
+                                out_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).searchinoutSymbol(out[1], OUT, nlin, ncol);
+                                int pos_aux = tfs.v_funcSymbols.at(pos).searchInstance(in[0], nlin, ncol);
+                                // check InoutSymbol
+                                int in_inout;
+                                in_inout = tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).searchinoutSymbol(in[1], IN, nlin, ncol);
+                                // all verfiy
+                                // add values instance and store wire
+                                string name_wire = out[1] + "_" + out[0] + "_" + in[0];
+                                // verify the wire if already exists and register if
+                                if (!ts.contains(name_wire,s1)){
+                                    // resgiter only of already exits
+                                    ts.addSymbol(name_wire,WIRE,s1, nlin, ncol);
+                                }
+                                else{
+                                    print = false;
+                                }
+                                // create wire.
+                                // add and instace out
+                                string value = tfs.v_funcSymbols.at(pos).v_instances.at(pos_base).addValueInoutSymbolParam(out[1], name_wire, OUT, nlin,ncol);
+                                if (value == ""){
+                                    // not filled yet
+                                    // add and instace in
+                                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], name_wire, INFLOP, nlin,ncol);
+                                    // add wire
+                                    tfs.v_funcSymbols.at(pos).addWireConnection(out[0],in[0],out_inout, in_inout, $2.trad,name_wire, out[1] + "_o", in[1]+ "_i",print);
+
+                                }
+                                else{
+                                    // already filled only add the symbol
+                                    tfs.v_funcSymbols.at(pos).v_instances.at(pos_aux).addValueInoutSymbolParam(in[1], value, IN, nlin,ncol);
+                                    if(!tfs.v_funcSymbols.at(pos).addNewFunctionInWireConnection(value, in[0],in[1]+ "_i")){
+                                        cout<< "ERROR"<<endl;
+                                    }
+                                    
+                                }
+
                                 }
             | wiretipe Arrayargs Ref connectwire Ref {
                                 string var_out = $3.trad;

@@ -319,6 +319,7 @@ void FunctionSymbol ::createFileModuleBase(){
         this -> output_file_data += "module " + this -> name + " (\n";
     }
     /* copy the inputs and outputs*/
+    // detect a flop
     for (int i = 0; i < this -> v_inoutwires.size();++i) {
         string type = "";
             if (this -> v_inoutwires.at(i).getType() == IN){
@@ -377,11 +378,31 @@ void FunctionSymbol ::createFileModuleBase(){
     }
     this -> output_file_data +="\n";
     /* Add instances */
+    /* Process the flops */
+    bool flop_detected = false;
+    vector<string> v_in_flopp;
     for (int i = 0; i < this -> v_instances.size(); ++i){
         this -> output_file_data += this -> v_instances.at(i).generateInstance();
+        for (int j = 0; j < this -> v_instances.at(i).v_inoutwires.size(); ++j){
+            if (this -> v_instances.at(i).v_inoutwires.at(j).getFlop() && this -> v_instances.at(i).v_inoutwires.at(j).getType() == IN){
+                v_in_flopp.push_back(this -> v_instances.at(i).v_inoutwires.at(j).getValue());
+                if (!flop_detected) { 
+                    flop_detected = true;
+                }
+            }
+        }
     }
     this -> output_file_data +="\n";
     /* Putin some extra coments */
+    /* Add Flops */
+    if (flop_detected){
+        /* Add the always block */
+        this -> output_file_data += tabulate + "always @(posedge clk_i) begin\n"; // TODO how to check the clock
+        for (int i = 0; i < v_in_flopp.size(); ++i ){
+             this -> output_file_data += tabulate + tabulate  + " " + v_in_flopp.at(i) + "_wf" +  " <= " + v_in_flopp.at(i)  + ";\n";
+        }
+        this -> output_file_data += tabulate + "end\n";
+    }
 
     if (this->verilog_dump != ""){
         this ->output_file_data += "//***Dumped Internal logic***";

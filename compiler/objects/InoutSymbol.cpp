@@ -7,6 +7,7 @@ InoutSymbol :: InoutSymbol()
 	this -> width = "";
 	this -> name_verilog = "";
 	this -> value = "";
+    this -> flop = false;
 }
 string InoutSymbol :: getPadding(string name)
 {
@@ -43,6 +44,7 @@ InoutSymbol :: InoutSymbol(const string name,const int typeconnection,const stri
 
 	}
 	this -> value = "";
+    this -> flop = false;
 }
 InoutSymbol :: InoutSymbol(const InoutSymbol &In){
 	this -> name = In.name ;
@@ -50,6 +52,7 @@ InoutSymbol :: InoutSymbol(const InoutSymbol &In){
 	this -> width = In.width;
 	this -> name_verilog = In.name_verilog;
 	this -> value = In.value;
+    this -> flop = In.flop;
 }
 InoutSymbol :: ~InoutSymbol(){}
 InoutSymbol& InoutSymbol :: operator = (const InoutSymbol &In) {
@@ -66,6 +69,7 @@ string InoutSymbol :: getNameVerilog(){return this -> name_verilog;}
 int InoutSymbol :: getType(){return this->typeconnection;}
 string InoutSymbol :: getWidth(){return this -> width;}
 string InoutSymbol :: getValue(){return this -> value;}
+bool InoutSymbol :: getFlop(){return this -> flop;}
 void InoutSymbol :: setType(int type){this -> typeconnection = type;}
 void InoutSymbol :: setWidth(int width){this -> width = width;}
 void InoutSymbol :: setName(string name){
@@ -84,3 +88,4 @@ void InoutSymbol :: setName(string name){
 	}
 }
 void InoutSymbol :: setValue(string value){ this -> value = value;}
+void InoutSymbol :: setFlop(bool flop){this ->flop = flop;}

@@ -38,12 +38,12 @@ public:
 	InstanceComponentFunctionSymbol* instancenDesig;
 
 	vector<WireSymbol> v_wire; // of the actual module that is calling
+	vector<InoutSymbol> v_inoutwires; // of the module to connect
 
 private:
 	string nameModule;
 	string nameInstance;
 	string nameInstanceVerilog;
-	vector<InoutSymbol> v_inoutwires; // of the module to connect
 	vector<FunctionSymbolParam> v_param; // of the module to connect
     string currentspace(string a, int max);
     int getmaxNameVerilog();

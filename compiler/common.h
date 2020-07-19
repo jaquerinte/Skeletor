@@ -57,6 +57,9 @@ typedef struct {
 #define OUT 2
 #define INOUT 3
 
+#define INFLOP 4
+#define OUTFLOP 5
+
 #define COMPONENT 1
 #define SHEET 2
 
