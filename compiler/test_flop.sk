@@ -1,0 +1,64 @@
+`define T_ADDR_SIZE 32
+`define ADDR_SIZE 32
+#define N 2
+#define GENERALDESCIPTION "TEST"
+#define WORKER1 "G.Cabo"
+#define GENRALREFERENCE "https://github.com/jaquerinte/skeletor"
+
+module a (TransAddrSize, AddrSize){
+    #function "AND current addr_i with previous addr_i"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in clk;
+    in rts;
+    out taddr;
+    $$
+    always @(*) begin
+        taddr_o <= !rts_i;
+    end; 
+    $$
+}
+
+module b (TransAddrSize, AddrSize){
+    #function "OR current addr_i with previous addr_i"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in rstn;                           
+    in clk;                                    
+    in taddr;
+    out test;
+    $$
+    assign test_o = taddr_i; 
+    $$                 
+}
+
+module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
+    #function  "Module to provide a reference output"
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in clk;
+    in rts;
+    out out_value;
+    
+
+    a:x(AddrSize = AddrSize, TransAddrSize = TransAddrSize){
+        in clk = in clk,
+        in rts = in rts
+    
+
+    };
+
+    b:y(TransAddrSize, AddrSize){
+        in rstn = in rts,
+        in clk = in clk,
+        out test = out out_value
+    };
+    
+   flop x.taddr -> y.taddr;
+    
+}
