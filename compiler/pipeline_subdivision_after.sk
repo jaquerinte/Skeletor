@@ -29,6 +29,35 @@ module decode(AddrSize,BITS_REGFILE){
     out [AddrSize-1:0] extendedimm;
 }
 
+module execute_1(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in  aluc;
+    in  aluimm;
+    out  wreg;
+    out  m2reg;
+    out  wmem;
+    out  aluc;
+    out  aluimm;
+
+}
+module execute_2(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in  aluc;
+    in  aluimm;
+    out  wreg;
+    out  m2reg;
+    out  wmem;
+
+}
+
 module execute(AddrSize,BITS_REGFILE){
     in  clk;
     in  rst;
@@ -47,7 +76,35 @@ module execute(AddrSize,BITS_REGFILE){
     out [BITS_REGFILE:0] destination;
     out [AddrSize-1:0] aluresult;
     out [AddrSize-1:0] op2;
+
+    execute_1:U41(){
+        in  rst = in rst,
+        in  clk = in clk,
+        in  wreg = in wreg,
+        in  m2reg = in  m2reg,
+        in  wmem = in  wmem,
+        in  aluc = in aluc,
+        in  aluimm = in aluimm
+
+    };
+
+    execute_2:U42(){
+        in  rst = in rst,
+        in  clk = in clk,
+        out wreg = out wreg,
+        out m2reg = out m2reg,
+        out wmem = out wmem
+    };
+
+    flop  U41.wreg -> U42.wreg;
+    flop  U41.m2reg -> U42.m2reg;
+    flop  U41.wmem -> U42.wmem;
+    flop  U41.aluc -> U42.aluc;
+    flop  U41.aluimm -> U42.aluimm;
+
 }
+
+
 
 module memory(AddrSize,BITS_REGFILE){
     in  clk;
@@ -101,6 +158,7 @@ module top main(AddrSize,BITS_REGFILE){
         in  rst = in rst,
         in  clk = in clk
     };
+
 
     flop  U3.wreg -> U5.wreg;
     flop  U4.m2reg -> U3.m2reg;
