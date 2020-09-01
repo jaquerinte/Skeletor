@@ -366,6 +366,32 @@ void FunctionSymbol ::createFileModuleBase(){
             this -> output_file_data += "\n";
         }
     }
+    // detect flop
+    bool flop_detected = false;
+    vector<string> v_in_flopp;
+    vector<string> v_in_flopp_size;
+    for (int i = 0; i < this -> v_instances.size(); ++i){
+        for (int j = 0; j < this -> v_instances.at(i).v_inoutwires.size(); ++j){
+            if (this -> v_instances.at(i).v_inoutwires.at(j).getFlop() && this -> v_instances.at(i).v_inoutwires.at(j).getType() == IN){
+                v_in_flopp.push_back(this -> v_instances.at(i).v_inoutwires.at(j).getValue());
+                v_in_flopp_size.push_back(this -> v_instances.at(i).v_inoutwires.at(j).getWidth());
+                if (!flop_detected) { 
+                    flop_detected = true;
+                }
+            }
+        }
+    }
+    // add registers for flops
+    if (flop_detected){
+        for (int i = 0; i < v_in_flopp.size(); ++i ){
+            string width = v_in_flopp_size.at(i);
+            this -> output_file_data += tabulate + "reg " + width + v_in_flopp.at(i) + "_wf" + ";";
+            this -> output_file_data += " // register for flop with original wire " + v_in_flopp.at(i);
+            this -> output_file_data += "\n";
+        }
+    }
+    
+
     if (this -> v_vwire.size() > 0){
         this -> output_file_data += "//***Auxiliar Wires***  \n";
     }
@@ -379,18 +405,18 @@ void FunctionSymbol ::createFileModuleBase(){
     this -> output_file_data +="\n";
     /* Add instances */
     /* Process the flops */
-    bool flop_detected = false;
-    vector<string> v_in_flopp;
+    //bool flop_detected = false;
+    //vector<string> v_in_flopp;
     for (int i = 0; i < this -> v_instances.size(); ++i){
         this -> output_file_data += this -> v_instances.at(i).generateInstance();
-        for (int j = 0; j < this -> v_instances.at(i).v_inoutwires.size(); ++j){
+        /*for (int j = 0; j < this -> v_instances.at(i).v_inoutwires.size(); ++j){
             if (this -> v_instances.at(i).v_inoutwires.at(j).getFlop() && this -> v_instances.at(i).v_inoutwires.at(j).getType() == IN){
                 v_in_flopp.push_back(this -> v_instances.at(i).v_inoutwires.at(j).getValue());
                 if (!flop_detected) { 
                     flop_detected = true;
                 }
             }
-        }
+        }*/
     }
     this -> output_file_data +="\n";
     /* Putin some extra coments */

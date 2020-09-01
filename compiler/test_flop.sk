@@ -15,9 +15,7 @@ module a (TransAddrSize, AddrSize){
     in rts;
     out taddr;
     $$
-    always @(*) begin
-        taddr_o <= !rts_i;
-    end; 
+    assign taddr_o = rts_i; 
     $$
 }
 
@@ -55,10 +53,15 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
 
     b:y(TransAddrSize, AddrSize){
         in rstn = in rts,
+        in clk = in clk
+    };
+
+   b:z(TransAddrSize, AddrSize){
+        in rstn = in rts,
         in clk = in clk,
         out test = out out_value
     };
     
    flop x.taddr -> y.taddr;
-    
+   flop y.test -> z.taddr; 
 }
