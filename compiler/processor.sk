@@ -1,0 +1,2320 @@
+`define SIM 1
+#define CODER_0 "Jaquer AND VORIXO"
+
+module memory(WORD_SIZE = 32, WORDS_PER_LINES = 4, LINE_SIZE = 128, MEMORY_LINES = 32, BYTE_SIZE = 8){
+    #function "Memory emulator for the processor"
+    #description "Memory simulation using a 32 bit size and a LINE_SIZE of 128 with a delay in 3 cycles for geting the data"
+    #coder CODER_0
+
+    in clk;
+    in rstn;
+    in we_w;
+    in we_l;
+    in strobe;
+    in  [LINE_SIZE-1:0]data;
+    in  [WORD_SIZE-1:0]addr;
+    out [LINE_SIZE-1:0]data;
+    out valid_data;
+    // dump of the code for the memory
+    $$
+    reg [BYTE_SIZE-1:0] main_mem [0:(MEMORY_LINES*(WORD_SIZE/BYTE_SIZE))-1];
+    reg [LINE_SIZE-1:0] data_o_0;
+    reg [LINE_SIZE-1:0] data_o_1;
+    reg [LINE_SIZE-1:0] data_o_2;
+    reg [LINE_SIZE-1:0] data_o_3; 
+    reg [LINE_SIZE-1:0] data_o_4;    
+    reg valid_0; 
+    reg valid_1;
+    reg valid_2;
+    reg valid_3;
+    reg valid_4;
+    `ifdef SIM
+        initial begin
+        $display("Loading rom.");
+        $readmemh("../../../memory.hex", main_mem);
+        $display("Rom loaded");
+        end
+    `endif
+
+    always @(posedge clk_i) begin
+        // data_o_0 <= {WORD_SIZE{1'b0}};
+        valid_0 <=0;                           
+        if (!rstn_i) begin                                       
+            // reset                                            
+            integer i;         
+            /* verilator lint_off BLKLOOPINIT*/                                 
+            for(i=0;i<(MEMORY_LINES*(WORD_SIZE/BYTE_SIZE)); i=i+1) begin                 
+                main_mem[i] <= {BYTE_SIZE{1'b0}};                
+            end   
+            /* verilator lint_on BLKLOOPINIT*/                                             
+                                                                
+        end                                                  
+        else if (we_l_i) begin
+            // first word
+            main_mem[addr_i]  <= data_i[7:0];
+            main_mem[addr_i + 1]  <= data_i[15:8];
+            main_mem[addr_i + 2]  <= data_i[23:16]; 
+            main_mem[addr_i + 3]  <= data_i[31:24];
+            // second word
+            main_mem[addr_i + 4]  <= data_i[39:32];
+            main_mem[addr_i + 5]  <= data_i[47:40];
+            main_mem[addr_i + 6]  <= data_i[55:48];
+            main_mem[addr_i + 7]  <= data_i[63:56];
+            // third word
+            main_mem[addr_i + 8]  <= data_i[71:64];
+            main_mem[addr_i + 9]  <= data_i[79:72];
+            main_mem[addr_i + 10]  <= data_i[87:80];
+            main_mem[addr_i + 11]  <= data_i[95:88];
+            // ford word
+            main_mem[addr_i + 12]  <= data_i[103:96];
+            main_mem[addr_i + 13]  <= data_i[111:104];
+            main_mem[addr_i + 14]  <= data_i[119:112];
+            main_mem[addr_i + 15]  <= data_i[127:120];
+        end
+        else if (we_w_i) begin
+            // FLIP: Inverse address placement + 3 to + 0
+            main_mem[addr_i + 0]  <= data_i[7:0];
+            main_mem[addr_i + 1]  <= data_i[15:8];
+            main_mem[addr_i + 2]  <= data_i[23:16]; 
+            main_mem[addr_i + 3]  <= data_i[31:24];                       
+                                                                
+        end 
+        else if (strobe_i) begin
+            // FLIP: Inverse every row from 0 to 3
+            data_o_0[31:0] <=  {main_mem[{addr_i[31:4],4'b0000} + 3] , main_mem[{addr_i[31:4],4'b0000} + 2] , main_mem[{addr_i[31:4],4'b0000} + 1] , main_mem[{addr_i[31:4],4'b0000} + 0]}; 
+            data_o_0[63:32] <= {main_mem[{addr_i[31:4],4'b0000} + 7] , main_mem[{addr_i[31:4],4'b0000} + 6] , main_mem[{addr_i[31:4],4'b0000} + 5] , main_mem[{addr_i[31:4],4'b0000} + 4]};
+            data_o_0[95:64] <= {main_mem[{addr_i[31:4],4'b0000} + 11] , main_mem[{addr_i[31:4],4'b0000} + 10] , main_mem[{addr_i[31:4],4'b0000} + 9] , main_mem[{addr_i[31:4],4'b0000} + 8]};
+            data_o_0[127:96] <= {main_mem[{addr_i[31:4],4'b0000} + 15] , main_mem[{addr_i[31:4],4'b0000} + 14] , main_mem[{addr_i[31:4],4'b0000} + 13] , main_mem[{addr_i[31:4],4'b0000} + 12]};
+            valid_0 <= 1;                    
+        end
+        data_o <= data_o_4;
+        valid_data_o <= valid_4;
+        data_o_4 <=  data_o_3;
+        valid_4 <= valid_3;
+        data_o_3 <= data_o_2;
+        valid_3 <= valid_2;
+        data_o_2 <= data_o_1;
+        valid_2 <= valid_1;
+        data_o_1 <= data_o_0;
+        valid_1 <= valid_0;
+
+    end   
+    $$
+
+}
+
+module memory_coordinator(LINE_SIZE = 128,WORD_SIZE = 32){
+    #function "Memory coordinator "
+    #description "Memory coordinator"
+    #coder CODER_0
+
+    in clk;
+    in rstn;
+    in we_w;    // write enable word
+    in we_l;    // write enable line
+    in strobe_icache;   // 3. Supongo que cuando esto esta a 1, esque la icache me ha mandado un bit stream
+    in strobe_dcache;   // 4. Supongo que cuando esto esta a 1, esque la dcache me ha mandado un bit stream
+    in  [WORD_SIZE-1:0]addr_icache; // 6. Para que necesito la address aqui?
+    in  [WORD_SIZE-1:0]addr_dcache; // 7. Para que necesito la address aqui?
+    in  [LINE_SIZE-1:0]data;    // esto es lo que se escribe en mem data bus cuando dcache quiere escribir
+    out valid_data_icache;          // 8. tengo aqui que comprobar si la data es valida? o esto es para forwardear icache?
+    out valid_data_dcache;          // 9. tengo aqui que comprobar si la data es valida? o esto es para forwardear dcache?
+    out  [LINE_SIZE-1:0]data_icache;// 10. esto es lo que haria data_icache = data segun la logica de strobes
+    out  [LINE_SIZE-1:0]data_dcache;// 11. esto es lo que haria data_dcache = data segun la logica de strobes
+
+
+    vwire [LINE_SIZE-1:0]mem_data_bus_in; // - Goes to memory
+    vwire [LINE_SIZE-1:0]mem_data_bus_out; // - Comes from memory
+    vwire [WORD_SIZE-1:0]mem_addr_memory; // -
+    vwire strobe_main_memory; // -
+    vwire valid_data_memory; // -
+
+    memory:PMEM(){
+        in clk = in clk,
+        in rstn = in rstn,
+        in we_w = in we_w,
+        in we_l = in we_l,
+        in data = mem_data_bus_in,
+        in strobe = strobe_main_memory,
+        in addr = mem_addr_memory,
+        out data = mem_data_bus_out,
+        out valid_data = valid_data_memory
+    };
+
+    $$
+        // Local constants for History operations 
+        localparam HISTORY_WIDTH = 5;
+        localparam ICACHE_REQUEST = 1'b0;
+        localparam DCACHE_REQUEST = 1'b1;
+        
+        // Registers str should be on sequential
+        // These two arrays store the history of the different requests that have been given to the mem coordinator
+        // 0: ICache 1: ICache
+        reg [HISTORY_WIDTH-1:0]cache_history;
+        reg [HISTORY_WIDTH-1:0]validity_history;
+        // if dcache and icache conflicted we need to forward the dcache 
+        // and store the icache to send it the next cycle
+        reg [WORD_SIZE-1:0]last_addr_icache;
+        // One cycle delay var
+        reg pending_icache;
+        reg nextcyclegoes_icache;
+
+
+        // (WIP) Combinational
+        assign strobe_main_memory_w = strobe_dcache_i || (!strobe_dcache_i && strobe_icache_i) || nextcyclegoes_icache;
+        assign mem_addr_memory_w = (strobe_dcache_i || (we_w_i || we_l_i)) ? addr_dcache_i : (strobe_icache_i) ? addr_icache_i : nextcyclegoes_icache ? last_addr_icache : {WORD_SIZE{1'b0}};
+        assign mem_data_bus_in_w = data_i;
+        // End after 5 cycles
+        assign valid_data_icache_o = (valid_data_memory_w && validity_history[HISTORY_WIDTH-1] && (cache_history[HISTORY_WIDTH-1] == ICACHE_REQUEST));
+        assign valid_data_dcache_o = (valid_data_memory_w && validity_history[HISTORY_WIDTH-1] && (cache_history[HISTORY_WIDTH-1] == DCACHE_REQUEST));
+        assign data_icache_o = mem_data_bus_out_w;
+        assign data_dcache_o = mem_data_bus_out_w;
+
+
+        always @(posedge clk_i) begin
+            // reset-e-o
+            if(!rstn_i) begin
+                cache_history <= {HISTORY_WIDTH{1'b0}};
+                validity_history <= {HISTORY_WIDTH{1'b0}};
+                last_addr_icache <= {WORD_SIZE{1'b0}};
+                pending_icache <= 1'b0;
+            end
+
+            //valid_data_dcache_o <= 1'b0;
+            //valid_data_icache_o <= 1'b0;
+            nextcyclegoes_icache <= 1'b0;
+            // Shifting our history 1 shift per cycle
+            cache_history <= cache_history << 1;
+            validity_history <= validity_history << 1;
+
+            // icache strobes
+            if(strobe_icache_i && !strobe_dcache_i) begin
+                //strobe_main_memory_w <= 1'b1;
+                //mem_addr_memory_w <= addr_icache_i;
+                cache_history[0] <= ICACHE_REQUEST;
+                validity_history[0] <= 1'b1;
+            end
+            // dcache strobes
+            else if(!strobe_icache_i && strobe_dcache_i) begin
+                //strobe_main_memory_w <= 1'b1;
+                //mem_addr_memory_w <= addr_dcache_i;
+                cache_history[0] <= DCACHE_REQUEST;
+                validity_history[0] <= 1'b1;
+            end
+            // icache and dcache strobes
+            else if (strobe_icache_i && strobe_dcache_i) begin
+                last_addr_icache <= addr_icache_i;
+                pending_icache <= 1'b1;
+                //strobe_main_memory_w <= 1'b1;
+                //mem_addr_memory_w <= addr_dcache_i;
+                cache_history[0] <= DCACHE_REQUEST;
+                validity_history[0] <= 1'b1;
+            end
+            else if((we_w_i || we_l_i) && strobe_icache_i) begin
+                last_addr_icache <= addr_icache_i;
+                pending_icache <= 1'b1;
+                //mem_data_bus_in_w <= data_i;
+                //mem_addr_memory_w <= addr_dcache_i;
+            end
+            //else if((we_w_i || we_l_i) && !strobe_icache_i) begin
+                //mem_data_bus_in_w <= data_i;
+                //mem_addr_memory_w <= addr_dcache_i;
+            //end
+            // no strobes
+            else begin
+                // Send pending signals
+                if (pending_icache) begin
+                    //strobe_main_memory_w <= 1'b1;
+                    //mem_addr_memory_w <= last_addr_icache;
+                    cache_history[0] <= ICACHE_REQUEST;
+                    validity_history[0] <= 1'b1;
+                    pending_icache <= 1'b0;
+                    // This thing is needed since icache needs to be written the next cycle pending varies its value
+                    nextcyclegoes_icache <= 1'b1;
+                end
+                // Back-mem operations
+                // 5 cycles later... 
+                //selse // this needs to be sequential
+                //if(valid_data_memory_w && validity_history[HISTORY_WIDTH-1] && (cache_history[HISTORY_WIDTH-1] == ICACHE_REQUEST)) begin
+                    // 5 cycles ago a valid icache strobe request happened
+                    //valid_data_icache_o <= 1'b1;
+                    //valid_data_dcache_o <= 1'b0;
+                    //data_icache_o <= mem_data_bus_out_w;
+                //end
+                //else if(valid_data_memory_w && validity_history[HISTORY_WIDTH-1] && (cache_history[HISTORY_WIDTH-1] == DCACHE_REQUEST)) begin
+                    // 5 cycles ago a valid dcache strobe request happened
+                    //valid_data_icache_o <= 1'b0;
+                    //valid_data_dcache_o <= 1'b1;
+                    //data_dcache_o <= mem_data_bus_out_w;
+                //end                
+            end
+            
+        end
+        
+    $$
+
+    
+}
+
+
+
+
+module fetch(WORD_SIZE= 32, LINE_SIZE=128, WORDS_PER_LINES = 4, MEMORY_LINES = 4, TAG=27, OFFSET=4){
+    #function "fetch instruction form the I-cache"
+    #description "This module is for the feching instruction from the I-cahe in order to provided to the processor"
+    #coder CODER_0
+    in clk;
+    in rstn;
+    in [WORD_SIZE-1:0] pc; // PC
+    in nvalid_data_register; // value to stop the pipeline if we are waiting from memory
+    in valid_new_pc; 
+    in [LINE_SIZE-1:0] data;
+    in valid_input;
+    in nvalid_decode;
+    out [WORD_SIZE-1:0] npc; // nextPC
+    out [WORD_SIZE-1:0] addr;
+    out [WORD_SIZE-1:0] instruction_register;
+    out ask_memory;
+    out valid; // if the output is valid
+
+    //vwire [WORD_SIZE-1:0]next_pc;
+
+    $$
+
+    // Two ways associative 
+    // > 2 offset bits  
+    // > 1 index bit for set 
+    // > 29 tagbits
+    //       index
+    // memory structure
+    // l   dirty1 v0    tag_way0:29 bits data_cache:128 bits dirty2 v1  tag_way1:29 bits data_cache:128bits 
+    // 0   0      0       0000 ... 0000     0000 ... 0000    0       0     0000 ... 0000     0000 ... 0000  
+
+    localparam NUM_SETS_CACHE = ((LINE_SIZE * MEMORY_LINES)/(LINE_SIZE *2));
+    localparam WIDE_CACHE_LINE = (TAG*2 + LINE_SIZE*2 + 3);
+    localparam INIT_POS_TAG_WAY_1 = 2;
+    localparam INIT_POS_TAG_WAY_2 = 3+TAG+LINE_SIZE;
+    localparam END_POS_TAG_WAY_1 = TAG+1;
+    localparam END_POS_TAG_WAY_2 = TAG+2+LINE_SIZE+TAG;
+    // params for cache word acces
+    // way 1
+    localparam INIT_POS_WORD_1_WAY_1 = TAG+2;
+    localparam END_POS_WORD_1_WAY_1 = TAG+2+WORD_SIZE-1;
+    localparam INIT_POS_WORD_2_WAY_1 = TAG+WORD_SIZE+2;
+    localparam END_POS_WORD_2_WAY_1 = TAG+2+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_3_WAY_1 = TAG+WORD_SIZE+WORD_SIZE+2;
+    localparam END_POS_WORD_3_WAY_1 = TAG+2+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_4_WAY_1 = TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE+2;
+    localparam END_POS_WORD_4_WAY_1 = TAG+2+WORD_SIZE+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    
+    // way 2
+    localparam INIT_POS_WORD_1_WAY_2 = TAG+TAG+3+LINE_SIZE;
+    localparam END_POS_WORD_1_WAY_2 = TAG+3+TAG+LINE_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_2_WAY_2 = TAG+TAG+WORD_SIZE+3+LINE_SIZE;
+    localparam END_POS_WORD_2_WAY_2 = TAG+3+TAG+LINE_SIZE+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_3_WAY_2 = TAG+TAG+WORD_SIZE+WORD_SIZE+3+LINE_SIZE;
+    localparam END_POS_WORD_3_WAY_2 = TAG+3+TAG+LINE_SIZE+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_4_WAY_2 = TAG+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE+3+LINE_SIZE;
+    localparam END_POS_WORD_4_WAY_2 = TAG+3+TAG+LINE_SIZE+WORD_SIZE+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    
+    // block 0 --> block in way 0
+    localparam INIT_POS_LINE_0 = TAG+2;
+    localparam END_POS_LINE_0 = TAG+2+LINE_SIZE-1;
+    localparam INIT_POS_TAG_LINE_0 = 2;
+    localparam END_POS_TAG_LINE_0 = TAG+1;
+    localparam VALID_BIT_WAY_0 = 1;
+
+    // block 1
+
+    localparam INIT_POS_LINE_1 = TAG+TAG+3+LINE_SIZE;
+    localparam END_POS_LINE_1 = TAG+3+TAG+LINE_SIZE+LINE_SIZE-1;
+    localparam INIT_POS_TAG_LINE_1 = 3+TAG+LINE_SIZE;
+    localparam END_POS_TAG_LINE_1 = TAG+2+LINE_SIZE+TAG;
+    localparam VALID_BIT_WAY_1 = TAG+2+LINE_SIZE;
+
+    reg [WORD_SIZE-1:0]addr_asked;
+    reg addr_ask;
+    reg [WIDE_CACHE_LINE-1:0] cache_men [0:NUM_SETS_CACHE-1];
+
+    reg [WORD_SIZE-1:0] pc;
+
+
+    //assign next_pc_w = !rstn_i ? {WORD_SIZE{1'b0}} : valid_o ? pc + 32 :  pc;
+    always @(posedge clk_i) begin
+
+        
+        if (!rstn_i) begin                                       
+            // reset                                            
+            integer i;         
+            /* verilator lint_off BLKLOOPINIT*/                                 
+            for(i=0;i<NUM_SETS_CACHE; i=i+1) begin                 
+                cache_men[i] <= {WIDE_CACHE_LINE{1'b0}};                
+            end   
+            /* verilator lint_on BLKLOOPINIT*/
+            pc <= {WORD_SIZE{1'b0}};
+        end
+        else if (!nvalid_data_register_i && !nvalid_decode_i) begin
+            //pc <= next_pc_w;
+            /*if (valid_new_pc_i) begin
+                pc <= pc_i;
+            end*/
+            // take the pc and check if is in catch
+            // check if is in way 1 or 0
+            // check way 0 and valid 23/7
+            if(cache_men[pc[OFFSET]][END_POS_TAG_WAY_1:INIT_POS_TAG_WAY_1] == pc[WORD_SIZE-1:OFFSET+1] && cache_men[pc[OFFSET]][VALID_BIT_WAY_0]) begin
+                // hit in way 0
+                // pc[WORD_SIZE-1:TAG] is offset
+                valid_o <= 1;
+                //if (!nvalid_decode_i) begin
+                pc <= pc + 4;
+                npc_o <= pc +4;
+                if(pc[OFFSET-1:OFFSET-2] == 2'b00) begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_1_WAY_1:INIT_POS_WORD_1_WAY_1];
+                end
+                else if (pc[OFFSET-1:OFFSET-2] == 2'b01) begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_2_WAY_1:INIT_POS_WORD_2_WAY_1];
+                end
+
+                else if (pc[OFFSET-1:OFFSET-2] == 2'b10) begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_3_WAY_1:INIT_POS_WORD_3_WAY_1];
+                end
+                else if (pc[OFFSET-1:OFFSET-2] == 2'b11)begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_4_WAY_1:INIT_POS_WORD_4_WAY_1];
+                end
+                //end
+                
+
+
+                
+            end
+            // check way 1 and valid 
+            else if(cache_men[pc[OFFSET]][END_POS_TAG_WAY_2:INIT_POS_TAG_WAY_2] == pc[WORD_SIZE-1:OFFSET+1] && cache_men[pc[OFFSET]][VALID_BIT_WAY_1]) begin
+                // hit in way 1
+                valid_o <= 1;
+                //if (!nvalid_decode_i) begin
+                pc <= pc + 4;
+                npc_o <= pc +4;
+
+                if(pc[OFFSET-1:OFFSET-2] == 2'b00) begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_1_WAY_2:INIT_POS_WORD_1_WAY_2];
+                end
+                else if (pc[OFFSET-1:OFFSET-2] == 2'b01) begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_2_WAY_2:INIT_POS_WORD_2_WAY_2];
+                end
+
+                else if (pc[OFFSET-1:OFFSET-2] == 2'b10) begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_3_WAY_2:INIT_POS_WORD_3_WAY_2];
+                end
+                else if (pc[OFFSET-1:OFFSET-2] == 2'b11)begin
+                    instruction_register_o <= cache_men[pc[OFFSET]][END_POS_WORD_4_WAY_2:INIT_POS_WORD_4_WAY_2];
+                end
+                //end
+
+                
+            end
+            else if (addr_ask && valid_input_i) begin
+                if(cache_men[addr_asked[OFFSET]][0]) begin
+                    // LRU == 1 replace way 1
+                    // replace LRU
+                    cache_men[addr_asked[OFFSET]][0] <= 1'b0;
+                    // store block in way 1
+                    cache_men[addr_asked[OFFSET]][END_POS_LINE_1:INIT_POS_LINE_1] <= data_i;
+                    // set the valid bit
+                    cache_men[addr_asked[OFFSET]][VALID_BIT_WAY_1] <= 1'b1;
+                    // store the tag
+                    cache_men[addr_asked[OFFSET]][END_POS_TAG_LINE_1:INIT_POS_TAG_LINE_1] <= addr_asked[WORD_SIZE-1:OFFSET+1];
+                    // set the ask
+                    addr_ask <= 1'b0;
+
+                end
+                else begin
+                    // LRU == 0 replace way 0
+                    // replace LRU
+                    cache_men[addr_asked[OFFSET]][0] <= 1'b1;
+                    // store block in way 0
+                    cache_men[addr_asked[OFFSET]][END_POS_LINE_0:INIT_POS_LINE_0] <= data_i;
+                    // set bit to valid
+                    cache_men[addr_asked[OFFSET]][VALID_BIT_WAY_0] <= 1'b1;
+                    //store the tag
+                    cache_men[addr_asked[OFFSET]][END_POS_TAG_LINE_0:INIT_POS_TAG_LINE_0] <= addr_asked[WORD_SIZE-1:OFFSET+1];
+                    // set the ask
+                    addr_ask <= 1'b0;
+
+                end
+                ask_memory_o <= 1'b0;
+            end
+            else if (addr_ask && pc == addr_asked) begin
+                // same addr ask 
+                valid_o <= 0;
+            end
+            else begin
+                // Mis go to main memory
+                addr_asked <= pc;
+                addr_ask <= 1'b1;
+                valid_o <= 0;
+                addr_o <= pc;
+                ask_memory_o <= 1'b1;
+
+            end
+        end
+        if (valid_new_pc_i) begin
+                pc <= pc_i;
+        end
+
+    end
+    //assign next_pc_w = !rstn_i ? {WORD_SIZE{1'b0}} : valid_o ? pc + 32 :  pc;
+    //assign npc_o = next_pc_w;
+    $$
+
+
+}
+
+module decode(WORD_SIZE= 32, LINE_SIZE=128, REGISTERS=32, ALUOP_SIZE=4, REGDIRSIZE=5){
+    #function "Decoder and control of the processor"
+    #description "cosas"
+    #coder CODER_0
+
+    /**
+    *   INSTRUCTION SCHEME
+    *
+    * RTYPE
+    *  31    25 24      20 19       15 14         10 9          0
+    * | opcode |   dst    |    src1   |    src2     | 0000000000 |
+    *
+    * MTYPE
+    *  31    25 24      20 19       15 14                       0
+    * | opcode |   dst    |    src1   |         offset           | 
+    *
+    * BTYPE
+    *  31    25 24      20 19       15 14          10 9         0
+    * | opcode | OffsetHi |    src1   | src2/OffsetM | offsetLo  |
+    * RPTYPE
+    *  31    25 24      20 19       15 14                       0
+    * | opcode |   dst    |    src1   |    15 bit integer value  |
+    * FTYPE
+    *  31    25 24      20 19       15 14         10 9          0
+    * | opcode |   dst    |    src1   |    00000     | 0000000000 |
+    **/
+
+    in clk;
+    in rstn;
+    in valid_instruction_register;
+    in nvalid_data_register; // value to stop the pipelien if we are waiting from memory
+    in write; // Boolean flag determines if we need to write a value into a register
+    in [WORD_SIZE-1:0] write_data; // Data to store in our write register
+    in [REGDIRSIZE-1:0] write_operation_dst; // position to store the write register
+    in [WORD_SIZE-1:0] pc;
+    in [WORD_SIZE-1:0] instruction_register;
+
+    // bypass zone
+    // bypass execute
+    //in [2:0] optype_execute;
+    in [WORD_SIZE-1:0] bypass_alu;
+    in [REGDIRSIZE-1:0] write_operation_dst_execute;
+    in write_operation_dst_execute_valid;
+    in [1:0] valid_bypass_execute;
+    // bypass mem
+    //in [2:0] optype_mem;
+    in [WORD_SIZE-1:0] bypass_mem;
+    in [REGDIRSIZE-1:0] write_operation_dst_mem;
+    in write_operation_dst_mem_valid;
+    in [1:0] valid_bypass_mem;
+    // Get the signal for finish branch
+    in finish_branch_instr;
+    in branch_taken;
+    // bypass wb
+    // in [2:0] optype_wb;
+    // in [WORD_SIZE-1:0] bypass_wb;
+    // in [REGDIRSIZE-1:0] write_operation_dst_wb;
+    // in valid_bypass_wb;
+    // end bypass zone
+    
+    // Output data to execute (instruction sources)
+    out [WORD_SIZE-1:0] src1;
+    out [WORD_SIZE-1:0] src2;
+    // Decides the type of operation to do with the ALU in the EX phase
+    out [ALUOP_SIZE-1:0] alu_op;
+    // Sends information to write in with register and if shud be done
+    out [REGDIRSIZE-1:0] write_operation_dst;
+    out write_mem;
+    out write_to_register;
+    // read form memory
+    out strobe_memory;
+    // out the PC
+    out [WORD_SIZE-1:0]pc;
+    // out to stop the Fech
+    out nvalid_decode;
+    // out data to be written in memory
+    out [WORD_SIZE-1:0] data_to_mem;
+    // defines the type of operation R, M and B
+    //out [2:0] optype;
+    // This binary output enables the execute to bypass mem
+    out bypass_exe_to_wb;
+
+    // out the valid
+    out valid_instruction_register;
+    // out of the ask signal
+    out is_byte;
+    out is_word;
+
+    out [1:0] valid_bypass;
+    /*
+    How the valid_bypass works. Is a One Hot encoding. With exceptions.
+    Truth table:
+                00 means that the bypass is not valid NEVER.
+                01 means that the bypass is only valid if comes from the EXE.
+                10 means that the bypass is only valid if comes form the MEM.
+                11 means that the bypass is only valid if comes from the EXE or MEM.
+
+    */
+
+    $$  
+        localparam RTYPE = 3'b000; // Adding operations
+        localparam MTYPE = 3'b001; // Memory operations
+        localparam BTYPE = 3'b011; // Jump operations
+        localparam RPTYPE= 3'b100; // Additional Adding operations
+        localparam FTYPE = 3'b111; // System instruccions 
+
+        reg [WORD_SIZE-1:0] r[0:REGISTERS-1]; // general_use_register r0 to r31
+        reg [WORD_SIZE-1:0] rm0; // holding the last PC for error handeling
+        reg [WORD_SIZE-1:0] rm1; // holding an @ for centain exceptions
+        // structure to store the last send instruccion
+        reg [REGDIRSIZE-1:0] dst_0;
+        reg valid_dst_0;
+        reg [2:0] type_dst_0;
+        reg instert_bubble;
+        reg jump_intr;
+        reg wait_fech;
+        reg [WORD_SIZE-1:0] instruction_register_stoped;
+        reg valid_instruction_register_stoped;
+        wire [WORD_SIZE-1:0] instruction_register;
+        wire valid_instruction_register;
+
+
+       
+        /*`ifdef SIM
+            initial begin
+            $display("Loading register file.");
+            $readmemh("../../../reg.hex", r);
+            $display("Register file loaded");
+            end
+        `endif*/
+        assign  nvalid_decode_o = 1'b0;
+        //assign next_pc_w = !rstn_i ? {WORD_SIZE{1'b0}} : valid_o ? pc + 32 :  pc;
+        assign  instruction_register = instert_bubble ? instruction_register_stoped : instruction_register_i;
+        assign  valid_instruction_register = instert_bubble ? valid_instruction_register_stoped : valid_instruction_register_i;
+    always @(posedge clk_i) begin
+            //write_to_register_o <= 1'b0;
+            //bypass_exe_to_wb_o <= 1'b0;
+            r[0] <= {WORD_SIZE{1'b0}};
+            if (!rstn_i) begin
+                integer i;    
+                /* verilator lint_off BLKLOOPINIT*/                                 
+                for(i=0;i<REGISTERS; i=i+1) begin                 
+                    r[i] <= {WORD_SIZE{1'b0}}; 
+                    rm1  <= {WORD_SIZE{1'b0}};            
+                end   
+                /* verilator lint_on BLKLOOPINIT*/
+            end
+            // FIXMEVORI this must me change to respert the rstn signal
+            if (write_i) begin
+                    r[write_operation_dst_i] <= write_data_i;   
+            end
+            if (!nvalid_data_register_i)begin
+                valid_instruction_register_o <= valid_instruction_register;
+                
+                
+                // check if is valid
+                if (valid_instruction_register && jump_intr == 1'b0 && wait_fech == 1'b0) begin
+                    
+                    is_byte_o <= 1'b0;
+                    is_word_o <= 1'b0;
+                    pc_o <= pc_i;
+                    instert_bubble <= 1'b0;
+                    //optype_o <= instruction_register_i[31:29];
+                    
+                    case (instruction_register[31:29])
+                        RTYPE:  
+                            begin
+                                // local variable
+                                //bypass_exe_to_wb_o <= 1'b1;
+                                reg src_1_bypassed;
+                                reg src_2_bypassed;
+                                reg bubble_stop;
+                                src_1_bypassed = 0;
+                                src_2_bypassed = 0;
+                                bubble_stop = 0;
+
+
+                                //bypass_exe_to_wb_o <= 1'b1;
+                                alu_op_o <= instruction_register[28:25];
+                                // bypass mechanisim
+                                 // check if the last send instruccion is use in this inscruccion
+                                //$display("EMPIEZO");
+                                //$display("INTR: %h", instruction_register);
+                                if (valid_dst_0 && (instruction_register[19:15] == dst_0 || instruction_register[14:10] == dst_0)) begin
+                                    // FIXMEVORI
+                                    //$display("DEPENDECY WITH JUST LAUNCHED DST: %d", dst_0);
+                                    //$display("VALUES dst_0 %d : src1 %d : src2 %d",dst_0, instruction_register[19:15], instruction_register[14:10]);
+                                    // this instruccion needs the register we need to send a bubble and stop fech, and try next time
+                                    valid_instruction_register_o <= 1'b0;
+                                    // stop fech
+                                    
+                                    instert_bubble <= 1'b1;
+                                    nvalid_decode_o <= 1'b1;
+                                    bubble_stop = 1'b1;
+                                    instruction_register_stoped <= instruction_register;
+                                    valid_instruction_register_stoped <= valid_instruction_register;
+                                end
+                                // check if this instruccion needs the value in the exe stage
+                                //if(valid_bypass_execute_i[0] != 1'b0 && !bubble_stop && (instruction_register[19:15] == write_operation_dst_execute_i  || instruction_register[14:10] == write_operation_dst_execute_i)) begin
+                                if((instruction_register[19:15] == write_operation_dst_execute_i  || instruction_register[14:10] == write_operation_dst_execute_i) && write_operation_dst_execute_valid_i) begin
+                                        // ok, used for this instruccion check if is valid to use or not
+                                        //$display("ENTRO EXE %d", write_operation_dst_execute_i);
+                                        //$display("VALIDity EXE %d", valid_bypass_execute_i);
+                                        if (valid_bypass_execute_i[0] == 1'b1) begin
+                                            instert_bubble <= 1'b0;
+                                            // valid to use check witch 
+                                            //$display("VALID EXE");
+                                            if (instruction_register[19:15] == write_operation_dst_execute_i) begin
+                                                // check if src1 has already bypassed
+                                                if (src_1_bypassed == 0) begin
+                                                    // add value
+                                                    //$display("USE EXE src1");
+                                                    src1_o <= bypass_alu_i;
+                                                    src_1_bypassed = 1'b1;
+                                                    nvalid_decode_o <= 1'b0;
+                                                end
+                                                // If already change not need change because is a new value to instruccion
+                                            end
+                                            else begin
+                                                // take the other one
+                                                if (src_2_bypassed == 0) begin
+                                                        // add value
+                                                        //$display("USE EXE src2");
+                                                        src2_o <= bypass_alu_i;
+                                                        src_2_bypassed = 1'b1;
+                                                        nvalid_decode_o <= 1'b0;
+                                                end
+                                                // If already change not need change because is a new value to instruccion
+                                            end
+                                        end
+                                        else begin
+                                            // Needed and not valid to use send a bubble and stop fech
+                                            // send bubble
+                                            //$display("SEND BUBBLE EXE");
+                                            valid_instruction_register_o <= 1'b0;
+                                            // stop fech
+                                            nvalid_decode_o <= 1'b1;
+                                            instert_bubble <= 1'b1;
+                                            instruction_register_stoped <= instruction_register;
+                                            valid_instruction_register_stoped <= valid_instruction_register;
+                                        end  
+                                end
+                                // check if this instruccion needs the value in the MEM stage
+                                //if(valid_bypass_mem_i[1] != 1'b0 && !bubble_stop && (instruction_register[19:15] == write_operation_dst_mem_i || instruction_register[14:10] == write_operation_dst_mem_i)) begin
+                                if((instruction_register[19:15] == write_operation_dst_mem_i || instruction_register[14:10] == write_operation_dst_mem_i) && write_operation_dst_mem_valid_i) begin
+                                        // ok, used for this instruccion check if is valid to use or not
+                                        //$display("ENTRO MEM %d", write_operation_dst_mem_i);
+                                        if (valid_bypass_mem_i[1] == 1'b1) begin
+                                            instert_bubble <= 1'b0;
+                                            // valid to use check witch
+                                            if (instruction_register[19:15] == write_operation_dst_mem_i) begin
+                                                // check if src1 has already bypassed
+                                                if (src_1_bypassed == 0) begin
+                                                    // add value
+                                                    //$display("USE MEM src1");
+                                                    src1_o <= bypass_mem_i;
+                                                    src_1_bypassed = 1;
+                                                    nvalid_decode_o <= 1'b0;
+                                                end
+                                                // If already change not need change because is a new value to instruccion
+                                            end
+                                            else begin
+                                                // take the other one
+                                                if (src_2_bypassed == 0) begin
+                                                        // add value
+                                                        //$display("USE MEM src2");
+                                                        src2_o <= bypass_mem_i;
+                                                        src_2_bypassed = 1;
+                                                        nvalid_decode_o <= 1'b0;
+                                                end
+                                                // If already change not need change because is a new value to instruccion
+                                            end
+                                        end
+                                        else begin
+                                            //$display("SEND BUBBLE MEM");
+                                            // not valid to use send a bubble and stop fech
+                                            valid_instruction_register_o <= 1'b0;
+                                            // stop fech
+                                            nvalid_decode_o <= 1'b1;
+                                            instert_bubble <= 1'b1;
+                                            instruction_register_stoped <= instruction_register;
+                                            valid_instruction_register_stoped <= valid_instruction_register;
+                                        end
+                                    
+                                end
+                                // check if bypass has ocurr and if not add the data to src1 and src2
+                                if (src_1_bypassed == 1'b0) begin
+                                    //$display("ADD SRC1");
+                                    // add the src1 from registers
+                                    src1_o <= r[instruction_register[19:15]]; 
+                                end
+                                if (src_2_bypassed == 1'b0) begin
+                                    // add the src2 from registers
+                                    //$display("ADD SRC2");
+                                    src2_o <= r[instruction_register[14:10]];
+                                end  
+                                
+                                //if (instert_bubble != 1'b1 && bubble_stop != 1'b1) begin
+                                if (bubble_stop != 1'b1) begin
+                                    write_to_register_o <= 1'b1;
+                                    write_mem_o <= 1'b0;
+                                    strobe_memory_o <=1'b0;
+                                    // RAW info pass
+                                    //$display("NO BUBBLE");
+                                    dst_0 <= instruction_register[24:20];
+                                    write_operation_dst_o <= instruction_register[24:20]; // this is a register position
+                                    valid_dst_0 <= 1'b1;
+                                    //valid_dst_0 <= 1'b1;
+                                    // RAW problem
+                                    // no stop
+                                    nvalid_decode_o <= 1'b0;
+                                    //operation_0 <= RTYPE;
+                                    //  We need to tell the execute that it needs to bypass mem
+                                    if (type_dst_0 == MTYPE) begin
+                                        bypass_exe_to_wb_o <= 1'b0;
+                                    end
+                                    else begin
+                                        bypass_exe_to_wb_o <= 1'b1;
+                                    end
+                                    
+                                    valid_bypass_o <= 2'b01;
+                                    type_dst_0 <= RTYPE;
+                                    //$display("SEND TO EXE");
+                                end
+                                else begin
+                                    write_to_register_o <= 1'b0;
+                                    valid_dst_0 <= 1'b0;
+                                end
+                            //$display("---------------------------------------");
+                            end
+                        MTYPE:  
+                            begin
+                                reg src_1_bypassed;
+                                reg bubble_stop;
+                                src_1_bypassed = 0;
+                                bubble_stop = 0;
+                                is_word_o <= 1'b0;
+                                is_byte_o <= 1'b0;
+                                valid_bypass_o <= 2'b10;
+                                // bypassses Start
+                                if (valid_dst_0 && instruction_register[19:15] == dst_0) begin
+                                    // FIXMEVORI
+                                    //$display("DEPENDECY WITH JUST LAUNCHED DST: %d", dst_0);
+                                    //$display("VALUES dst_0 %d : src1 %d : src2 %d",dst_0, instruction_register[19:15], instruction_register[14:10]);
+                                    // this instruccion needs the register we need to send a bubble and stop fech, and try next time
+                                    valid_instruction_register_o <= 1'b0;
+                                    // stop fech
+                                    instert_bubble <= 1'b1;
+                                    nvalid_decode_o <= 1'b1;
+                                    bubble_stop = 1'b1;
+                                    instruction_register_stoped <= instruction_register;
+                                    valid_instruction_register_stoped <= valid_instruction_register;
+                                end
+                                if(instruction_register[19:15] == write_operation_dst_execute_i && write_operation_dst_execute_valid_i) begin
+                                        // ok, used for this instruccion check if is valid to use or not
+                                        //$display("ENTRO EXE %d", write_operation_dst_execute_i);
+                                        //$display("VALIDity EXE %d", valid_bypass_execute_i);
+                                        if (valid_bypass_execute_i[0] == 1'b1) begin
+                                            instert_bubble <= 1'b0;
+                                            // valid to use check witch 
+                                            //$display("VALID EXE");
+                                            // check if src1 has already bypassed
+                                            if (src_1_bypassed == 0) begin
+                                                // add value
+                                                //$display("USE EXE src1");
+                                                src1_o <= bypass_alu_i;
+                                                src_1_bypassed = 1'b1;
+                                                nvalid_decode_o <= 1'b0;
+                                            end
+                                                // If already change not need change because is a new value to instruccion
+                                        end
+                                        else begin
+                                            // Needed and not valid to use send a bubble and stop fech
+                                            // send bubble
+                                            //$display("SEND BUBBLE EXE");
+                                            valid_instruction_register_o <= 1'b0;
+                                            // stop fech
+                                            nvalid_decode_o <= 1'b1;
+                                            instert_bubble <= 1'b1;
+                                            instruction_register_stoped <= instruction_register;
+                                            valid_instruction_register_stoped <= valid_instruction_register;
+                                        end  
+                                end
+                                if(instruction_register[19:15] == write_operation_dst_mem_i  && write_operation_dst_mem_valid_i) begin
+                                        // ok, used for this instruccion check if is valid to use or not
+                                        //$display("ENTRO MEM %d", write_operation_dst_mem_i);
+                                        if (valid_bypass_mem_i[1] == 1'b1) begin
+                                            instert_bubble <= 1'b0;
+                                            // valid to use check witch
+                                            // check if src1 has already bypassed
+                                            if (src_1_bypassed == 0) begin
+                                                // add value
+                                                //$display("USE MEM src1");
+                                                src1_o <= bypass_mem_i;
+                                                src_1_bypassed = 1;
+                                                nvalid_decode_o <= 1'b0;
+                                            end
+                                        end
+                                        else begin
+                                            //$display("SEND BUBBLE MEM");
+                                            // not valid to use send a bubble and stop fech
+                                            valid_instruction_register_o <= 1'b0;
+                                            // stop fech
+                                            nvalid_decode_o <= 1'b1;
+                                            instert_bubble <= 1'b1;
+                                            instruction_register_stoped <= instruction_register;
+                                            valid_instruction_register_stoped <= valid_instruction_register;
+                                        end
+                                    
+                                end
+                                // End Bypasses
+                                
+                                // feed the source 1
+                                if (src_1_bypassed == 1'b0) begin
+                                    //$display("ADD SRC1");
+                                    // add the src1 from registers
+                                    src1_o <= r[instruction_register[19:15]]; 
+                                end
+                                // check if bubble or not
+                                if (bubble_stop != 1'b1) begin
+                                    // feed the offset
+                                    src2_o <= {{(WORD_SIZE-15){1'b0}},instruction_register[14:0]};
+                                    // create the operation
+                                    alu_op_o <= 4'b0000;
+                                    // load Word
+                                    if (instruction_register[31:25] == 7'h11) begin
+                                        write_mem_o <= 1'b0;
+                                        // pass the destination
+                                        write_operation_dst_o <= instruction_register[24:20];
+                                        dst_0 <= instruction_register[24:20];
+                                        //valid_dst_0 <= 1'b1;
+                                        // ask for a read
+                                        strobe_memory_o <= 1'b1;
+                                        is_word_o <= 1'b1;
+                                        write_to_register_o <= 1'b1;
+                                        valid_dst_0 <= 1'b1;
+                                        type_dst_0 <= MTYPE;
+                                        bypass_exe_to_wb_o <= 1'b0;
+                                    end
+                                    // store Word
+                                    else if (instruction_register[31:25] == 7'h13) begin
+                                        // Stores: dst will save the address for where the data is located
+                                        strobe_memory_o <= 1'b0;
+                                        write_to_register_o <= 1'b0;
+                                        // Since the dst is my value, we invalidate further bypasses
+                                        //valid_dst_0 <= 1'b0;     
+                                        // ask for a write  
+                                        write_mem_o <= 1'b1;
+                                        is_word_o <= 1'b1;
+                                        data_to_mem_o <= r[instruction_register[24:20]];
+                                        valid_dst_0 <= 1'b0;
+                                        bypass_exe_to_wb_o <= 1'b0;
+                                    end
+                                    // load Byte
+                                    else if (instruction_register[31:25] == 7'h10) begin
+                                        write_mem_o <= 1'b0;
+                                        // feed the source 1
+                                        // pass the destination
+                                        write_operation_dst_o <= instruction_register[24:20];
+                                        dst_0 <= instruction_register[24:20];
+                                        //valid_dst_0 <= 1'b1;
+                                        // ask for a read
+                                        strobe_memory_o <= 1'b1;
+                                        is_byte_o <= 1'b1;
+                                        write_to_register_o <= 1'b1;
+                                        valid_dst_0 <= 1'b1;
+                                        type_dst_0 <= MTYPE;
+                                        bypass_exe_to_wb_o <= 1'b0;
+                                    end
+                                    // store Byte
+                                    else if (instruction_register[31:25] == 7'h12) begin
+                                        // Stores: dst will save the address for where the data is located
+                                        strobe_memory_o <= 1'b0;
+                                        write_to_register_o <= 1'b0;
+                                        // Since the dst is my value, we invalidate further bypasses
+                                        //valid_dst_0 <= 1'b0;     
+                                        // We need to add in the alu, the offseted content of inst. register.
+                                        // ask for a write  
+                                        write_mem_o <= 1'b1;
+                                        is_byte_o <= 1'b1;
+                                        data_to_mem_o <= r[instruction_register[24:20]];
+                                        valid_dst_0 <= 1'b0;
+                                        bypass_exe_to_wb_o <= 1'b0;
+                                    end
+                                    // mov instruction
+                                    else if (instruction_register[31:25] == 7'h14) begin
+                                        strobe_memory_o <= 1'b0;
+                                        write_mem_o <= 1'b0;
+                                        write_operation_dst_o <= instruction_register[24:20];
+                                        write_to_register_o <= 1'b1;
+                                        src1_o <= rm0;
+                                        src2_o <= {(WORD_SIZE){1'b0}};
+                                        bypass_exe_to_wb_o <= 1'b1;
+                                        valid_dst_0 <= 1'b1;
+                                        type_dst_0 <= MTYPE;
+                                    end
+                                    else begin
+                                        write_to_register_o <= 1'b0;
+                                        write_mem_o <= 1'b0;
+                                        strobe_memory_o <=1'b0;
+                                    end
+                                end
+                                else begin
+                                    write_to_register_o <= 1'b0;
+                                    valid_dst_0 <= 1'b0;
+                                end
+                                type_dst_0 <= MTYPE;
+                                //operation_0 <= MTYPE;
+                                
+                            end
+                        BTYPE:  
+                            begin
+                                //$display("BTYPE");
+                                reg src_1_bypassed;
+                                reg src_2_bypassed;
+                                reg bubble_stop;
+                                src_1_bypassed = 0;
+                                src_2_bypassed = 0;
+                                bubble_stop = 0;
+                                is_word_o <= 1'b0;
+                                is_byte_o <= 1'b0;
+                                valid_bypass_o <= 2'b00;
+                                // BEQ operation
+                                if (instruction_register[31:25] == 7'h30) begin
+                                    //bypass_exe_to_wb_o <= 1'b1;
+                                    alu_op_o <= instruction_register[28:25];
+                                    // bypass mechanisim
+                                    // check if the last send instruccion is use in this inscruccion
+                                    //$display("EMPIEZO");
+                                    //$display("INTR: %h", instruction_register);
+                                    if (valid_dst_0 && (instruction_register[19:15] == dst_0 || instruction_register[14:10] == dst_0)) begin
+                                        // FIXMEVORI
+                                        //$display("DEPENDECY WITH JUST LAUNCHED DST: %d", dst_0);
+                                        //$display("VALUES dst_0 %d : src1 %d : src2 %d",dst_0, instruction_register[19:15], instruction_register[14:10]);
+                                        // this instruccion needs the register we need to send a bubble and stop fech, and try next time
+                                        valid_instruction_register_o <= 1'b0;
+                                        // stop fech
+                                        
+                                        instert_bubble <= 1'b1;
+                                        nvalid_decode_o <= 1'b1;
+                                        bubble_stop = 1'b1;
+                                        instruction_register_stoped <= instruction_register;
+                                        valid_instruction_register_stoped <= valid_instruction_register;
+                                    end
+                                    // check if this instruccion needs the value in the exe stage
+                                    //if(valid_bypass_execute_i[0] != 1'b0 && !bubble_stop && (instruction_register[19:15] == write_operation_dst_execute_i  || instruction_register[14:10] == write_operation_dst_execute_i)) begin
+                                    if((instruction_register[19:15] == write_operation_dst_execute_i  || instruction_register[14:10] == write_operation_dst_execute_i) && write_operation_dst_execute_valid_i) begin
+                                            // ok, used for this instruccion check if is valid to use or not
+                                            //$display("ENTRO EXE %d", write_operation_dst_execute_i);
+                                            //$display("VALIDity EXE %d", valid_bypass_execute_i);
+                                            if (valid_bypass_execute_i[0] == 1'b1) begin
+                                                instert_bubble <= 1'b0;
+                                                // valid to use check witch 
+                                                //$display("VALID EXE");
+                                                if (instruction_register[19:15] == write_operation_dst_execute_i) begin
+                                                    // check if src1 has already bypassed
+                                                    if (src_1_bypassed == 0) begin
+                                                        // add value
+                                                        //$display("USE EXE src1");
+                                                        src1_o <= bypass_alu_i;
+                                                        src_1_bypassed = 1'b1;
+                                                        nvalid_decode_o <= 1'b0;
+                                                    end
+                                                    // If already change not need change because is a new value to instruccion
+                                                end
+                                                else begin
+                                                    // take the other one
+                                                    if (src_2_bypassed == 0) begin
+                                                            // add value
+                                                            //$display("USE EXE src2");
+                                                            src2_o <= bypass_alu_i;
+                                                            src_2_bypassed = 1'b1;
+                                                            nvalid_decode_o <= 1'b0;
+                                                    end
+                                                    // If already change not need change because is a new value to instruccion
+                                                end
+                                            end
+                                            else begin
+                                                // Needed and not valid to use send a bubble and stop fech
+                                                // send bubble
+                                                //$display("SEND BUBBLE EXE");
+                                                valid_instruction_register_o <= 1'b0;
+                                                // stop fech
+                                                nvalid_decode_o <= 1'b1;
+                                                instert_bubble <= 1'b1;
+                                                instruction_register_stoped <= instruction_register;
+                                                valid_instruction_register_stoped <= valid_instruction_register;
+                                            end  
+                                    end
+                                    // check if this instruccion needs the value in the MEM stage
+                                    //if(valid_bypass_mem_i[1] != 1'b0 && !bubble_stop && (instruction_register[19:15] == write_operation_dst_mem_i || instruction_register[14:10] == write_operation_dst_mem_i)) begin
+                                    if((instruction_register[19:15] == write_operation_dst_mem_i || instruction_register[14:10] == write_operation_dst_mem_i) && write_operation_dst_mem_valid_i) begin
+                                            // ok, used for this instruccion check if is valid to use or not
+                                            //$display("ENTRO MEM %d", write_operation_dst_mem_i);
+                                            if (valid_bypass_mem_i[1] == 1'b1) begin
+                                                instert_bubble <= 1'b0;
+                                                // valid to use check witch
+                                                if (instruction_register[19:15] == write_operation_dst_mem_i) begin
+                                                    // check if src1 has already bypassed
+                                                    if (src_1_bypassed == 0) begin
+                                                        // add value
+                                                        //$display("USE MEM src1");
+                                                        src1_o <= bypass_mem_i;
+                                                        src_1_bypassed = 1;
+                                                        nvalid_decode_o <= 1'b0;
+                                                    end
+                                                    // If already change not need change because is a new value to instruccion
+                                                end
+                                                else begin
+                                                    // take the other one
+                                                    if (src_2_bypassed == 0) begin
+                                                            // add value
+                                                            //$display("USE MEM src2");
+                                                            src2_o <= bypass_mem_i;
+                                                            src_2_bypassed = 1;
+                                                            nvalid_decode_o <= 1'b0;
+                                                    end
+                                                    // If already change not need change because is a new value to instruccion
+                                                end
+                                            end
+                                            else begin
+                                                //$display("SEND BUBBLE MEM");
+                                                // not valid to use send a bubble and stop fech
+                                                valid_instruction_register_o <= 1'b0;
+                                                // stop fech
+                                                nvalid_decode_o <= 1'b1;
+                                                instert_bubble <= 1'b1;
+                                                instruction_register_stoped <= instruction_register;
+                                                valid_instruction_register_stoped <= valid_instruction_register;
+                                            end
+                                        
+                                    end
+                                    // check if bypass has ocurr and if not add the data to src1 and src2
+                                    if (src_1_bypassed == 1'b0) begin
+                                        //$display("ADD SRC1");
+                                        // add the src1 from registers
+                                        src1_o <= r[instruction_register[19:15]]; 
+                                    end
+                                    if (src_2_bypassed == 1'b0) begin
+                                        // add the src2 from registers
+                                        //$display("ADD SRC2");
+                                        src2_o <= r[instruction_register[14:10]];
+                                    end  
+                                    
+                                    //if (instert_bubble != 1'b1 && bubble_stop != 1'b1) begin
+                                    if (bubble_stop != 1'b1) begin
+
+                                        alu_op_o <=4'b1111;
+                                        src1_o <= r[instruction_register[19:15]];
+                                        src2_o <= r[instruction_register[14:10]];
+                                        data_to_mem_o <= {{(WORD_SIZE-15){1'b0}},instruction_register[24:20],instruction_register[9:0]};
+                                        write_to_register_o <= 1'b0;
+                                        write_mem_o <= 1'b0;
+                                        strobe_memory_o <=1'b0;  
+                                        // stop fech
+                                        nvalid_decode_o <= 1'b1;
+                                        jump_intr <= 1'b1; // store that a jump is going to ocurr
+                                    end
+                                end
+                                // JUMP
+                                else if(instruction_register[31:25] == 7'h31) begin
+                                    // bypassses Start
+                                    if (valid_dst_0 && instruction_register[19:15] == dst_0) begin
+                                        // FIXMEVORI
+                                        //$display("DEPENDECY WITH JUST LAUNCHED DST: %d", dst_0);
+                                        //$display("VALUES dst_0 %d : src1 %d : src2 %d",dst_0, instruction_register[19:15], instruction_register[14:10]);
+                                        // this instruccion needs the register we need to send a bubble and stop fech, and try next time
+                                        valid_instruction_register_o <= 1'b0;
+                                        // stop fech
+                                        instert_bubble <= 1'b1;
+                                        nvalid_decode_o <= 1'b1;
+                                        bubble_stop = 1'b1;
+                                        instruction_register_stoped <= instruction_register;
+                                        valid_instruction_register_stoped <= valid_instruction_register;
+                                    end
+                                    if(instruction_register[19:15] == write_operation_dst_execute_i && write_operation_dst_execute_valid_i) begin
+                                            // ok, used for this instruccion check if is valid to use or not
+                                            //$display("ENTRO EXE %d", write_operation_dst_execute_i);
+                                            //$display("VALIDity EXE %d", valid_bypass_execute_i);
+                                            if (valid_bypass_execute_i[0] == 1'b1) begin
+                                                instert_bubble <= 1'b0;
+                                                // valid to use check witch 
+                                                //$display("VALID EXE");
+                                                // check if src1 has already bypassed
+                                                if (src_1_bypassed == 0) begin
+                                                    // add value
+                                                    //$display("USE EXE src1");
+                                                    src1_o <= bypass_alu_i;
+                                                    src_1_bypassed = 1'b1;
+                                                    nvalid_decode_o <= 1'b0;
+                                                end
+                                                    // If already change not need change because is a new value to instruccion
+                                            end
+                                            else begin
+                                                // Needed and not valid to use send a bubble and stop fech
+                                                // send bubble
+                                                //$display("SEND BUBBLE EXE");
+                                                valid_instruction_register_o <= 1'b0;
+                                                // stop fech
+                                                nvalid_decode_o <= 1'b1;
+                                                instert_bubble <= 1'b1;
+                                                instruction_register_stoped <= instruction_register;
+                                                valid_instruction_register_stoped <= valid_instruction_register;
+                                            end  
+                                    end
+                                    if(instruction_register[19:15] == write_operation_dst_mem_i  && write_operation_dst_mem_valid_i) begin
+                                            // ok, used for this instruccion check if is valid to use or not
+                                            //$display("ENTRO MEM %d", write_operation_dst_mem_i);
+                                            if (valid_bypass_mem_i[1] == 1'b1) begin
+                                                instert_bubble <= 1'b0;
+                                                // valid to use check witch
+                                                // check if src1 has already bypassed
+                                                if (src_1_bypassed == 0) begin
+                                                    // add value
+                                                    //$display("USE MEM src1");
+                                                    src1_o <= bypass_mem_i;
+                                                    src_1_bypassed = 1;
+                                                    nvalid_decode_o <= 1'b0;
+                                                end
+                                            end
+                                            else begin
+                                                //$display("SEND BUBBLE MEM");
+                                                // not valid to use send a bubble and stop fech
+                                                valid_instruction_register_o <= 1'b0;
+                                                // stop fech
+                                                nvalid_decode_o <= 1'b1;
+                                                instert_bubble <= 1'b1;
+                                                instruction_register_stoped <= instruction_register;
+                                                valid_instruction_register_stoped <= valid_instruction_register;
+                                            end
+                                        
+                                    end
+                                    // End Bypasses
+                                    
+                                    // feed the source 1
+                                    if (src_1_bypassed == 1'b0) begin
+                                        //$display("ADD SRC1");
+                                        // add the src1 from registers
+                                        src1_o <= r[instruction_register[19:15]]; 
+                                    end
+                                    // check if bubble or not
+                                    if (bubble_stop != 1'b1) begin
+                                        // when a jump operation enters makes to stop the pipeline beacuse whe do not know the outcome of the jump
+                                        // BEQ operation 
+
+                                        // JUMP operation 
+                                        //$display("JUMP");
+                                        src1_o <= r[instruction_register[19:15]];
+                                        src2_o <= {{(WORD_SIZE-20){1'b0}},instruction_register[24:20],instruction_register[14:10],instruction_register[9:0] };
+                                        alu_op_o <=4'b1110;
+                                            
+                                        write_to_register_o <= 1'b0;
+                                        write_mem_o <= 1'b0;
+                                        strobe_memory_o <=1'b0;  
+                                        // stop fech
+                                        nvalid_decode_o <= 1'b1;
+                                        jump_intr <= 1'b1; // store that a jump is going to ocurr
+                                    end
+                                    else begin
+                                        write_to_register_o <= 1'b0;
+                                        valid_dst_0 <= 1'b0;
+                                    end
+                                end
+                                type_dst_0 <= BTYPE;
+                                //operation_0 <= BTYPE;
+                            end
+                        RPTYPE:
+                            begin
+                                reg src_1_bypassed;
+                                reg bubble_stop;
+                                src_1_bypassed = 0;
+                                bubble_stop = 0;
+                                is_word_o <= 1'b0;
+                                is_byte_o <= 1'b0;
+                                valid_bypass_o <= 2'b01;
+                                alu_op_o <= instruction_register[28:25];
+
+                                // bypassses Start
+                                if (valid_dst_0 && instruction_register[19:15] == dst_0) begin
+                                    // FIXMEVORI
+                                    //$display("DEPENDECY WITH JUST LAUNCHED DST: %d", dst_0);
+                                    //$display("VALUES dst_0 %d : src1 %d : src2 %d",dst_0, instruction_register[19:15], instruction_register[14:10]);
+                                    // this instruccion needs the register we need to send a bubble and stop fech, and try next time
+                                    valid_instruction_register_o <= 1'b0;
+                                    // stop fech
+                                    instert_bubble <= 1'b1;
+                                    nvalid_decode_o <= 1'b1;
+                                    bubble_stop = 1'b1;
+                                    instruction_register_stoped <= instruction_register;
+                                    valid_instruction_register_stoped <= valid_instruction_register;
+                                end
+                                if(instruction_register[19:15] == write_operation_dst_execute_i && write_operation_dst_execute_valid_i) begin
+                                        // ok, used for this instruccion check if is valid to use or not
+                                        //$display("ENTRO EXE %d", write_operation_dst_execute_i);
+                                        //$display("VALIDity EXE %d", valid_bypass_execute_i);
+                                        if (valid_bypass_execute_i[0] == 1'b1) begin
+                                            instert_bubble <= 1'b0;
+                                            // valid to use check witch 
+                                            //$display("VALID EXE");
+                                            // check if src1 has already bypassed
+                                            if (src_1_bypassed == 0) begin
+                                                // add value
+                                                //$display("USE EXE src1");
+                                                src1_o <= bypass_alu_i;
+                                                src_1_bypassed = 1'b1;
+                                                nvalid_decode_o <= 1'b0;
+                                            end
+                                                // If already change not need change because is a new value to instruccion
+                                        end
+                                        else begin
+                                            // Needed and not valid to use send a bubble and stop fech
+                                            // send bubble
+                                            //$display("SEND BUBBLE EXE");
+                                            valid_instruction_register_o <= 1'b0;
+                                            // stop fech
+                                            nvalid_decode_o <= 1'b1;
+                                            instert_bubble <= 1'b1;
+                                            instruction_register_stoped <= instruction_register;
+                                            valid_instruction_register_stoped <= valid_instruction_register;
+                                        end  
+                                end
+                                if(instruction_register[19:15] == write_operation_dst_mem_i  && write_operation_dst_mem_valid_i) begin
+                                        // ok, used for this instruccion check if is valid to use or not
+                                        //$display("ENTRO MEM %d", write_operation_dst_mem_i);
+                                        if (valid_bypass_mem_i[1] == 1'b1) begin
+                                            instert_bubble <= 1'b0;
+                                            // valid to use check witch
+                                            // check if src1 has already bypassed
+                                            if (src_1_bypassed == 0) begin
+                                                // add value
+                                                //$display("USE MEM src1");
+                                                src1_o <= bypass_mem_i;
+                                                src_1_bypassed = 1;
+                                                nvalid_decode_o <= 1'b0;
+                                            end
+                                        end
+                                        else begin
+                                            //$display("SEND BUBBLE MEM");
+                                            // not valid to use send a bubble and stop fech
+                                            valid_instruction_register_o <= 1'b0;
+                                            // stop fech
+                                            nvalid_decode_o <= 1'b1;
+                                            instert_bubble <= 1'b1;
+                                            instruction_register_stoped <= instruction_register;
+                                            valid_instruction_register_stoped <= valid_instruction_register;
+                                        end
+                                    
+                                end
+                                // End Bypasses
+                                
+                                // feed the source 1
+                                 if (src_1_bypassed == 1'b0) begin
+                                    //$display("ADD SRC1");
+                                    // add the src1 from registers
+                                    src1_o <= r[instruction_register[19:15]]; 
+                                end
+                                // check if bubble or not
+                                if (bubble_stop != 1'b1) begin
+                                    // feed the offset
+                                    src2_o <= {{(WORD_SIZE-15){1'b0}},instruction_register[14:0]};
+                                    write_operation_dst_o <= instruction_register[24:20];
+                                    dst_0 <= instruction_register[24:20];
+                                    //valid_dst_0 <= 1'b1;
+                                    // ask for a read
+                                    strobe_memory_o <= 1'b0;
+                                    write_mem_o <= 1'b0;
+                                    write_to_register_o <= 1'b1;
+                                    valid_dst_0 <= 1'b1;
+                                    valid_bypass_o <= 2'b01;
+                                    if (type_dst_0 == MTYPE) begin
+                                        bypass_exe_to_wb_o <= 1'b0;
+                                    end
+                                    else begin
+                                        bypass_exe_to_wb_o <= 1'b1;
+                                    end
+                                end
+                                else begin
+                                    write_to_register_o <= 1'b0;
+                                    valid_dst_0 <= 1'b0;
+                                end
+                                type_dst_0 <= RPTYPE;
+                            end
+                        FTYPE:
+                            begin
+                                // NOP operation
+                                if (instruction_register[31:25] == 7'h70) begin
+                                    valid_bypass_o <= 2'b00;
+                                    write_to_register_o <= 1'b0;
+                                    write_mem_o <= 1'b0;
+                                    strobe_memory_o <=1'b0;
+                                    alu_op_o <=4'b0000;
+                                    src1_o <= {(WORD_SIZE){1'b0}};
+                                    src2_o <= {(WORD_SIZE){1'b0}};
+                                    type_dst_0 <= FTYPE;
+                                end
+                                // HALT operation
+                                else if (instruction_register[31:25] == 7'h7F) begin
+                                    valid_bypass_o <= 2'b00;
+                                    write_to_register_o <= 1'b0;
+                                    write_mem_o <= 1'b0;
+                                    strobe_memory_o <=1'b0;
+                                    alu_op_o <=4'b0000;
+                                    src1_o <= {(WORD_SIZE){1'b0}};
+                                    src2_o <= {(WORD_SIZE){1'b0}};
+                                    type_dst_0 <= FTYPE;
+                                    nvalid_decode_o <= 1'b1;
+                                    valid_instruction_register_o <= 1'b0;
+                                    instert_bubble <= 1'b1;
+                                    instruction_register_stoped <= instruction_register;
+                                end
+
+                                
+                            end
+                        default: begin
+                            src1_o <= {WORD_SIZE{1'b0}};
+                            src2_o <= {WORD_SIZE{1'b0}};
+                            pc_o <= pc_i;
+                            write_to_register_o <= 1'b0;
+                            write_mem_o <= 1'b0;
+                            strobe_memory_o <=1'b0;
+                            $display("NO VALID INSTRUCTION");
+
+                            // TODO ADD EXCEPTION
+
+                        end
+                    endcase
+                    
+                    
+                end
+                else begin
+                    write_operation_dst_o <= 5'b00000;
+                    write_mem_o <= 1'b0;
+                    write_to_register_o <= 1'b0;
+                    valid_dst_0 <= 1'b0;
+                    dst_0 <= {REGDIRSIZE{1'b0}};
+                    valid_instruction_register_o <= 1'b0;
+                end
+                wait_fech <= 1'b0;
+                //check if we reset the nvalid bit
+                if (finish_branch_instr_i == 1'b1) begin
+                    nvalid_decode_o <= 1'b0;
+                    jump_intr <= 1'b0;
+                    if(branch_taken_i) begin
+                        // because the branch is taking we need to wait until fech finish the next instruccion
+                        wait_fech <= 1'b1;
+                    end
+                end
+            end
+        end
+
+
+    $$
+
+
+
+
+}
+
+module execute(WORD_SIZE = 32,ALUOP_SIZE=4,REGDIRSIZE=5){
+    #function "Executing face"
+    #description "Executes things "
+    #coder CODER_0
+
+    in clk;
+    in rstn;
+
+    // pc
+    in [WORD_SIZE-1:0]pc;
+    in nvalid_data_register; // value to stop the pipeline if we are waiting from memory
+    // data to be written in memory
+    in [WORD_SIZE-1:0] data_to_mem;
+    // data sources
+    in [WORD_SIZE-1:0]src1;
+    in [WORD_SIZE-1:0]src2;
+    // operation
+    in [ALUOP_SIZE-1:0]alu_op;
+    // stoble memory
+    in strobe_memory;
+    // write signal
+    in write_to_register;
+    // write signal to mem
+    in write_mem;
+    // write to register
+    in [REGDIRSIZE-1:0] write_operation_dst;
+    // in the instr valid
+    in valid_instruction_register;
+    // in pass the ask word or byte
+    in is_byte;
+    in is_word;
+    // if byass is valid
+    in [1:0] valid_bypass;
+    // forwarded optype from the execute phase for bypassing operations
+    // in [2:0] optype;
+    // defines the type of operation R, M and B
+    in bypass_exe_to_wb;
+
+    // write signal
+    out write_to_register;
+    out write_mem;
+    // write to register
+    out [REGDIRSIZE-1:0] write_operation_dst;
+    // out data to be written in memory
+    out [WORD_SIZE-1:0] data_to_mem;
+    // strobe signal
+    out strobe_memory;
+    // out data
+    out [WORD_SIZE-1:0]data;
+    out [WORD_SIZE-1:0]pc;
+    out valid_new_pc;
+    out finish_branch_instr; // put's to one one a BType instr finish
+
+    // out the intr valid
+    out valid_instruction_register;
+    // in pass the ask word or byte
+    out is_byte;
+    out is_word;
+    // defines the type of operation R, M and B
+    // out [2:0] optype;
+    out bypass_exe_to_wb;
+
+    out [1:0] valid_bypass;
+
+    
+
+    $$
+
+    localparam ADD = 4'b0000;
+    localparam SUB = 4'b0001;
+    localparam MUL = 4'b0010;
+    localparam BEQ = 4'b1111;
+    localparam JUM = 4'b1110;
+
+    
+    //wire [WORD_SIZE - 1 : 0] output_alu_w;
+    //reg [WORD_SIZE - 1 : 0] output_alu;
+    //assign output_alu_w = !rstn_i ? {WORD_SIZE{1'b0}} : nvalid_data_register_i ? {WORD_SIZE{1'b0}} : ADD == alu_op_i ? src1_i + src2_i : SUB == alu_op_i ? src1_i - src2_i : MUL  == alu_op_i ? src1_i * src2_i : {WORD_SIZE{1'b0}};
+    
+
+    
+
+    always @(posedge clk_i) begin
+        valid_new_pc_o <= 1'b0;
+        finish_branch_instr_o <= 1'b0;
+        if (valid_instruction_register_i && !nvalid_data_register_i) begin
+            case(alu_op_i)
+                ADD: begin
+                    data_o <= src1_i + src2_i;
+                    pc_o <= pc_i;
+                    valid_new_pc_o <= 1'b0;
+                    data_to_mem_o <= data_to_mem_i;
+                end
+                SUB: begin
+                    data_o <= src1_i - src2_i;
+                    pc_o <= pc_i;
+                    valid_new_pc_o <= 1'b0;
+                    data_to_mem_o <= data_to_mem_i;
+                end
+                MUL: begin
+                    data_o <= src1_i * src2_i;
+                    pc_o <= pc_i;
+                    valid_new_pc_o <= 1'b0;
+                    data_to_mem_o <= data_to_mem_i;
+                end
+                BEQ: begin
+                    valid_new_pc_o <= 1'b0;
+                    pc_o <= data_to_mem_i + pc_i;
+                    if (src1_i - src2_i == 0) begin
+                        valid_new_pc_o <= 1'b1;
+                    end
+                    else begin
+                        valid_new_pc_o <= 1'b0;
+                    end
+                    
+                    data_to_mem_o <= {WORD_SIZE{1'b0}};
+                    finish_branch_instr_o <= 1'b1;
+                end
+                JUM: begin
+                    // $display("PC_in in jump %h",pc_i);
+                    data_o <= {WORD_SIZE{1'b0}};
+                    pc_o <= src1_i + src2_i;
+                    valid_new_pc_o <= 1'b1;
+                    data_to_mem_o <= data_to_mem_i;
+                    finish_branch_instr_o <= 1'b1;
+                end
+                default: begin
+                    data_o <= {WORD_SIZE{1'b0}};
+                    pc_o <= pc_i;
+                    valid_new_pc_o <= 1'b0;
+                end
+            endcase
+            // optype_o <= optype_i;
+            // Propagate bypass info from the decoder
+            
+            write_mem_o <= write_mem_i;
+            write_operation_dst_o <= write_operation_dst_i;
+        
+            strobe_memory_o <= strobe_memory_i;
+            is_byte_o <= is_byte_i;
+            is_word_o <= is_word_i;
+            
+            
+        end
+        valid_bypass_o <= valid_bypass_i;
+        valid_instruction_register_o <= valid_instruction_register_i;
+        bypass_exe_to_wb_o <= bypass_exe_to_wb_i;
+        write_to_register_o <= write_to_register_i;
+
+    end
+    //assign data_o = output_alu;
+    //assign bypass_alu_o = output_alu_w;
+    $$
+}
+
+// FIXMEVORI: Rearrange numerical code, 0-1-2... or 1-2-3... Just pick one
+// FIXMEVORI: change logic to work with byte directioning
+module DCache(WORD_SIZE = 32, WORDS_PER_LINES = 4, LINE_SIZE = 128, MEMORY_LINES = 4, TAG=27, OFFSET=4,REGDIRSIZE=5){
+    #function "Stores the data"
+    #description "This module is for storing the cached data"
+    #coder CODER_0
+    in clk;
+    in rstn;
+    in [LINE_SIZE-1:0] data_from_memory;
+    in [WORD_SIZE-1:0] data; 
+    in [WORD_SIZE-1:0] addr;
+    in store_data;
+    in write_to_register;
+    in write;
+    in strobe;
+    in valid_instruction_register;
+    in is_byte;
+    in is_word;
+    in [REGDIRSIZE-1:0] write_operation_dst;
+    // in [2:0] optype;
+    in [1:0] valid_bypass;
+    in bypass_mem;
+    out [WORD_SIZE-1:0] data;
+    out [LINE_SIZE-1:0] data_to_memory;
+    out [WORD_SIZE-1:0] addr;
+    out nvalid_data;
+    out ask_memory;
+    out write_line_to_mem;
+    out write_word_to_mem;
+    out write_to_register;
+    out [REGDIRSIZE-1:0] write_operation_dst;
+    out valid_instruction_register;
+    // out [2:0] optype;
+    // passtho
+    // bypass
+    //out [WORD_SIZE-1:0] bypass_mem;
+    out [1:0] valid_bypass;
+
+
+    $$
+    // Two ways associative 
+    // > 7 offset bits  
+    // > 1 index bit for set 
+    // > 24 tagbits
+    // tag in memory
+    // 0000 0000 0000 0000 0000 0000 0000 0000
+    // |offset|| |----------tag--------------|
+    //       index
+    // memory structure
+    // l   dirty1 v0    tag_way0:24 bits data_cache:128 bits dirty2 v1  tag_way1:24 bits data_cache:128bits 
+    // 0   0      0       0000 ... 0000     0000 ... 0000    0       0     0000 ... 0000     0000 ... 0000  
+    localparam NUM_SETS_CACHE = ((LINE_SIZE * MEMORY_LINES)/(LINE_SIZE *2));
+    localparam WIDE_CACHE_LINE = 3 + TAG + LINE_SIZE + 2 + TAG + LINE_SIZE;
+    localparam INIT_POS_TAG_WAY_1 = 3;
+    localparam END_POS_TAG_WAY_1 = 3+TAG-1;
+    localparam INIT_POS_TAG_WAY_2 = 3+TAG+LINE_SIZE+2;
+    localparam END_POS_TAG_WAY_2 = 3+TAG+LINE_SIZE+2+TAG-1;
+    
+    // params for byte access
+    // 1 BYTE = 8 BITS, to address bytes we need to do 8 by 8 jumps. DUH
+    localparam INIT_POS_BYTE_0 = 0;
+    localparam END_POS_BYTE_0 = 7;
+    localparam INIT_POS_BYTE_1 = 8;
+    localparam END_POS_BYTE_1 = 15;
+    localparam INIT_POS_BYTE_2 = 16;
+    localparam END_POS_BYTE_2 = 23;
+    localparam INIT_POS_BYTE_3 = 24;
+    localparam END_POS_BYTE_3 = 31;
+
+    // params for cache word acces
+    // way 1
+    localparam INIT_POS_WORD_1_WAY_1 = 3+TAG;
+    localparam END_POS_WORD_1_WAY_1 = 3+TAG+WORD_SIZE-1;
+    localparam INIT_POS_WORD_2_WAY_1 = 3+TAG+WORD_SIZE;
+    localparam END_POS_WORD_2_WAY_1 = 3+TAG+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_3_WAY_1 = 3+TAG+WORD_SIZE+WORD_SIZE;
+    localparam END_POS_WORD_3_WAY_1 = 3+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_4_WAY_1 = 3+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE;
+    localparam END_POS_WORD_4_WAY_1 = 3+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    
+    // way 2
+    localparam INIT_POS_WORD_1_WAY_2 = 3+TAG+LINE_SIZE+2+TAG;
+    localparam END_POS_WORD_1_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE-1;
+    localparam INIT_POS_WORD_2_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE;
+    localparam END_POS_WORD_2_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_3_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE+WORD_SIZE;
+    localparam END_POS_WORD_3_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    localparam INIT_POS_WORD_4_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE;
+    localparam END_POS_WORD_4_WAY_2 = 3+TAG+LINE_SIZE+2+TAG+WORD_SIZE+WORD_SIZE+WORD_SIZE+WORD_SIZE-1;
+    
+    // block 0 --> block in way 0
+    localparam INIT_POS_LINE_0 = 3+TAG;
+    localparam END_POS_LINE_0 = 3+TAG+LINE_SIZE-1;
+    localparam INIT_POS_TAG_LINE_0 = 3;
+    localparam END_POS_TAG_LINE_0 = 3+TAG-1;
+    localparam DIRTY_BIT_WAY_0 = 1;
+    localparam VALID_BIT_WAY_0 = 2;
+
+    // block 1
+    localparam INIT_POS_LINE_1 = 3+TAG+LINE_SIZE+2+TAG;
+    localparam END_POS_LINE_1 = 3+TAG+LINE_SIZE+2+TAG+LINE_SIZE-1;
+    localparam INIT_POS_TAG_LINE_1 = 3+TAG+LINE_SIZE+2;
+    localparam END_POS_TAG_LINE_1 = 3+TAG+LINE_SIZE+2+TAG-1;
+    localparam DIRTY_BIT_WAY_1 = 3+TAG+LINE_SIZE;
+    localparam VALID_BIT_WAY_1 = 3+TAG+LINE_SIZE+1;
+    
+    // Misses types
+    localparam NO_MISS      = 2'b00;
+    localparam MISS_WRITE   = 2'b01;
+    localparam MISS_STROBE  = 2'b10;
+
+    // Internal registers
+    reg [WORD_SIZE-1:0]addr_asked;
+    reg addr_ask;
+    reg [WIDE_CACHE_LINE-1:0] cache_men [0:NUM_SETS_CACHE-1];
+    reg [1:0]miss_type;
+
+    // bypass mem
+    //assign   bypass_mem_o = addr_i;
+    // hit or miss for the valid bit 
+    always @(strobe_i or write_i) begin
+        if(cache_men[addr_i[OFFSET]][END_POS_TAG_WAY_1:INIT_POS_TAG_WAY_1] == addr_i[WORD_SIZE-1:OFFSET+1] && cache_men[addr_i[OFFSET]][VALID_BIT_WAY_0]) begin
+            nvalid_data_o = 1'b0;
+        end
+        else if(cache_men[addr_i[OFFSET]][END_POS_TAG_WAY_2:INIT_POS_TAG_WAY_2] == addr_i[WORD_SIZE-1:OFFSET+1] && cache_men[addr_i[OFFSET]][VALID_BIT_WAY_1]) begin
+            nvalid_data_o = 1'b0;
+        end
+        else begin
+            if(strobe_i || write_i)begin
+                nvalid_data_o = 1'b1;
+            end
+            else begin
+                nvalid_data_o = 1'b0;
+            end
+        end
+    end
+    always @(posedge clk_i) begin
+        //$display("Address ask: %d, Store data: %d, Write: %d, Strobe: %d", addr_ask, store_data_i, write_i, strobe_i);
+        write_line_to_mem_o <= 1'b0;
+        write_word_to_mem_o <= 1'b0;
+        //nvalid_data_o <= 1'b0;
+        if (!rstn_i) begin                                       
+            // reset                                            
+            integer i;         
+            /* verilator lint_off BLKLOOPINIT*/                                 
+            for(i=0;i<NUM_SETS_CACHE; i=i+1) begin                 
+                cache_men[i] <= {WIDE_CACHE_LINE{1'b0}};                
+            end   
+            /* verilator lint_on BLKLOOPINIT*/
+        end
+        else if (!valid_instruction_register_i && !store_data_i) begin
+            valid_instruction_register_o <= valid_instruction_register_i;
+        end
+        else begin
+            if (!nvalid_data_o && !bypass_mem_i) begin
+                write_to_register_o <= write_to_register_i;
+                write_operation_dst_o <= write_operation_dst_i;
+                valid_instruction_register_o <= valid_instruction_register_i;
+                // optype_o <= optype_i;
+                valid_bypass_o <= valid_bypass_i; 
+
+                if(!strobe_i && !write_i) begin
+                    data_o <= addr_i;
+                end
+            end
+            
+
+            // Miss confirmed and memory returned some data
+            if (addr_ask && store_data_i) begin
+                ask_memory_o <= 1'b0;
+                if(cache_men[addr_asked[OFFSET]][0]) begin
+                    // LRU == 1 replace way 1
+                    if(cache_men[addr_asked[OFFSET]][DIRTY_BIT_WAY_1]) begin 
+                        // TODO: Mandar la linea de cache a memoria principal
+                        data_to_memory_o <= cache_men[addr_asked[OFFSET]][END_POS_LINE_1:INIT_POS_LINE_1];
+                        cache_men[addr_asked[OFFSET]][DIRTY_BIT_WAY_1] <= 1'b0; 
+                        write_line_to_mem_o <= 1'b1;
+                        addr_o <= addr_i;
+                    end 
+                    // replace LRU
+                    cache_men[addr_asked[OFFSET]][0] <= 1'b0;
+                    // store block in way 1
+                    cache_men[addr_asked[OFFSET]][END_POS_LINE_1:INIT_POS_LINE_1] <= data_from_memory_i;
+                    // set the valid bit
+                    cache_men[addr_asked[OFFSET]][VALID_BIT_WAY_1] <= 1'b1;
+                    // store the tag
+                    cache_men[addr_asked[OFFSET]][END_POS_TAG_LINE_1:INIT_POS_TAG_LINE_1] <= addr_asked[WORD_SIZE-1:OFFSET+1];
+                    // set the ask
+                    addr_ask <= 1'b0;
+                end
+                else begin
+                    // LRU == 0 replace way 0
+                    if(cache_men[addr_asked[OFFSET]][DIRTY_BIT_WAY_0]) begin
+                        // TODO: Mandar la linea de cache a memoria principal
+                        data_to_memory_o <= cache_men[addr_asked[OFFSET]][END_POS_LINE_0:INIT_POS_LINE_0];
+                        cache_men[addr_asked[OFFSET]][DIRTY_BIT_WAY_0] <= 1'b0;
+                        write_line_to_mem_o <= 1'b1;
+                        addr_o <= addr_i;
+                    end
+                    // replace LRU
+                    cache_men[addr_asked[OFFSET]][0] <= 1'b1;
+                    // store block in way 0
+                    cache_men[addr_asked[OFFSET]][END_POS_LINE_0:INIT_POS_LINE_0] <= data_from_memory_i;
+                    // set bit to valid
+                    cache_men[addr_asked[OFFSET]][VALID_BIT_WAY_0] <= 1'b1;
+                    //store the tag
+                    cache_men[addr_asked[OFFSET]][END_POS_TAG_LINE_0:INIT_POS_TAG_LINE_0] <= addr_asked[WORD_SIZE-1:OFFSET+1];
+                    // set the ask
+                    addr_ask <= 1'b0;
+                    //$display("MISS CONFIRMED: Address: %h, Data: %h", addr_asked, data_from_memory_i);
+                end
+            end
+
+
+            /**
+            * case 1: DCache is sent only an address (strobe signal tells if we are in case 1)
+            **/
+            if (strobe_i) begin
+                // is addr_i in cache way 0?
+                if(cache_men[addr_i[OFFSET]][END_POS_TAG_WAY_1:INIT_POS_TAG_WAY_1] == addr_i[WORD_SIZE-1:OFFSET+1] && cache_men[addr_i[OFFSET]][VALID_BIT_WAY_0]) begin
+                    // Reset missing latch
+                    miss_type <= NO_MISS;
+                    //nvalid_data_o <= 1'b0;
+                    // swapping lru
+                    cache_men[addr_asked[OFFSET]][0] <= 1'b1;
+                    // since we have 4 words per way we need 2 bits, and we grab the 2 most relevant bits of the offset
+                    if(addr_i[OFFSET-1:OFFSET-2] == 2'b00) begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_1_WAY_1:INIT_POS_WORD_1_WAY_1];
+                        end
+                        else if (is_byte_i) begin
+                            // byte addressing
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                // We need to add a 24 bits padding to the 8 bit result so the result.size() = WORD_SIZE
+                                // WORD-SIZE - 8 = 24.
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b01) begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_2_WAY_1:INIT_POS_WORD_2_WAY_1];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b10) begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_3_WAY_1:INIT_POS_WORD_3_WAY_1];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b11)begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_4_WAY_1:INIT_POS_WORD_4_WAY_1];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+
+                end
+                ///////////////////////////////////////////////////// END WAY 0 CHECK
+
+
+                // is addr_i in cache way 1?
+                else if(cache_men[addr_i[OFFSET]][END_POS_TAG_WAY_2:INIT_POS_TAG_WAY_2] == addr_i[WORD_SIZE-1:OFFSET+1] && cache_men[addr_i[OFFSET]][VALID_BIT_WAY_1]) begin
+                    // Reset missing latch
+                    miss_type <= NO_MISS;
+                    //nvalid_data_o <= 1'b0;
+                    // swapping lru
+                    cache_men[addr_asked[OFFSET]][0] <= 1'b0;
+                    
+                    // since we have 4 words per way we need 2 bits, and we grab the 2 most relevant bits of the offset
+                    if(addr_i[OFFSET-1:OFFSET-2] == 2'b00) begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_1_WAY_2:INIT_POS_WORD_1_WAY_2];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+                    
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b01) begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_2_WAY_2:INIT_POS_WORD_2_WAY_2];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b10) begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_3_WAY_2:INIT_POS_WORD_3_WAY_2];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+                    
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b11)begin
+                        if(is_word_i) begin
+                            data_o <= cache_men[addr_i[OFFSET]][END_POS_WORD_4_WAY_2:INIT_POS_WORD_4_WAY_2];
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4]) 
+                                2'b00: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_0]};
+                                2'b01: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_1]};
+                                2'b10: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_2]};
+                                2'b11: data_o <= {{WORD_SIZE-8{1'b0}}, cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_3]};
+                            endcase
+                        end
+                    end
+                    
+                end
+                ///////////////////////////////////////////////////// END WAY 1 CHECK
+                // Strobe miss in this cycle
+                else if (miss_type == NO_MISS) begin
+                    addr_asked <= addr_i;
+                    addr_ask <= 1'b1;
+                    //nvalid_data_o <= 1'b1;
+                    addr_o <= addr_i;
+                    ask_memory_o <= 1'b1;
+                    //$display("STROBE MISS: Address: %h, Data: %h", addr_i, data_i);
+                    miss_type <= MISS_STROBE;
+                end 
+            end
+            // end strobeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+
+
+            // case 2 - writeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            else if (write_i) begin
+                // is addr_i in cache way 0?
+                if(cache_men[addr_i[OFFSET]][END_POS_TAG_WAY_1:INIT_POS_TAG_WAY_1] == addr_i[WORD_SIZE-1:OFFSET+1] && cache_men[addr_i[OFFSET]][VALID_BIT_WAY_0]) begin
+                    // Reset missing latch
+                    miss_type <= NO_MISS;
+                    if(addr_i[OFFSET-1:OFFSET-2] == 2'b00) begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_1_WAY_1:INIT_POS_WORD_1_WAY_1] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            // For writing on the cache we assume that the incoming data is in this format 00...00data (8 BITS, 1 BYTE).
+                            // then we place it wherever it needs to be based on basic rules.
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_1_WAY_1+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b01) begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_2_WAY_1:INIT_POS_WORD_2_WAY_1] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_2_WAY_1+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b10) begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_3_WAY_1:INIT_POS_WORD_3_WAY_1] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_3_WAY_1+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b11)begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_4_WAY_1:INIT_POS_WORD_4_WAY_1] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_0:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_1:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_2:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_1+END_POS_BYTE_3:INIT_POS_WORD_4_WAY_1+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+                    // we change the dirty bit to 1 because the cached value isn't equal to the mem value
+                    cache_men[addr_asked[OFFSET]][DIRTY_BIT_WAY_0] <= 1'b1; 
+
+                end
+                // is addr_i in cache way 1?
+                else if(cache_men[addr_i[OFFSET]][END_POS_TAG_WAY_2:INIT_POS_TAG_WAY_2] == addr_i[WORD_SIZE-1:OFFSET+1] && cache_men[addr_i[OFFSET]][VALID_BIT_WAY_1]) begin
+                    // Reset missing latch
+                    miss_type <= NO_MISS;
+                    if(addr_i[OFFSET-1:OFFSET-2] == 2'b00) begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_1_WAY_2:INIT_POS_WORD_1_WAY_2] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_1_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_1_WAY_2+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b01) begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_2_WAY_2:INIT_POS_WORD_2_WAY_2] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_2_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_2_WAY_2+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b10) begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_3_WAY_2:INIT_POS_WORD_3_WAY_2] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_3_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_3_WAY_2+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+                    else if (addr_i[OFFSET-1:OFFSET-2] == 2'b11)begin
+                        if(is_word_i) begin
+                            cache_men[addr_i[OFFSET]][END_POS_WORD_4_WAY_2:INIT_POS_WORD_4_WAY_2] <= data_i;
+                        end
+                        else if (is_byte_i) begin
+                            case(addr_i[OFFSET-3:OFFSET-4])
+                                2'b00: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_0:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_0] <= data_i[7:0];
+                                2'b01: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_1:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_1] <= data_i[7:0];
+                                2'b10: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_2:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_2] <= data_i[7:0];
+                                2'b11: cache_men[addr_i[OFFSET]][INIT_POS_WORD_4_WAY_2+END_POS_BYTE_3:INIT_POS_WORD_4_WAY_2+INIT_POS_BYTE_3] <= data_i[7:0];
+                            endcase
+                        end 
+                    end
+                    // we change the dirty bit to 1 because the cached value isn't equal to the mem value
+                    // we only consider the dirty before writing or reading (the previous mem content)
+                    cache_men[addr_asked[OFFSET]][DIRTY_BIT_WAY_1] <= 1'b1; 
+                end
+                
+                // Miss in this cycle
+                else if (miss_type == NO_MISS) begin
+                    addr_asked <= addr_i;
+                    addr_ask <= 1'b1;
+                    //nvalid_data_o <= 1'b1;
+                    addr_o <= addr_i;
+                    ask_memory_o <= 1'b1;
+                    //$display("WRITE MISS: Address: %h, Data: %h", addr_i, data_i);
+                    miss_type <= MISS_WRITE;
+                end 
+            end
+            // ENMD WRITEEEEEEEEEEEEEEEEEEEEEEE
+        end
+    end
+    $$
+
+
+}
+
+module writeback(WORD_SIZE = 32,REGDIRSIZE=5){
+    #function "Write Back"
+    #description "This is for the writeback fase of the processor"
+    #coder CODER_0
+
+    in clk;
+    in rstn;
+
+    in write_to_register;
+    in [REGDIRSIZE-1:0] write_operation_dst;
+    in [WORD_SIZE-1:0]data_from_cache;
+    // input the inst
+    in valid_instruction_register;
+    // in [2:0] optype;
+
+    // bypassed connections from exe
+    in [WORD_SIZE-1:0] bypass_exe_to_wb_data;
+    in [REGDIRSIZE-1:0] bypass_exe_to_wb_write_operation_dst;
+    in bypass_exe_to_wb_write_to_register;
+    in bypass_exe_to_wb;
+    in valid_instruction_register_bypass;
+
+    // non-bypassed connections
+    out write_to_register;
+    out [REGDIRSIZE-1:0] write_operation_dst;
+    out [WORD_SIZE-1:0] data;
+    //out [WORD_SIZE-1:0] bypass_mem;
+
+    $$
+    always @(posedge clk_i) begin
+        if(bypass_exe_to_wb_i && valid_instruction_register_bypass_i) begin
+            write_to_register_o <= bypass_exe_to_wb_write_to_register_i;
+            write_operation_dst_o <= bypass_exe_to_wb_write_operation_dst_i;
+            data_o <=  bypass_exe_to_wb_data_i;
+        end
+        else if (!bypass_exe_to_wb_i && valid_instruction_register_i) begin
+            write_to_register_o <= write_to_register_i;
+            write_operation_dst_o <= write_operation_dst_i;
+            data_o <=  data_from_cache_i;
+        end
+        else begin
+            write_to_register_o <= 1'b0;
+        end
+        
+
+    end
+
+    //assign write_to_register_o = write_to_register_i;
+    //assign write_operation_dst_o = write_operation_dst_i;
+    //assign data_o =  data_from_cache_i;
+    //reg [WORD_SIZE-1:0] output_mem;
+    //assign  output_mem = data_i;  
+    //assign  bypass_mem_o = output_mem;
+    /*always @(posedge clk_i) begin
+        if (!rstn_i) begin
+            data_o <= {WORD_SIZE{1'b0}};
+            write_to_register_o <= 1'b0;
+            write_operation_dst_o <= {REGDIRSIZE{1'b0}};
+            data_o <= {WORD_SIZE{1'b0}};
+        end
+        else begin
+            if(valid_instruction_register_i) begin
+                write_to_register_o <= write_to_register_i;
+                write_operation_dst_o <= write_operation_dst_i;
+                data_o <= output_mem;
+            end
+        end
+    end*/
+
+    $$
+}
+
+
+module top processor(WORD_SIZE = 32, REGISTERS = 32, LINE_SIZE=128,ALUOP_SIZE=4,REGDIRSIZE=5){
+    #function "Main processor "
+    #description "This is the main processor"
+    #coder CODER_0
+
+    in clk;
+    in rstn;
+
+    // vwires for interconect
+    vwire nvalid_data_register;
+
+    fetch:IF(){
+        in clk = in clk,
+        in rstn = in rstn,
+        in nvalid_data_register = nvalid_data_register
+    };
+
+    decode:ID(){
+        in clk = in clk,
+        in rstn = in rstn,
+        in nvalid_data_register = nvalid_data_register
+        //in pc = pc
+    };
+
+    execute:EXE(){
+        in clk = in clk,
+        in rstn = in rstn,
+        in nvalid_data_register = nvalid_data_register
+    };
+
+
+    DCache:MEM(){
+        in clk = in clk,
+        in rstn = in rstn,
+        out nvalid_data = nvalid_data_register
+
+    };
+
+    writeback:WB(){
+        in clk = in clk,
+        in rstn = in rstn
+    };
+
+    memory_coordinator:MEMC(){
+        in clk = in clk,
+        in rstn = in rstn
+    };
+
+    // MEMORY coordinator
+    // memory part connection
+    // something to memc
+    //flop [WORD_SIZE-1:0] IF.addr -> MEMC.addr_icache, clk, en, rst=0xff4;
+    wire [WORD_SIZE-1:0] MEM.addr -> MEMC.addr_dcache;
+    wire IF.ask_memory -> MEMC.strobe_icache;
+    wire MEM.ask_memory -> MEMC.strobe_dcache;
+    wire [LINE_SIZE-1:0] MEM.data_to_memory -> MEMC.data;
+    wire MEM.write_word_to_mem -> MEMC.we_w;
+    wire MEM.write_line_to_mem -> MEMC.we_l;
+    // memc to something
+    wire MEMC.valid_data_icache -> IF.valid_input;
+    wire MEMC.valid_data_dcache -> MEM.store_data;
+    wire [LINE_SIZE-1:0] MEMC.data_icache -> IF.data;
+    wire [LINE_SIZE-1:0] MEMC.data_dcache -> MEM.data_from_memory;
+
+
+
+    // IF -> ID
+    wire IF.valid -> ID.valid_instruction_register;
+    wire [WORD_SIZE-1:0]IF.npc -> ID.pc;
+    wire [WORD_SIZE-1:0] IF.instruction_register -> ID.instruction_register;
+    // ID -> IF
+    wire ID.nvalid_decode -> IF.nvalid_decode;
+
+    // ID -> Execute 
+    wire [WORD_SIZE-1:0] ID.pc -> EXE.pc;
+    wire [WORD_SIZE-1:0] ID.src1 -> EXE.src1;
+    wire [WORD_SIZE-1:0] ID.src2 -> EXE.src2;
+    wire [ALUOP_SIZE-1:0] ID.alu_op -> EXE.alu_op;
+    wire ID.write_to_register -> EXE.write_to_register;
+    wire ID.write_mem -> EXE.write_mem;
+    wire [REGDIRSIZE-1:0] ID.write_operation_dst -> EXE.write_operation_dst;
+    wire ID.valid_instruction_register -> EXE.valid_instruction_register;
+    wire ID.strobe_memory -> EXE.strobe_memory;
+    wire ID.is_byte -> EXE.is_byte;
+    wire ID.is_word -> EXE.is_word;
+    //wire [2:0] ID.optype -> EXE.optype;
+    wire [WORD_SIZE-1:0] ID.data_to_mem -> EXE.data_to_mem;
+    wire [1:0] ID.valid_bypass -> EXE.valid_bypass;
+    wire ID.bypass_exe_to_wb  -> EXE.bypass_exe_to_wb;
+
+    // EXE -> MEM
+    wire EXE.strobe_memory -> MEM.strobe;
+    wire [WORD_SIZE-1:0] EXE.data -> MEM.addr;
+    wire [WORD_SIZE-1:0] EXE.data_to_mem -> MEM.data;
+    wire EXE.write_to_register -> MEM.write_to_register;
+    wire EXE.write_mem -> MEM.write;
+    wire [REGDIRSIZE-1:0] EXE.write_operation_dst -> MEM.write_operation_dst;
+    wire EXE.valid_instruction_register -> MEM.valid_instruction_register;
+    wire EXE.is_byte -> MEM.is_byte;
+    //wire [2:0] EXE.optype -> MEM.optype;
+    wire EXE.is_word -> MEM.is_word;
+    wire [1:0] EXE.valid_bypass -> MEM.valid_bypass;
+    wire EXE.bypass_exe_to_wb -> MEM.bypass_mem;
+
+    // BYPASS EXE -> ID
+    wire [WORD_SIZE-1:0] EXE.data ->  ID.bypass_alu;
+    wire [REGDIRSIZE-1:0] EXE.write_operation_dst -> ID.write_operation_dst_execute;
+    wire EXE.write_to_register -> ID.write_operation_dst_execute_valid;
+    wire [1:0] EXE.valid_bypass -> ID.valid_bypass_execute;
+
+    // EXE -> ID 
+    wire EXE.finish_branch_instr -> ID.finish_branch_instr;
+    wire EXE.valid_new_pc -> ID.branch_taken;
+
+    // EXE -> IF
+    wire [WORD_SIZE-1:0] EXE.pc -> IF.pc;
+    wire EXE.valid_new_pc -> IF.valid_new_pc;
+
+    // connection of MEM to WB
+    wire MEM.valid_instruction_register -> WB.valid_instruction_register;
+    wire MEM.write_to_register -> WB.write_to_register;
+    wire [REGDIRSIZE-1:0] MEM.write_operation_dst -> WB.write_operation_dst;
+    wire [WORD_SIZE-1:0] MEM.data -> WB.data_from_cache;
+
+    //wire [2:0] MEM.optype -> WB.optype;
+    
+    // BYPASS MEM -> ID
+    wire [WORD_SIZE-1:0] MEM.data -> ID.bypass_mem;
+    wire [REGDIRSIZE-1:0] MEM.write_operation_dst -> ID.write_operation_dst_mem;
+    wire [1:0] MEM.valid_bypass -> ID.valid_bypass_mem;
+    wire MEM.write_to_register -> ID.write_operation_dst_mem_valid;
+
+
+    // connection WB TO ID
+    wire WB.write_to_register -> ID.write;
+    wire [REGDIRSIZE-1:0] WB.write_operation_dst -> ID.write_operation_dst;
+    wire [WORD_SIZE-1:0]  WB.data -> ID.write_data;
+   
+    // connection EXE to WB
+    wire EXE.bypass_exe_to_wb -> WB.bypass_exe_to_wb;
+    wire EXE.write_to_register -> WB.bypass_exe_to_wb_write_to_register;
+    wire [WORD_SIZE-1:0] EXE.data -> WB.bypass_exe_to_wb_data;
+    wire [REGDIRSIZE-1:0] EXE.write_operation_dst -> WB.bypass_exe_to_wb_write_operation_dst;
+    wire EXE.valid_instruction_register -> WB.valid_instruction_register_bypass;
+    // connection ALU TO ID 
+    wire [WORD_SIZE-1:0] EXE.bypass_exe_to_wb -> ID.bypass_alu;
+}

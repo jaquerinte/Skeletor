@@ -1,0 +1,187 @@
+module writeback(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in [AddrSize-1:0] aluresult;
+    in [AddrSize-1:0] dmemout;
+    in [BITS_REGFILE:0] destination;
+    out  wreg;
+    out [BITS_REGFILE:0] destination;
+    out [AddrSize-1:0] datareg;
+}
+
+module decode(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in [AddrSize-1:0] instruction;
+    in [BITS_REGFILE-1:0] destination;
+    in [AddrSize-1:0] datareg;
+    in  wreg;
+    out  wreg;
+    out  m2reg;
+    out  wmem;
+    out  aluc;
+    out  aluimm;
+    out [BITS_REGFILE:0] destination;
+    out [AddrSize-1:0] op1;
+    out [AddrSize-1:0] op2;
+    out [AddrSize-1:0] extendedimm;
+}
+
+module execute_1(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in  aluc;
+    in  aluimm;
+    out  wreg;
+    out  m2reg;
+    out  wmem;
+    out  aluc;
+    out  aluimm;
+
+}
+module execute_2(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in  aluc;
+    in  aluimm;
+    out  wreg;
+    out  m2reg;
+    out  wmem;
+
+}
+
+module execute(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in  aluc;
+    in  aluimm;
+    in [BITS_REGFILE:0] destination;
+    in [AddrSize-1:0] op1;
+    in [AddrSize-1:0] op2;
+    in [AddrSize-1:0] extendedimm;
+    out  wreg;
+    out  m2reg;
+    out  wmem;
+    out [BITS_REGFILE:0] destination;
+    out [AddrSize-1:0] aluresult;
+    out [AddrSize-1:0] op2;
+
+    execute_1:U41(){
+        in  rst = in rst,
+        in  clk = in clk,
+        in  wreg = in wreg,
+        in  m2reg = in  m2reg,
+        in  wmem = in  wmem,
+        in  aluc = in aluc,
+        in  aluimm = in aluimm
+
+    };
+
+    execute_2:U42(){
+        in  rst = in rst,
+        in  clk = in clk,
+        out wreg = out wreg,
+        out m2reg = out m2reg,
+        out wmem = out wmem
+    };
+
+    wire  U41.wreg -> U42.wreg;
+    wire  U41.m2reg -> U42.m2reg;
+    wire  U41.wmem -> U42.wmem;
+    wire  U41.aluc -> U42.aluc;
+    wire  U41.aluimm -> U42.aluimm;
+
+}
+
+
+
+module memory(AddrSize,BITS_REGFILE){
+    in  clk;
+    in  rst;
+    in  wreg;
+    in  m2reg;
+    in  wmem;
+    in [BITS_REGFILE:0] destination;
+    in [AddrSize-1:0] aluresult;
+    in [AddrSize-1:0] op2;
+    out  wreg;
+    out  m2reg;
+    out [BITS_REGFILE:0] destination;
+    out [AddrSize-1:0] aluresult;
+    out [AddrSize-1:0] dmemout;
+}
+
+module fetch(AddrSize){
+    in  clk;
+    in  rst;
+    in  pc;
+    out  nextpc;
+    out [AddrSize-1:0] instruction;
+}
+
+module top main(AddrSize,BITS_REGFILE){
+    in  rst;
+    in  clk;
+
+    fetch:U1(){
+        in  rst = in rst,
+        in  clk = in clk
+    };
+
+    decode:U2(){
+        in  rst = in rst,
+        in  clk = in clk
+    };
+
+    memory:U3(){
+        in  rst = in rst,
+        in  clk = in clk
+    };
+
+    writeback:U5(){
+        in  rst = in rst,
+        in  clk = in clk
+    };
+
+    execute:U4(){
+        in  rst = in rst,
+        in  clk = in clk
+    };
+
+    flop  U3.wreg -> U5.wreg;
+    flop  U4.m2reg -> U3.m2reg;
+    flop  U4.wreg -> U3.wreg;
+    flop  U3.m2reg -> U5.m2reg;
+    flop  U4.wmem -> U3.wmem;
+    flop [BITS_REGFILE:0] U4.destination -> U3.destination;
+    flop [AddrSize-1:0] U4.aluresult -> U3.aluresult;
+    flop [AddrSize-1:0] U4.op2 -> U3.op2;
+    flop [AddrSize-1:0] U5.datareg -> U2.datareg;
+    flop [AddrSize-1:0] U1.instruction -> U2.instruction;
+    flop [AddrSize-1:0] U2.op1 -> U4.op1;
+    flop [AddrSize-1:0] U2.op2 -> U4.op2;
+    flop [AddrSize-1:0] U2.extendedimm -> U4.extendedimm;
+    flop [AddrSize-1:0] U3.dmemout -> U5.dmemout;
+    flop [BITS_REGFILE:0] U3.destination -> U5.destination;
+    flop [AddrSize-1:0] U3.aluresult -> U5.aluresult;
+    flop  U5.wreg -> U2.wreg;
+    flop [BITS_REGFILE:0] U5.destination -> U2.destination;
+    flop  U1.nextpc -> U1.pc;
+    flop  U2.aluc -> U4.aluc;
+    flop  U2.aluimm -> U4.aluimm;
+    flop  U2.wreg -> U4.wreg;
+    flop  U2.wmem -> U4.wmem;
+    flop [BITS_REGFILE:0] U2.destination -> U4.destination;
+    flop  U2.m2reg -> U4.m2reg;
+}

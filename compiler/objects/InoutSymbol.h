@@ -7,9 +7,9 @@
 #include <vector>
 using namespace std;
 
-const int IN=1;
-const int OUT=2;
-const int INOUT=3;
+#include "../common.h"
+
+
 
 class InoutSymbol
 {
@@ -27,9 +27,11 @@ public:
 	string getValue();
 	void setName(string name);
 	string getPadding(string name);
+	bool getFlop();
 	void setType(int type);
 	void setWidth(int width);
 	void setValue(string value);
+	void setFlop(bool flop);
 
 
 private:
@@ -39,6 +41,7 @@ private:
 	int typeconnection;
 	string width; // TODO CHECK
 	string value;
+	bool flop;
 };
 
 

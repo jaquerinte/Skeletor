@@ -29,7 +29,9 @@ module b (TransAddrSize, AddrSize){
     in rstn;                           
     in clk;                            
     in [AddrSize-1:0] addr;            
-    in [TransAddrSize-1:0] taddr;            
+    in [TransAddrSize-1:0] taddr;
+    in in1;
+    in in2;          
     out [TransAddrSize-1:0] taddr;      
     out rdy;                            
 }
@@ -45,6 +47,19 @@ module c(n){
     out rdy;
 }
 
+
+
+module e(){
+    #function  "Three way AND gate"
+    #description GENERALDESCIPTION
+    #coder  WORKER1
+    #references GENRALREFERENCE
+
+    in a;
+    in test;
+    out b;
+}
+
 module d(){
     #function  "Three way AND gate"
     #description GENERALDESCIPTION
@@ -54,30 +69,18 @@ module d(){
     in in1;
     in in2;
     in in3;
+    in in4;
+    in in5;
+    in in6;
+    in in7;
     out out1; // no puede ser out porque es una palabra reservada
-}
 
-module e(){
-    #function  "Three way AND gate"
-    #description GENERALDESCIPTION
-    #coder  WORKER1
-    #references GENRALREFERENCE
+    e:muy_test(){
+        in a = in in1,
+        in test = in in2,
+        out b = out out1
+    };
 
-    in a;
-    out b;
-<<<<<<< HEAD
-    /$$
-	adadad
-	asdasda
-	asdadsasdasd
-    $$/
-=======
-    $$
-	adadad
-	asdasda
-	asdadsasdasd
-    $$
->>>>>>> f0030450d84556c4594422e756a81dd3433f3481
 }
 
 module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
@@ -90,7 +93,6 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     in [AddrSize -1 : 0] addr;
     out [TransAddrSize-1: 0] taddr;
     out rdy;
-    vwire base;
     
 
     a:x(AddrSize = AddrSize, TransAddrSize = TransAddrSize){
@@ -116,11 +118,13 @@ module top simple_example(TransAddrSize = T_ADDR_SIZE, AddrSize = ADDR_SIZE){
     };
 
     e:test(){
-        in a = base
+        in a = in rts
     };
     
     wire [TransAddrSize-1:0] x.taddr -> y.taddr;
-    wire x.rdy -> w.in1;
+    flop x.rdy -> w.in1;
+    wire x.rdy -> w.in4;
+    wire x.rdy -> test.test;
     wire y.rdy -> w.in2;
     wire z.rdy -> w.in3;
     

@@ -17,6 +17,7 @@ public:
 	bool addSymbol(string name, int type, string module, int nlin, int ncol);
 	bool addSymbol(string name, int type, string value,int type_var, string module, int nlin, int ncol);
 	int shearchSymbol(string name, string module, int nlin, int ncol);
+	bool contains(string name, string module);
 	string getTableSymbols();
 	bool createDefinitions();
 	bool createDefinitionsTop();

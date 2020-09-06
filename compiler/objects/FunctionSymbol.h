@@ -3,8 +3,12 @@
 
 
 #include "InstanceSymbol.h"
+#include "../kicatobjects/ComponentFunctionSymbol.h"
+#include "../kicatobjects/InstanceComponentFunctionSymbol.h"
+#include "../kicatobjects/ComponentWireManager.h"
 #include "../common.h"
-#include <sys/stat.h> 
+#include <sys/stat.h>
+#include <map>
 
 using namespace std;
 
@@ -15,6 +19,7 @@ public:
 
 	FunctionSymbol();
     FunctionSymbol(string name, string projectName, string projectFolder);
+    FunctionSymbol(string name, string projectName, string projectFolder, bool isTop);
 	FunctionSymbol(const FunctionSymbol &In);
 	~FunctionSymbol();
 	FunctionSymbol& operator = (const FunctionSymbol &In);
@@ -29,7 +34,9 @@ public:
 	FunctionSymbolParam& searchFunctionSymbolParam(string name, int nlin,int ncol);
 
 	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name);
+	bool addWireConnection(string function_out, string function_in, int pos_out, int pos_in, string width_out, string name_wire, string out_name, string in_name, bool print);
 	bool addVWireConnection(string width_out, string name_wire);
+	bool addNewFunctionInWireConnection(string name_wire, string newFunctionIn, string in_name);
 	bool addInstance(vector<InoutSymbol> v_inoutwires, vector<FunctionSymbolParam> v_param, string name_module, string name_instance);
 	int searchInstance(string name, int nlin,int ncol);
 	
@@ -37,6 +44,11 @@ public:
 	void createFileModule(string base, bool verilog_def);
 	void createRunTest(bool definitions, bool first, bool qtb, bool vtb, bool avb);
 	void printToFile();
+
+	// kicad functions
+	string getLibData();
+	void createProjectFile(string projectFolder, string name);
+	void CreateSchFile(string projectName, std::map<string, FunctionSymbol*> mapOfLeafsModules);
 
     void addVerilogDump(const string dump);
 
@@ -50,8 +62,12 @@ public:
 	string getProjectName();
 	string getReferences();
 	string getOutputFileData();
+	bool getIsTop();
+	int getNumberOfInstances();
+	bool isLeaf();
 	vector<FunctionSymbolParam> getFunctionSymbolParam();
 	vector<InoutSymbol> getInoutSymbol();
+	
 
 	//setters
 
@@ -63,6 +79,7 @@ public:
 	void setReferences(string references);
 
 	vector<InstanceSymbol> v_instances;
+	vector<InoutSymbol> v_inoutwires;
 
 private:
 	void createTbQuesta(bool definitions);
@@ -75,7 +92,7 @@ private:
 	void createFileModuleDefines();
 	void createFileModuleBase();
 	string name;
-	vector<InoutSymbol> v_inoutwires;
+	
 	vector<FunctionSymbolParam> v_param;
 	vector<WireSymbol> v_wire;
 	vector<VWireSymbol> v_vwire;
@@ -89,6 +106,11 @@ private:
 	string output_file_data;
 	string projectFolder;
 	string verilog_dump;
+
+	ComponentFunctionSymbol* functionDesig;
+
+
+	bool isTop;
 	
 };
 

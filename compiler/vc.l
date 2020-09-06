@@ -71,6 +71,7 @@ void msgError(int nerror, int nlin,int ncol,const char *s);
 "vwire"                     {return ret(wireverilogtipe);}
 "->"                        {return ret(connectwire);}
 "top"                       {return ret (mainmodule);}
+"flop"                      {return ret (flopconnection);}
 
 {name}                      {return ret(id);}
 {stringtext}                {return ret(stringtext);}
