@@ -97,7 +97,15 @@ string InstanceComponentFunctionSymbol :: generateSchematicDesing(string project
             }
             else{
                 output += "F" + std::to_string(w+2) + " \"" + mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getName() + "\" O R " + std::to_string(XPOSITIONBASE + this -> positionInComponent * CLEARANCEBETWEENMODULES + DEFAULTMODULEWIDTH) + " " + std::to_string(aux_position_output) + " 50\n";
-                this -> componentDesig -> addNewPin(aux_position_output,mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getType(),RIGHT, mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getName());
+                if(mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getFlop())
+                {
+                    this -> componentDesig -> addNewPin(aux_position_output,mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getType(),RIGHT, mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getName());
+                }
+                else
+                {
+                    this -> componentDesig -> addNewPin(aux_position_output,mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getType(),RIGHT, mapOfLeafsModules.at(functionName)->v_inoutwires.at(w).getName());
+                }
+                
                 aux_position_output = aux_position_output + DISTANCEBETWEENPINS;
             }
         }

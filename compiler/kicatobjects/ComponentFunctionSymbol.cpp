@@ -36,5 +36,10 @@ void ComponentFunctionSymbol :: addNewPin(int position, int type, int orientatio
      this -> v_pins.push_back(s);
 }
 
+void ComponentFunctionSymbol :: addNewPin(int position, int type, int orientation, string name, bool flop){
+     ComponentPin s(position, type, orientation, name, flop);
+     this -> v_pins.push_back(s);
+}
+
 int ComponentFunctionSymbol :: getWidth(){return this -> width;};
 int ComponentFunctionSymbol :: getHeigh(){return this -> heigh;};

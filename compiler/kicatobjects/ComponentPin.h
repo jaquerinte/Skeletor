@@ -19,18 +19,22 @@ class ComponentPin
 	public:
 		ComponentPin();
 	    ComponentPin(int position, int type, int orientation, string name);
+		ComponentPin(int position, int type, int orientation, string name, bool flop);
 		ComponentPin(const ComponentPin &In);
 		~ComponentPin();
 		ComponentPin& operator = (const ComponentPin &In);
 		string getName();
 		int getPosition();
 		int getType();
+		bool getFlop();
+		void setFlop(bool flop);
 
 	private:
 		int position;
 		int type;
 		int orientation;
 		string name;
+		bool flop;
 };
 
 

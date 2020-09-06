@@ -20,7 +20,9 @@ class ComponentFunctionSymbol
 		~ComponentFunctionSymbol();
 		ComponentFunctionSymbol& operator = (const ComponentFunctionSymbol &In);
 
+
 		void addNewPin(int position, int type, int orientation, string name);
+		void addNewPin(int position, int type, int orientation, string name, bool flop);
 
 		std::vector<ComponentPin> v_pins;
 		int getWidth();
